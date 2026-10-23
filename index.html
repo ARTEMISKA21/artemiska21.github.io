@@ -348,7 +348,7 @@
   .project-card__action--none { color: #7a7a7a; }
   .project-card__desc { font-size: 12px; color: #b0b0b0; line-height: 1.4; margin-top: 4px; }
   .project-card__download-wrap { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, margin-top 0.3s ease; margin-top: 0; }
-  .project-card.expanded .project-card__download-wrap { max-height: 120px; opacity: 1; margin-top: 8px; }
+  .project-card.expanded .project-card__download-wrap { max-height: 140px; opacity: 1; margin-top: 8px; }
   .project-card__download { display: block; width: 100%; padding: 10px 14px; font-size: 13px; font-weight: 600; font-family: inherit; border-radius: 8px; border: 1px solid #5a5a5a; background: #4a4a4a; color: #fff; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; transition: background 0.2s ease, border-color 0.2s ease; }
   .project-card__download:hover { background: #5a5a5a; border-color: #6a6a6a; }
   body.light .project-card__download { background: #333; border-color: #333; color: #fff; }
@@ -359,7 +359,6 @@
   .about-sign__left { flex: 0 0 340px; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
   .about-sign__heading { color: #d8d8d8; font-size: 18px; font-weight: 600; letter-spacing: 1.5px; text-align: center; width: 100%; transition: color 0.4s ease; min-height: 22px; }
 
-  /* ===== Цифровой тег: настоящий 3D-переворот ===== */
   .about-sign__media {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -760,18 +759,21 @@
     color: #888;
   }
 
+  /* ===== Профиль в настройках — по центру ===== */
   .profile-settings-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    padding: 14px;
+    gap: 12px;
+    padding: 16px;
     background: #2a2a2a;
     border-radius: 12px;
     margin-bottom: 14px;
+    text-align: center;
   }
   .avatar-upload__circle {
-    width: 72px;
-    height: 72px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
     background: #4a4a4a;
     border: 2px solid #5a5a5a;
@@ -795,25 +797,25 @@
     display: block;
   }
   .avatar-upload__placeholder {
-    font-size: 26px;
+    font-size: 30px;
     color: #9a9a9a;
     line-height: 1;
     user-select: none;
   }
   .profile-info-list {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
     font-size: 12px;
+    align-items: center;
   }
   .profile-info-list__row {
     display: flex;
     gap: 6px;
+    justify-content: center;
   }
   .profile-info-list__label {
     color: #9a9a9a;
-    min-width: 50px;
   }
   .profile-info-list__value {
     color: #e0e0e0;
@@ -821,7 +823,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
+    max-width: 200px;
   }
   body.light .profile-settings-header {
     background: #f0f0f0;
@@ -919,7 +921,6 @@
     color: #222;
   }
 
-  /* ===== Кнопка Заказ (растягивается влево, без пустоты справа) ===== */
   .order-btn {
     position: fixed;
     right: 0;
@@ -1009,10 +1010,8 @@
   }
 </style>
 
-<!-- ===== Кастомный курсор ===== -->
 <div class="custom-cursor" id="customCursor"></div>
 
-<!-- ===== Превью ===== -->
 <div class="site-preview" id="preview">
   <img class="site-preview__img" src="ARTEMIS.png" alt="ARTEMIS" draggable="false" oncontextmenu="return false;">
 
@@ -1049,10 +1048,8 @@
   </nav>
 </div>
 
-<!-- ===== Заголовок Проекты ===== -->
 <div class="projects-title" data-type="Проекты:" data-i18n="projectsTitle">Проекты:</div>
 
-<!-- ===== Блок с главными квадратами ===== -->
 <div class="tiles-block" id="tilesBlock">
 
   <a href="#" class="tile" data-category="android" data-label="Android">
@@ -1086,12 +1083,10 @@
   </a>
 </div>
 
-<!-- ===== Выезжающий блок с проектами ===== -->
 <div class="projects-panel" id="projectsPanel">
   <div class="projects-panel__grid" id="projectsGrid"></div>
 </div>
 
-<!-- ===== Блок "О знаке" ===== -->
 <section class="about-sign lazy-section" id="aboutSign">
   <div class="about-sign__inner">
 
@@ -1116,7 +1111,6 @@
   </div>
 </section>
 
-<!-- ===== Блок "Досье" ===== -->
 <section class="about-sign dossier lazy-section" id="dossier">
   <div class="about-sign__inner">
 
@@ -1135,7 +1129,6 @@
   </div>
 </section>
 
-<!-- ===== Кнопка Заказ ===== -->
 <div class="order-btn" id="orderBtn" title="Заказ">
   <div class="order-btn__inner">
     <span class="order-btn__text" data-i18n="order">Заказ</span>
@@ -1143,7 +1136,6 @@
   </div>
 </div>
 
-<!-- ===== Финальный блок сайта ===== -->
 <footer class="site-footer">
   <div class="site-footer__left">
     <div class="site-footer__ps">P.S.:</div>
@@ -1169,7 +1161,6 @@
   </div>
 </footer>
 
-<!-- ===== Плавающая кнопка соцсетей ===== -->
 <div class="social-wrap" id="socialWrap">
   <div class="social-list" id="socialList">
     <a href="https://t.me/ARTEMIS112" target="_blank" rel="noopener" class="social-item">
@@ -1195,10 +1186,8 @@
   </button>
 </div>
 
-<!-- ===== Кнопка «Наверх» ===== -->
 <button class="back-to-top" id="backToTop" aria-label="Наверх">↑</button>
 
-<!-- ===== Модальное окно регистрации ===== -->
 <div class="modal-overlay" id="registerModal">
   <div class="modal-box" id="registerBox">
     <div class="modal-box__content">
@@ -1233,7 +1222,6 @@
   </div>
 </div>
 
-<!-- ===== Модальное окно входа ===== -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal-box" id="loginBox">
     <div class="modal-box__content">
@@ -1263,7 +1251,6 @@
   </div>
 </div>
 
-<!-- ===== Модальное окно настроек ===== -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal-box" id="settingsBox">
     <button class="settings-close-btn" id="settingsClose" aria-label="Закрыть">✕</button>
@@ -1500,6 +1487,7 @@
   let fbDeleteUser = null;
   let fbGetProjectStats = null;
   let fbToggleReaction = null;
+  let fbIncrementDownload = null;
 
   window.__firebaseReady = new Promise((resolve) => {
     window.__resolveFirebaseReady = resolve;
@@ -1555,7 +1543,9 @@
       fillAll: 'Заполните все поля',
       check: 'Проверка...',
       nameShort: 'Имя — минимум 3 символа',
-      wrongPass: 'Неверный пароль'
+      wrongPass: 'Неверный пароль',
+      needLogin: 'Войдите, чтобы оценивать проекты',
+      needLoginDownload: 'Зарегистрируйтесь или войдите, чтобы скачать'
     },
     en: {
       login: 'Log in',
@@ -1606,7 +1596,9 @@
       fillAll: 'Fill all fields',
       check: 'Checking...',
       nameShort: 'Name — at least 3 chars',
-      wrongPass: 'Wrong password'
+      wrongPass: 'Wrong password',
+      needLogin: 'Log in to rate projects',
+      needLoginDownload: 'Sign up or log in to download'
     }
   };
 
@@ -1833,6 +1825,7 @@
 
   let currentUser = null;
   let currentUserAvatar = null;
+  let currentUserId = null;
 
   function showUser(name) {
     currentUser = name || null;
@@ -1842,6 +1835,7 @@
       openRegisterBtn.style.display = '';
       openLoginBtn.style.display = '';
       menuUserAvatar.style.display = 'none';
+      currentUserId = null;
       return;
     }
     menuUserName.textContent = name;
@@ -1879,7 +1873,7 @@
 
     nameEl.textContent = currentUser || '—';
     genderEl.textContent = genderLabel(getCookie('artemis_gender'));
-    idEl.textContent = currentUser ? ('#' + currentUser.toLowerCase().replace(/[^a-z0-9]/g, '')) : '—';
+    idEl.textContent = currentUserId ? ('#' + currentUserId) : '—';
     langEl.textContent = currentLang() === 'en' ? 'English' : 'Русский';
   }
 
@@ -1988,8 +1982,8 @@
       const theme = document.body.classList.contains('light') ? 'light' : 'dark';
       const anim = animationsEnabled() ? 'on' : 'off';
 
-      const ok = await fbCreateUser(name, pass, theme, anim);
-      if (!ok) {
+      const created = await fbCreateUser(name, pass, theme, anim);
+      if (!created) {
         regError.style.color = '#ff6b6b';
         regError.textContent = t('nameTaken');
         regSubmit.disabled = false;
@@ -1998,6 +1992,11 @@
 
       setCookie('artemis_user', name, 365);
       showUser(name);
+      const freshUser = await fbGetUser(name);
+      if (freshUser && freshUser.id) {
+        currentUserId = freshUser.id;
+        updateInfoPanel();
+      }
       closeRegisterModal();
       burger.classList.add('open');
       menu.classList.add('open');
@@ -2065,7 +2064,9 @@
       setCookie('artemis_user', name, 365);
       showUser(name);
       currentUserAvatar = user.avatar || null;
+      currentUserId = user.id || null;
       updateMenuAvatar();
+      updateInfoPanel();
 
       applyTheme(user.theme === 'light', true);
       applyAnimSetting(user.anim !== 'off');
@@ -2099,6 +2100,7 @@
     deleteCookie('artemis_lang');
     showUser(null);
     currentUserAvatar = null;
+    currentUserId = null;
     setAvatar(null);
     profileMenu.classList.remove('visible');
   });
@@ -2241,12 +2243,16 @@
         const oldUser = await fbGetUser(currentUser);
         if (!oldUser) { privacyErr.textContent = t('errSave'); return; }
 
-        await fbCreateUser(newNameVal, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on');
-        if (oldUser.avatar) {
-          await fbUpdateUser(newNameVal, { avatar: oldUser.avatar });
+        const created = await fbCreateUser(newNameVal, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on', oldUser.id);
+        if (created) {
+          if (oldUser.avatar) await fbUpdateUser(newNameVal, { avatar: oldUser.avatar });
+          await fbUpdateUser(newNameVal, { gender: newGender, lang: newLang });
+          await fbDeleteUser(currentUser);
+        } else {
+          privacyErr.style.color = '#ff6b6b';
+          privacyErr.textContent = t('nameTaken');
+          return;
         }
-        await fbUpdateUser(newNameVal, { gender: newGender, lang: newLang });
-        await fbDeleteUser(currentUser);
 
         setCookie('artemis_user', newNameVal, 365);
         showUser(newNameVal);
@@ -2391,6 +2397,7 @@
       reactions.appendChild(dislikeBtn);
       card.appendChild(reactions);
 
+      let downloadCountEl = null;
       if (p.action === 'download') {
         const wrap = document.createElement('div');
         wrap.className = 'project-card__download-wrap';
@@ -2398,16 +2405,30 @@
         btn.className = 'project-card__download';
         btn.href = '#';
         btn.textContent = t('download');
-        btn.addEventListener('click', (ev) => {
+        btn.addEventListener('click', async (ev) => {
           ev.preventDefault(); ev.stopPropagation();
+          if (!currentUser) {
+            openRegisterModal();
+            return;
+          }
+          if (fbIncrementDownload) {
+            try {
+              const result = await fbIncrementDownload(p.name);
+              if (result && downloadCountEl) {
+                downloadCountEl.textContent = t('downloaded') + ': ' + result;
+              }
+            } catch (e) {
+              console.warn('download:', e);
+            }
+          }
           alert(t('download') + ': ' + p.name);
         });
         wrap.appendChild(btn);
 
-        const downloadCount = document.createElement('div');
-        downloadCount.className = 'project-card__download-count';
-        downloadCount.textContent = t('downloaded') + ': 0';
-        wrap.appendChild(downloadCount);
+        downloadCountEl = document.createElement('div');
+        downloadCountEl.className = 'project-card__download-count';
+        downloadCountEl.textContent = t('downloaded') + ': 0';
+        wrap.appendChild(downloadCountEl);
 
         card.appendChild(wrap);
         card.addEventListener('click', (ev) => {
@@ -2429,17 +2450,21 @@
         typeText(el, text, 14, 150 + i * 80);
       });
 
-      if (currentUser && fbGetProjectStats) {
+      // Загружаем статистику (лайки + скачивания) для всех — даже незалогиненных
+      if (fbGetProjectStats) {
         fbGetProjectStats(p.name).then(stats => {
           if (!stats) return;
           const likeCount = likeBtn.querySelector('.like-count');
           const dislikeCount = dislikeBtn.querySelector('.dislike-count');
           likeCount.textContent = stats.likes ? stats.likes.length : 0;
           dislikeCount.textContent = stats.dislikes ? stats.dislikes.length : 0;
-          if (stats.likes && stats.likes.includes(currentUser)) {
+          if (downloadCountEl) {
+            downloadCountEl.textContent = t('downloaded') + ': ' + (stats.downloads || 0);
+          }
+          if (currentUser && stats.likes && stats.likes.includes(currentUser)) {
             likeBtn.classList.add('active');
           }
-          if (stats.dislikes && stats.dislikes.includes(currentUser)) {
+          if (currentUser && stats.dislikes && stats.dislikes.includes(currentUser)) {
             dislikeBtn.classList.add('active');
           }
         }).catch(e => console.warn('stats:', e));
@@ -2448,7 +2473,7 @@
       likeBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (!currentUser) {
-          alert('Войдите / Log in');
+          openRegisterModal();
           return;
         }
         if (fbToggleReaction) {
@@ -2467,7 +2492,7 @@
       dislikeBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (!currentUser) {
-          alert('Войдите / Log in');
+          openRegisterModal();
           return;
         }
         if (fbToggleReaction) {
@@ -2764,7 +2789,9 @@
       }
       showUser(savedName);
       currentUserAvatar = user.avatar || null;
+      currentUserId = user.id || null;
       updateMenuAvatar();
+      updateInfoPanel();
       applyTheme(user.theme === 'light', true);
       updateAnimToggle(user.anim !== 'off', true);
       if (user.gender) setCookie('artemis_gender', user.gender, 365);
@@ -2779,7 +2806,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onDisconnect, set, onValue, get, remove, update }
+  import { getDatabase, ref, onDisconnect, set, onValue, get, remove, update, runTransaction }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -2837,19 +2864,48 @@
     return snap.exists() ? snap.val() : null;
   };
 
-  window.fbCreateUser = async function(name, pass, theme, anim) {
+  // Генерация следующего числового ID через транзакцию
+  async function nextUserId() {
+    const counterRef = ref(db, 'meta/nextUserId');
+    const result = await runTransaction(counterRef, (current) => {
+      if (current === null) return 1000;
+      return current + 1;
+    });
+    return result.snapshot.val();
+  }
+
+  window.fbCreateUser = async function(name, pass, theme, anim, forcedId) {
     const key = normName(name);
     if (!key) return false;
     const snap = await get(ref(db, 'users/' + key));
     if (snap.exists()) return false;
-    await set(ref(db, 'users/' + key), {
+
+    let userId = forcedId;
+    if (!userId) {
+      try { userId = await nextUserId(); } catch (e) { console.warn('id:', e); userId = null; }
+    }
+    if (!userId) {
+      // fallback
+      const allSnap = await get(ref(db, 'users'));
+      const allUsers = allSnap.val() || {};
+      let maxId = 999;
+      for (const k in allUsers) {
+        const v = allUsers[k];
+        if (v && typeof v.id === 'number' && v.id > maxId) maxId = v.id;
+      }
+      userId = maxId + 1;
+    }
+
+    const data = {
       name: String(name).trim(),
       pass: String(pass),
       theme: theme || 'dark',
       anim: anim || 'on',
+      id: userId,
       created: Date.now()
-    });
-    return true;
+    };
+    await set(ref(db, 'users/' + key), data);
+    return data;
   };
 
   window.fbUpdateUser = async function(name, patch) {
@@ -2872,7 +2928,12 @@
     const key = projectKey(projectName);
     if (!key) return null;
     const snap = await get(ref(db, 'projects/' + key));
-    return snap.exists() ? snap.val() : { likes: [], dislikes: [] };
+    const data = snap.exists() ? snap.val() : {};
+    return {
+      likes: data.likes || [],
+      dislikes: data.dislikes || [],
+      downloads: data.downloads || 0
+    };
   };
 
   window.fbToggleReaction = async function(projectName, userName, reaction) {
@@ -2893,7 +2954,18 @@
     }
 
     await set(ref(db, 'projects/' + key), data);
-    return data;
+    return { likes: data.likes, dislikes: data.dislikes, downloads: data.downloads || 0 };
+  };
+
+  window.fbIncrementDownload = async function(projectName) {
+    const key = projectKey(projectName);
+    if (!key) return 0;
+    const downloadsRef = ref(db, 'projects/' + key + '/downloads');
+    const result = await runTransaction(downloadsRef, (current) => {
+      if (current === null) return 1;
+      return current + 1;
+    });
+    return result.snapshot.val() || 0;
   };
 
   fbGetUser = window.fbGetUser;
@@ -2902,6 +2974,7 @@
   fbDeleteUser = window.fbDeleteUser;
   fbGetProjectStats = window.fbGetProjectStats;
   fbToggleReaction = window.fbToggleReaction;
+  fbIncrementDownload = window.fbIncrementDownload;
 
   window.__resolveFirebaseReady();
 </script>
