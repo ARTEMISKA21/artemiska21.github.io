@@ -1068,6 +1068,42 @@
   @media (max-width: 700px) {
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
+
+  /* ===== Морфинг кнопки "Заказ" в блок ===== */
+  .order-btn--morph {
+    transition: left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                border-radius 0.95s ease,
+                background 0.7s ease,
+                border-color 0.7s ease !important;
+    cursor: default !important;
+  }
+  .order-btn--morph:hover {
+    width: auto !important;
+  }
+  .order-btn--morph .order-btn__inner {
+    transition: padding 0.95s ease, gap 0.95s ease;
+    writing-mode: horizontal-tb;
+    padding: 20px;
+    gap: 0;
+  }
+  .order-btn--morph .order-btn__text {
+    writing-mode: horizontal-tb;
+    transform: rotate(0deg);
+    opacity: 1;
+    transition: writing-mode 0s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.5s ease 0.2s, letter-spacing 0.9s ease, font-size 0.9s ease;
+    letter-spacing: 2px;
+    font-size: 14px;
+  }
+  .order-btn--morph .order-btn__stripe {
+    transition: width 0.9s ease, height 0.9s ease, opacity 0.4s ease;
+    width: 60px;
+    height: 3px;
+    opacity: 0.6;
+  }
 </style>
 
 <div class="custom-cursor" id="customCursor"></div>
@@ -2873,10 +2909,7 @@
       const projectsPanel = document.getElementById('projectsPanel');
       const aboutSign = document.getElementById('aboutSign');
       const dossier = document.getElementById('dossier');
-
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
-
-      targets.forEach(el => el.classList.add('fade-out'));
 
       let orderSection = document.getElementById('orderSection');
       if (!orderSection) {
@@ -2891,16 +2924,48 @@
           document.body.appendChild(orderSection);
         }
       }
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => orderSection.classList.add('visible'));
-      });
+
+      targets.forEach(el => el.classList.add('fade-out'));
 
       setTimeout(() => {
         targets.forEach(el => {
           el.classList.remove('fade-out');
           el.classList.add('hidden-by-order');
         });
-        orderBtn.style.display = 'none';
+
+        const targetRect = orderSection.getBoundingClientRect();
+        const btnRect = orderBtn.getBoundingClientRect();
+
+        orderBtn.style.position = 'fixed';
+        orderBtn.style.left = btnRect.left + 'px';
+        orderBtn.style.top = btnRect.top + 'px';
+        orderBtn.style.width = btnRect.width + 'px';
+        orderBtn.style.height = btnRect.height + 'px';
+        orderBtn.style.right = 'auto';
+        orderBtn.style.transform = 'none';
+        orderBtn.style.borderRadius = '10px 0 0 10px';
+        void orderBtn.offsetWidth;
+
+        orderBtn.classList.add('order-btn--morph');
+
+        const isLight = document.body.classList.contains('light');
+
+        requestAnimationFrame(() => {
+          orderBtn.style.left = targetRect.left + 'px';
+          orderBtn.style.top = targetRect.top + 'px';
+          orderBtn.style.width = targetRect.width + 'px';
+          orderBtn.style.height = targetRect.height + 'px';
+          orderBtn.style.borderRadius = '16px';
+          orderBtn.style.background = isLight ? '#eaeaea' : '#1a1a1a';
+          orderBtn.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
+        });
+
+        setTimeout(() => {
+          orderSection.classList.add('visible');
+          orderBtn.style.display = 'none';
+          const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }, 1000);
       }, 750);
     });
   }
