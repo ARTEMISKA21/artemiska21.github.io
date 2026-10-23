@@ -759,30 +759,17 @@
     color: #888;
   }
 
-  /* ===== Профиль в настройках — аватарка слева, инфо справа ===== */
+  /* ===== Профиль в настройках — по центру ===== */
   .profile-settings-header {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     padding: 16px;
     background: #2a2a2a;
     border-radius: 12px;
     margin-bottom: 14px;
-    text-align: left;
-  }
-  .profile-settings-header__avatar {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .profile-settings-header .profile-info-list {
-    flex: 1 1 auto;
-    align-items: flex-start;
-  }
-  .profile-settings-header .profile-info-list__row {
-    justify-content: flex-start;
+    text-align: center;
   }
   .avatar-upload__circle {
     width: 84px;
@@ -857,19 +844,6 @@
   }
   body.light .profile-info-list__value {
     color: #222;
-  }
-  @media (max-width: 480px) {
-    .profile-settings-header {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .profile-settings-header .profile-info-list {
-      align-items: center;
-    }
-    .profile-settings-header .profile-info-list__row {
-      justify-content: center;
-    }
   }
 
   .privacy-section {
@@ -1035,23 +1009,59 @@
     transform: translateY(0);
   }
 
-  /* ===== Блок, который появляется при нажатии на "Заказ" ===== */
-  .order-placeholder {
-    width: 100%;
-    min-height: 200px;
-    background: #1a1a1a;
-    border-top: 1px solid #2a2a2a;
-    border-bottom: 1px solid #2a2a2a;
-    transition: background 0.4s ease, border-color 0.4s ease;
-    box-sizing: border-box;
-  }
-  body.light .order-placeholder {
-    background: #eaeaea;
-    border-top-color: #d8d8d8;
-    border-bottom-color: #d8d8d8;
+  /* ===== Плавное исчезновение блоков при нажатии "Заказ" ===== */
+  .fade-out {
+    opacity: 0 !important;
+    transform: translateY(-24px) scale(0.96) !important;
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    pointer-events: none;
   }
   .hidden-by-order {
     display: none !important;
+  }
+
+  /* ===== Кнопка "Заказ", превращающаяся в центральный блок ===== */
+  .order-btn--centered {
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    width: 420px !important;
+    max-width: calc(100% - 40px) !important;
+    height: 200px !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 16px !important;
+    border: 1px solid #5a5a5a !important;
+    background: #1a1a1a !important;
+    cursor: default !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
+    transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                border-radius 0.9s ease,
+                background 0.4s ease, border-color 0.4s ease !important;
+  }
+  .order-btn--centered .order-btn__inner {
+    padding: 20px;
+    gap: 0;
+    writing-mode: horizontal-tb;
+  }
+  .order-btn--centered .order-btn__text {
+    writing-mode: horizontal-tb;
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .order-btn--centered .order-btn__stripe {
+    width: 60px;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  body.light .order-btn--centered {
+    background: #eaeaea !important;
+    border-color: #d8d8d8 !important;
   }
 </style>
 
@@ -1183,8 +1193,8 @@
 
 <footer class="site-footer">
   <div class="site-footer__left">
-    <div class="site-footer__ps">P.S.:</div>
-    <div class="site-footer__quote">
+    <div class="site-footer__ps" data-i18n="ps">P.S.:</div>
+    <div class="site-footer__quote" data-i18n="quote">
       Покуда песок не остолбенел вне времени — узри в ближнем зерцало.
     </div>
   </div>
@@ -1304,11 +1314,9 @@
       <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="settings">Настройки</h2>
 
       <div class="profile-settings-header">
-        <div class="profile-settings-header__avatar">
-          <div class="avatar-upload__circle" id="avatarCircle">
-            <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
-            <img id="avatarPreview" src="" alt="Аватар" style="display:none;">
-          </div>
+        <div class="avatar-upload__circle" id="avatarCircle">
+          <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
+          <img id="avatarPreview" src="" alt="Аватар" style="display:none;">
         </div>
         <div class="profile-info-list">
           <div class="profile-info-list__row">
@@ -1579,6 +1587,8 @@
       newPassword: 'Новый пароль',
       os: 'OS',
       order: 'Заказ',
+      ps: 'P.S.:',
+      quote: 'Покуда песок не остолбенел вне времени — узри в ближнем зерцало.',
       pwdMin: 'Пароль — минимум 3 символа',
       pwdMismatch: 'Пароли не совпадают',
       pwdSaved: 'Пароль сохранён',
@@ -1638,6 +1648,8 @@
       newPassword: 'New password',
       os: 'OS',
       order: 'Order',
+      ps: 'P.S.:',
+      quote: 'While the sand has not frozen outside of time — behold the mirror in your neighbor.',
       pwdMin: 'Password — at least 3 chars',
       pwdMismatch: 'Passwords do not match',
       pwdSaved: 'Password saved',
@@ -1705,7 +1717,6 @@
     if (openSettingsBtn) openSettingsBtn.textContent = t('settings');
     if (logoutBtn) logoutBtn.textContent = t('logout');
 
-    // Досье — абзацы
     document.querySelectorAll('#dossier .about-sign__text p[data-i18n]').forEach(p => {
       const key = p.getAttribute('data-i18n');
       const txt = t(key);
@@ -1713,7 +1724,6 @@
       p.textContent = txt;
     });
 
-    // Цифровой тег — текст
     const tagTextEl = document.querySelector('#aboutSign .about-sign__text');
     if (tagTextEl) {
       const txt = t('tagText');
@@ -1721,7 +1731,6 @@
       tagTextEl.textContent = txt;
     }
 
-    // Сброс флага typing, чтобы при смене языка текст перепечатался
     const aboutSignSection = document.getElementById('aboutSign');
     const dossierSection = document.getElementById('dossier');
     if (aboutSignSection) aboutSignSection.dataset.typed = '';
@@ -2851,29 +2860,31 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      // Скрываем проекты (заголовок + плитки + панель), цифровой тег и досье
+      if (orderBtn.classList.contains('order-btn--centered')) return;
+
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
       const projectsPanel = document.getElementById('projectsPanel');
       const aboutSign = document.getElementById('aboutSign');
       const dossier = document.getElementById('dossier');
 
-      [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].forEach(el => {
-        if (el) el.classList.add('hidden-by-order');
-      });
+      const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      // Создаём пустой блок, если его ещё нет
-      if (!document.getElementById('orderPlaceholder')) {
-        const placeholder = document.createElement('div');
-        placeholder.id = 'orderPlaceholder';
-        placeholder.className = 'order-placeholder';
-        const footer = document.querySelector('.site-footer');
-        if (footer && footer.parentNode) {
-          footer.parentNode.insertBefore(placeholder, footer);
-        } else {
-          document.body.appendChild(placeholder);
-        }
-      }
+      // 1) Плавно исчезают
+      targets.forEach(el => el.classList.add('fade-out'));
+
+      setTimeout(() => {
+        // 2) Полностью скрываем
+        targets.forEach(el => {
+          el.classList.remove('fade-out');
+          el.classList.add('hidden-by-order');
+        });
+
+        // 3) Кнопка "Заказ" плавно перемещается в центр и превращается в пустой блок
+        orderBtn.classList.add('order-btn--centered');
+        orderBtn.title = '';
+        orderBtn.setAttribute('aria-label', 'Заказ');
+      }, 750);
     });
   }
 
