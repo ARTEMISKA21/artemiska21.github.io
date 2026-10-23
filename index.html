@@ -759,17 +759,25 @@
     color: #888;
   }
 
-  /* ===== Профиль в настройках — по центру ===== */
+  /* ===== Профиль в настройках: ава слева, текст справа, вся группа по центру ===== */
   .profile-settings-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    gap: 18px;
     padding: 16px;
     background: #2a2a2a;
     border-radius: 12px;
     margin-bottom: 14px;
-    text-align: center;
+    text-align: left;
+  }
+  .profile-settings-header .profile-info-list {
+    flex: 0 0 auto;
+    align-items: flex-start;
+  }
+  .profile-settings-header .profile-info-list__row {
+    justify-content: flex-start;
   }
   .avatar-upload__circle {
     width: 84px;
@@ -844,6 +852,19 @@
   }
   body.light .profile-info-list__value {
     color: #222;
+  }
+  @media (max-width: 480px) {
+    .profile-settings-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .profile-settings-header .profile-info-list {
+      align-items: center;
+    }
+    .profile-settings-header .profile-info-list__row {
+      justify-content: center;
+    }
   }
 
   .privacy-section {
@@ -1009,7 +1030,6 @@
     transform: translateY(0);
   }
 
-  /* ===== Плавное исчезновение блоков при нажатии "Заказ" ===== */
   .fade-out {
     opacity: 0 !important;
     transform: translateY(-24px) scale(0.96) !important;
@@ -1020,7 +1040,6 @@
     display: none !important;
   }
 
-  /* ===== Кнопка "Заказ", превращающаяся в центральный блок ===== */
   .order-btn--centered {
     left: 50% !important;
     right: auto !important;
@@ -2870,17 +2889,14 @@
 
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      // 1) Плавно исчезают
       targets.forEach(el => el.classList.add('fade-out'));
 
       setTimeout(() => {
-        // 2) Полностью скрываем
         targets.forEach(el => {
           el.classList.remove('fade-out');
           el.classList.add('hidden-by-order');
         });
 
-        // 3) Кнопка "Заказ" плавно перемещается в центр и превращается в пустой блок
         orderBtn.classList.add('order-btn--centered');
         orderBtn.title = '';
         orderBtn.setAttribute('aria-label', 'Заказ');
