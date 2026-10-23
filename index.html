@@ -358,9 +358,66 @@
   .about-sign__inner { display: flex; gap: 40px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1100px; }
   .about-sign__left { flex: 0 0 340px; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
   .about-sign__heading { color: #d8d8d8; font-size: 18px; font-weight: 600; letter-spacing: 1.5px; text-align: center; width: 100%; transition: color 0.4s ease; min-height: 22px; }
-  .about-sign__media { width: 100%; aspect-ratio: 1 / 1; border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: background 0.4s ease; position: relative; }
-  .about-sign__media img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; opacity: 0; transition: opacity 0.8s ease; }
-  .about-sign__media img.revealed { opacity: 1; }
+
+  /* ===== Цифровой тег: настоящий 3D-переворот ===== */
+  .about-sign__media {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    transition: background 0.4s ease;
+    position: relative;
+    perspective: 1400px;
+  }
+  .about-sign__media-inner {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: rotateY(180deg);
+  }
+  .about-sign__media.revealed .about-sign__media-inner {
+    transform: rotateY(0deg);
+  }
+  .about-sign__media-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .about-sign__media-face--back {
+    background: #000;
+    transform: rotateY(180deg);
+  }
+  .about-sign__media-face--back::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(60,60,60,0.4) 0%, #000 70%);
+  }
+  .about-sign__media-face--front {
+    background: #000;
+    transform: rotateY(0deg);
+  }
+  .about-sign__media-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
+  body.no-animations .about-sign__media-inner { transition: none; }
+
   .about-sign__text { flex: 1 1 0; max-width: 620px; color: #d8d8d8; font-size: 15px; line-height: 1.65; padding-top: 36px; transition: color 0.4s ease; }
   .about-sign__text p { margin: 0 0 16px; }
   .about-sign__text p:last-child { margin-bottom: 0; }
@@ -490,13 +547,65 @@
     .social-item__user { font-size: 10px; }
   }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.3s ease; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.3s ease; overflow: visible; }
   .modal-overlay.open { display: flex; opacity: 1; }
   .modal-box { width: 100%; max-width: 380px; background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 24px; box-sizing: border-box; color: #e0e0e0; box-shadow: 0 20px 60px rgba(0,0,0,0.8); font-family: Arial, sans-serif; transform: scaleY(0.01); opacity: 0; transform-origin: center center; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; position: relative; }
   .modal-box.open { transform: scaleY(1); opacity: 1; }
   .modal-box__content { opacity: 0; transition: opacity 0.3s ease 0.2s; }
   .modal-box.open .modal-box__content { opacity: 1; }
   @media (max-width: 600px) { .modal-box { padding: 20px; } }
+
+  /* ===== Настройки: модалка со скроллом внутри, крестик снаружи ===== */
+  #settingsBox {
+    position: relative;
+    overflow: visible !important;
+    max-width: 440px;
+  }
+  #settingsBox .modal-box__content {
+    max-height: 82vh;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  /* ===== Кнопка закрытия настроек (половина за блоком) ===== */
+  .settings-close-btn {
+    position: absolute;
+    top: -22px;
+    right: -22px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 2px solid #5a5a5a;
+    color: #e0e0e0;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.25s ease, border-color 0.25s ease;
+    transform-origin: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    padding: 0;
+    font-family: inherit;
+  }
+  .settings-close-btn:hover {
+    transform: rotate(360deg);
+    background: #3a3a3a;
+    border-color: #7a7a7a;
+  }
+  body.light .settings-close-btn {
+    background: #ffffff;
+    border-color: #c0c0c0;
+    color: #333;
+  }
+  body.light .settings-close-btn:hover {
+    background: #f0f0f0;
+    border-color: #999;
+  }
 
   /* ===== Кастомный курсор (только для ПК) ===== */
   @media (hover: hover) and (pointer: fine) {
@@ -656,7 +765,7 @@
     color: #888;
   }
 
-  /* ===== Аватарка в настройках (новый дизайн) ===== */
+  /* ===== Профиль в настройках ===== */
   .profile-settings-header {
     display: flex;
     align-items: center;
@@ -770,7 +879,7 @@
     transition: max-height 0.35s ease, margin-top 0.3s ease;
   }
   .privacy-section__body.open {
-    max-height: 400px;
+    max-height: 500px;
     margin-top: 12px;
   }
   .privacy-section__row {
@@ -817,41 +926,6 @@
     color: #222;
   }
 
-  /* ===== Кнопка закрытия настроек ===== */
-  .settings-close-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.5);
-    border: 2px solid #555;
-    color: #e0e0e0;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, border-color 0.25s ease;
-    transform-origin: center;
-  }
-  .settings-close-btn:hover {
-    transform: rotate(360deg);
-    background: rgba(80,80,80,0.8);
-    border-color: #888;
-  }
-  body.light .settings-close-btn {
-    background: rgba(255,255,255,0.8);
-    border-color: #ccc;
-    color: #333;
-  }
-  body.light .settings-close-btn:hover {
-    background: rgba(255,255,255,1);
-    border-color: #999;
-  }
-
   /* ===== Кнопка Заказ ===== */
   .order-btn {
     position: fixed;
@@ -860,29 +934,33 @@
     transform: translateY(-50%);
     z-index: 9997;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 16px 8px;
+    padding: 0;
     background: #4a4a4a;
     border: 1px solid #5a5a5a;
     border-right: none;
     border-radius: 10px 0 0 10px;
     cursor: pointer;
     box-shadow: -4px 0 16px rgba(0,0,0,0.4);
-    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    overflow: hidden;
+    height: 130px;
   }
   .order-btn:hover {
     background: #5a5a5a;
     border-color: #6a6a6a;
-    transform: translateY(-50%) translateX(-3px);
+    transform: translateY(-50%) translateX(-8px);
   }
-  .order-btn__stripe {
-    width: 4px;
-    height: 30px;
-    border-radius: 2px;
-    background: #8a8a8a;
+  .order-btn__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 10px;
+    height: 100%;
+    box-sizing: border-box;
   }
   .order-btn__text {
     writing-mode: vertical-rl;
@@ -893,6 +971,14 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     text-decoration: none;
+    white-space: nowrap;
+  }
+  .order-btn__stripe {
+    width: 4px;
+    height: 40px;
+    border-radius: 2px;
+    background: #8a8a8a;
+    flex-shrink: 0;
   }
   body.light .order-btn {
     background: #d8d8d8;
@@ -910,25 +996,17 @@
     color: #333;
   }
   @media (max-width: 600px) {
-    .order-btn {
-      padding: 12px 6px;
-      gap: 6px;
-    }
-    .order-btn__stripe {
-      height: 22px;
-      width: 3px;
-    }
-    .order-btn__text {
-      font-size: 12px;
-      letter-spacing: 1.5px;
-    }
+    .order-btn { height: 110px; }
+    .order-btn__inner { padding: 10px 8px; gap: 8px; }
+    .order-btn__stripe { height: 30px; width: 3px; }
+    .order-btn__text { font-size: 12px; letter-spacing: 1.5px; }
   }
 
   /* ===== Ленивая загрузка ===== */
   .lazy-section {
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
+    transition: opacity 0.8s ease, transform 0.8s ease;
   }
   .lazy-section.loaded {
     opacity: 1;
@@ -961,12 +1039,12 @@
       <button class="profile-menu__item profile-menu__item--danger" id="logoutBtn" type="button">Выйти</button>
     </div>
 
-    <a href="#tilesBlock" data-scroll>Проекты</a>
-    <a href="#aboutSign" data-scroll>Цифровой тег</a>
-    <a href="#dossier" data-scroll>Досье</a>
+    <a href="#tilesBlock" data-scroll data-i18n="projects">Проекты</a>
+    <a href="#aboutSign" data-scroll data-i18n="digitalTag">Цифровой тег</a>
+    <a href="#dossier" data-scroll data-i18n="dossier">Досье</a>
 
     <div class="theme-switch">
-      <span class="theme-switch__label">Тема</span>
+      <span class="theme-switch__label" data-i18n="theme">Тема</span>
       <div class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" tabindex="0">
         <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
         <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
@@ -977,7 +1055,7 @@
 </div>
 
 <!-- ===== Заголовок Проекты ===== -->
-<div class="projects-title" data-type="Проекты:"></div>
+<div class="projects-title" data-type="Проекты:" data-i18n="projectsTitle">Проекты:</div>
 
 <!-- ===== Блок с главными квадратами ===== -->
 <div class="tiles-block" id="tilesBlock">
@@ -1023,9 +1101,14 @@
   <div class="about-sign__inner">
 
     <div class="about-sign__left">
-      <div class="about-sign__heading" data-type="Цифровой тег:"></div>
+      <div class="about-sign__heading" data-type="Цифровой тег:" data-i18n="tagTitle">Цифровой тег:</div>
       <div class="about-sign__media" id="tagMedia">
-        <img src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;" id="tagImage">
+        <div class="about-sign__media-inner">
+          <div class="about-sign__media-face about-sign__media-face--back"></div>
+          <div class="about-sign__media-face about-sign__media-face--front">
+            <img src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1043,7 +1126,7 @@
   <div class="about-sign__inner">
 
     <div class="about-sign__left">
-      <div class="about-sign__heading">Досье</div>
+      <div class="about-sign__heading" data-i18n="dossierTitle">Досье</div>
     </div>
 
     <div class="about-sign__text">
@@ -1059,8 +1142,10 @@
 
 <!-- ===== Кнопка Заказ ===== -->
 <div class="order-btn" id="orderBtn" title="Заказ">
-  <span class="order-btn__stripe"></span>
-  <span class="order-btn__text">Заказ</span>
+  <div class="order-btn__inner">
+    <span class="order-btn__text" data-i18n="order">Заказ</span>
+    <span class="order-btn__stripe"></span>
+  </div>
 </div>
 
 <!-- ===== Финальный блок сайта ===== -->
@@ -1076,7 +1161,7 @@
 
     <div class="site-footer__online">
       <span class="site-footer__online-dot"></span>
-      Онлайн:
+      <span data-i18n="online">Онлайн:</span>
       <span class="site-footer__online-count" id="onlineCount">—</span>
     </div>
 
@@ -1089,7 +1174,7 @@
   </div>
 </footer>
 
-<!-- ===== Плавающая кнопка соцсетей (левый верхний угол) ===== -->
+<!-- ===== Плавающая кнопка соцсетей ===== -->
 <div class="social-wrap" id="socialWrap">
   <div class="social-list" id="socialList">
     <a href="https://t.me/ARTEMIS112" target="_blank" rel="noopener" class="social-item">
@@ -1122,30 +1207,30 @@
 <div class="modal-overlay" id="registerModal">
   <div class="modal-box" id="registerBox">
     <div class="modal-box__content">
-      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;">Регистрация</h2>
+      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="registerTitle">Регистрация</h2>
 
       <div style="margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;">Имя</label>
+        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;" data-i18n="name">Имя</label>
         <input id="regName" type="text" autocomplete="off" style="width:100%; padding:11px 14px; font-size:14px; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:10px; color:#e8e8e8; outline:none; box-sizing:border-box;">
       </div>
 
       <div style="margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;">Пароль</label>
+        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;" data-i18n="password">Пароль</label>
         <input id="regPass" type="password" autocomplete="new-password" style="width:100%; padding:11px 14px; font-size:14px; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:10px; color:#e8e8e8; outline:none; box-sizing:border-box;">
       </div>
 
       <div style="margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;">Повтор пароля</label>
+        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;" data-i18n="passwordRepeat">Повтор пароля</label>
         <input id="regPass2" type="password" autocomplete="new-password" style="width:100%; padding:11px 14px; font-size:14px; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:10px; color:#e8e8e8; outline:none; box-sizing:border-box;">
       </div>
 
       <p id="regError" style="color:#ff6b6b; font-size:12px; margin:0 0 12px; min-height:14px; text-align:center;"></p>
 
       <div style="display:flex; gap:10px; margin-top:6px;">
-        <button id="regCancel" type="button" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #444; background:transparent; color:#c8c8c8; cursor:pointer;">
+        <button id="regCancel" type="button" data-i18n="cancel" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #444; background:transparent; color:#c8c8c8; cursor:pointer;">
           Отмена
         </button>
-        <button id="regSubmit" type="button" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
+        <button id="regSubmit" type="button" data-i18n="confirm" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
           Подтвердить
         </button>
       </div>
@@ -1157,25 +1242,25 @@
 <div class="modal-overlay" id="loginModal">
   <div class="modal-box" id="loginBox">
     <div class="modal-box__content">
-      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;">Вход</h2>
+      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="loginTitle">Вход</h2>
 
       <div style="margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;">Имя</label>
+        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;" data-i18n="name">Имя</label>
         <input id="loginName" type="text" autocomplete="off" style="width:100%; padding:11px 14px; font-size:14px; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:10px; color:#e8e8e8; outline:none; box-sizing:border-box;">
       </div>
 
       <div style="margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
-        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;">Пароль</label>
+        <label style="font-size:12px; color:#9a9a9a; letter-spacing:0.5px; text-transform:uppercase;" data-i18n="password">Пароль</label>
         <input id="loginPass" type="password" autocomplete="current-password" style="width:100%; padding:11px 14px; font-size:14px; background:#2a2a2a; border:1px solid #3a3a3a; border-radius:10px; color:#e8e8e8; outline:none; box-sizing:border-box;">
       </div>
 
       <p id="loginError" style="color:#ff6b6b; font-size:12px; margin:0 0 12px; min-height:14px; text-align:center;"></p>
 
       <div style="display:flex; gap:10px; margin-top:6px;">
-        <button id="loginCancel" type="button" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #444; background:transparent; color:#c8c8c8; cursor:pointer;">
+        <button id="loginCancel" type="button" data-i18n="cancel" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #444; background:transparent; color:#c8c8c8; cursor:pointer;">
           Отмена
         </button>
-        <button id="loginSubmit" type="button" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
+        <button id="loginSubmit" type="button" data-i18n="login" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
           Войти
         </button>
       </div>
@@ -1185,11 +1270,11 @@
 
 <!-- ===== Модальное окно настроек ===== -->
 <div class="modal-overlay" id="settingsModal">
-  <div class="modal-box" id="settingsBox" style="max-width:440px; max-height:90vh; overflow-y:auto;">
+  <div class="modal-box" id="settingsBox">
     <button class="settings-close-btn" id="settingsClose" aria-label="Закрыть">✕</button>
 
     <div class="modal-box__content">
-      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;">Настройки</h2>
+      <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="settings">Настройки</h2>
 
       <!-- Профиль: аватар слева, инфо справа -->
       <div class="profile-settings-header">
@@ -1199,19 +1284,19 @@
         </div>
         <div class="profile-info-list">
           <div class="profile-info-list__row">
-            <span class="profile-info-list__label">Имя:</span>
+            <span class="profile-info-list__label" data-i18n="name">Имя:</span>
             <span class="profile-info-list__value" id="infoName">—</span>
           </div>
           <div class="profile-info-list__row">
-            <span class="profile-info-list__label">Пол:</span>
+            <span class="profile-info-list__label" data-i18n="gender">Пол:</span>
             <span class="profile-info-list__value" id="infoGender">—</span>
           </div>
           <div class="profile-info-list__row">
-            <span class="profile-info-list__label">ID:</span>
+            <span class="profile-info-list__label" data-i18n="id">ID:</span>
             <span class="profile-info-list__value" id="infoId">—</span>
           </div>
           <div class="profile-info-list__row">
-            <span class="profile-info-list__label">Язык:</span>
+            <span class="profile-info-list__label" data-i18n="lang">Язык:</span>
             <span class="profile-info-list__value" id="infoLang">Русский</span>
           </div>
         </div>
@@ -1220,7 +1305,7 @@
 
       <!-- Анимации -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:#2a2a2a; border-radius:10px; margin-bottom:12px;">
-        <span style="font-size:14px; color:#e0e0e0;">Анимации</span>
+        <span style="font-size:14px; color:#e0e0e0;" data-i18n="animations">Анимации</span>
         <div id="animToggle" role="switch" aria-checked="true" tabindex="0" style="position:relative; width:52px; height:28px; border-radius:14px; background:#4a4a4a; cursor:pointer; transition:background 0.3s ease; flex-shrink:0;">
           <span id="animThumb" style="position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left 0.3s cubic-bezier(0.22,1,0.36,1);"></span>
         </div>
@@ -1229,32 +1314,32 @@
       <!-- Конфиденциальность -->
       <div class="privacy-section">
         <div class="privacy-section__header" id="privacyHeader">
-          <span class="privacy-section__title">Конфиденциальность</span>
+          <span class="privacy-section__title" data-i18n="privacy">Конфиденциальность</span>
           <span class="privacy-section__arrow" id="privacyArrow">›</span>
         </div>
         <div class="privacy-section__body" id="privacyBody">
           <div class="privacy-section__row">
-            <label>Имя</label>
+            <label data-i18n="name">Имя</label>
             <input id="privacyName" type="text" placeholder="Ваше имя">
           </div>
           <div class="privacy-section__row">
-            <label>Пол</label>
+            <label data-i18n="gender">Пол</label>
             <select id="privacyGender">
-              <option value="">Не указан</option>
-              <option value="male">Мужской</option>
-              <option value="female">Женский</option>
-              <option value="other">Другой</option>
+              <option value="" data-i18n="notSet">Не указан</option>
+              <option value="male" data-i18n="male">Мужской</option>
+              <option value="female" data-i18n="female">Женский</option>
+              <option value="other" data-i18n="other">Другой</option>
             </select>
           </div>
           <div class="privacy-section__row">
-            <label>Язык</label>
+            <label data-i18n="lang">Язык</label>
             <select id="privacyLang">
               <option value="ru">Русский</option>
               <option value="en">English</option>
             </select>
           </div>
           <div class="privacy-section__row">
-            <button id="savePrivacyBtn" type="button" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
+            <button id="savePrivacyBtn" type="button" data-i18n="save" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
               Сохранить
             </button>
             <p id="privacyErr" style="color:#ff6b6b; font-size:12px; margin:0; min-height:14px;"></p>
@@ -1262,16 +1347,40 @@
         </div>
       </div>
 
+      <!-- Изменить пароль -->
+      <div class="privacy-section" id="passSection">
+        <div class="privacy-section__header" id="passHeader">
+          <span class="privacy-section__title" data-i18n="changePass">Изменить пароль</span>
+          <span class="privacy-section__arrow" id="passArrow">›</span>
+        </div>
+        <div class="privacy-section__body" id="passBody">
+          <div class="privacy-section__row">
+            <label data-i18n="newPassword">Новый пароль</label>
+            <input id="newPass" type="password" autocomplete="new-password" placeholder="Новый пароль">
+          </div>
+          <div class="privacy-section__row">
+            <label data-i18n="passwordRepeat">Повтор пароля</label>
+            <input id="newPass2" type="password" autocomplete="new-password" placeholder="Повтор пароля">
+          </div>
+          <div class="privacy-section__row">
+            <button id="savePassBtn" type="button" data-i18n="savePass" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
+              Сохранить пароль
+            </button>
+            <p id="passErr" style="color:#ff6b6b; font-size:12px; margin:0; min-height:14px;"></p>
+          </div>
+        </div>
+      </div>
+
       <!-- OS внизу -->
       <div style="text-align:center; padding:8px 0 4px; font-size:12px; color:#7a7a7a; letter-spacing:0.5px;">
-        OS: <span id="osInfo" style="color:#b0b0b0; font-weight:600;">—</span>
+        <span data-i18n="os">OS</span>: <span id="osInfo" style="color:#b0b0b0; font-weight:600;">—</span>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  /* ===== Кастомный курсор (только для ПК) ===== */
+  /* ===== Кастомный курсор ===== */
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -1349,7 +1458,7 @@
     }
   });
 
-  /* ===== Плавный скролл к якорям ===== */
+  /* ===== Плавный скролл ===== */
   function smoothScrollTo(targetY, duration = 900) {
     const startY = window.scrollY;
     const diff = targetY - startY;
@@ -1357,9 +1466,7 @@
     let startTime = null;
 
     function easeInOutCubic(t) {
-      return t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
     function step(timestamp) {
@@ -1412,6 +1519,174 @@
   window.__firebaseReady = new Promise((resolve) => {
     window.__resolveFirebaseReady = resolve;
   });
+
+  /* ===== i18n: словари ===== */
+  const I18N = {
+    ru: {
+      login: 'Войти',
+      loginTitle: 'Вход',
+      register: 'Регистрация',
+      registerTitle: 'Регистрация',
+      cancel: 'Отмена',
+      confirm: 'Подтвердить',
+      projects: 'Проекты',
+      projectsTitle: 'Проекты:',
+      digitalTag: 'Цифровой тег',
+      tagTitle: 'Цифровой тег:',
+      dossier: 'Досье',
+      dossierTitle: 'Досье',
+      theme: 'Тема',
+      settings: 'Настройки',
+      logout: 'Выйти',
+      privacy: 'Конфиденциальность',
+      changePass: 'Изменить пароль',
+      save: 'Сохранить',
+      savePass: 'Сохранить пароль',
+      name: 'Имя',
+      gender: 'Пол',
+      id: 'ID',
+      lang: 'Язык',
+      language: 'Язык',
+      male: 'Мужской',
+      female: 'Женский',
+      other: 'Другой',
+      notSet: 'Не указан',
+      noRelease: 'Нет релиза',
+      download: 'Скачать',
+      downloaded: 'Скачано',
+      online: 'Онлайн:',
+      animations: 'Анимации',
+      password: 'Пароль',
+      passwordRepeat: 'Повтор пароля',
+      newPassword: 'Новый пароль',
+      os: 'OS',
+      order: 'Заказ',
+      pwdMin: 'Пароль — минимум 3 символа',
+      pwdMismatch: 'Пароли не совпадают',
+      pwdSaved: 'Пароль сохранён',
+      saved: 'Сохранено',
+      nameTaken: 'Такое имя уже занято',
+      errSave: 'Ошибка сохранения',
+      errConn: 'Ошибка соединения',
+      enterName: 'Введите имя',
+      fillAll: 'Заполните все поля',
+      check: 'Проверка...',
+      nameShort: 'Имя — минимум 3 символа'
+    },
+    en: {
+      login: 'Log in',
+      loginTitle: 'Log in',
+      register: 'Sign up',
+      registerTitle: 'Sign up',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      projects: 'Projects',
+      projectsTitle: 'Projects:',
+      digitalTag: 'Digital tag',
+      tagTitle: 'Digital tag:',
+      dossier: 'Dossier',
+      dossierTitle: 'Dossier',
+      theme: 'Theme',
+      settings: 'Settings',
+      logout: 'Log out',
+      privacy: 'Privacy',
+      changePass: 'Change password',
+      save: 'Save',
+      savePass: 'Save password',
+      name: 'Name',
+      gender: 'Gender',
+      id: 'ID',
+      lang: 'Language',
+      language: 'Language',
+      male: 'Male',
+      female: 'Female',
+      other: 'Other',
+      notSet: 'Not set',
+      noRelease: 'No release',
+      download: 'Download',
+      downloaded: 'Downloads',
+      online: 'Online:',
+      animations: 'Animations',
+      password: 'Password',
+      passwordRepeat: 'Repeat password',
+      newPassword: 'New password',
+      os: 'OS',
+      order: 'Order',
+      pwdMin: 'Password — at least 3 chars',
+      pwdMismatch: 'Passwords do not match',
+      pwdSaved: 'Password saved',
+      saved: 'Saved',
+      nameTaken: 'This name is taken',
+      errSave: 'Save error',
+      errConn: 'Connection error',
+      enterName: 'Enter name',
+      fillAll: 'Fill all fields',
+      check: 'Checking...',
+      nameShort: 'Name — at least 3 chars'
+    }
+  };
+
+  function currentLang() {
+    return getCookie('artemis_lang') === 'en' ? 'en' : 'ru';
+  }
+
+  function t(key) {
+    const lang = currentLang();
+    return (I18N[lang] && I18N[lang][key]) || (I18N.ru[key] || key);
+  }
+
+  function applyLanguage() {
+    const lang = currentLang();
+
+    // Все элементы с data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (!key) return;
+      const txt = t(key);
+      if (el.tagName === 'OPTION') {
+        el.textContent = txt;
+      } else {
+        el.textContent = txt;
+      }
+      if (el.hasAttribute('data-type')) {
+        el.setAttribute('data-type', txt);
+      }
+    });
+
+    // data-type с переопределением
+    const setData = (sel, key) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const txt = t(key);
+      el.setAttribute('data-type', txt);
+      el.textContent = txt;
+    };
+    setData('.projects-title', 'projectsTitle');
+    setData('.about-sign__heading', 'tagTitle');
+
+    const dossierHeading = document.querySelector('#dossier .about-sign__heading');
+    if (dossierHeading) {
+      dossierHeading.textContent = t('dossierTitle');
+    }
+
+    // Кнопки входа/регистрации
+    const openLogin = document.getElementById('openLogin');
+    const openRegister = document.getElementById('openRegister');
+    if (openLogin) openLogin.textContent = t('login');
+    if (openRegister) openRegister.textContent = t('register');
+    const openSettingsBtn = document.getElementById('openSettings');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (openSettingsBtn) openSettingsBtn.textContent = t('settings');
+    if (logoutBtn) logoutBtn.textContent = t('logout');
+
+    // Info-панель
+    updateInfoPanel();
+
+    // Перерисовать проекты, если открыта панель
+    if (selectedTile && panel && panel.classList.contains('open')) {
+      renderProjects(selectedTile.dataset.category);
+    }
+  }
 
   /* ===== Переключатель темы ===== */
   const themeToggle = document.getElementById('themeToggle');
@@ -1480,7 +1755,7 @@
     }
   });
 
-  /* ===== Анимация печати ===== */
+  /* ===== Анимации ===== */
   const ANIMATIONS_ENABLED_KEY = 'artemis_animations';
 
   function animationsEnabled() {
@@ -1488,6 +1763,7 @@
   }
 
   function typeText(el, text, speed = 18, startDelay = 0) {
+    if (!el) return;
     if (!animationsEnabled()) { el.textContent = text; return; }
     el.textContent = '';
     let i = 0;
@@ -1502,45 +1778,62 @@
     setTimeout(type, startDelay);
   }
 
-  function runDossierTyping() {
-    const dossierLines = document.querySelectorAll('#dossier .about-sign__text p[data-type]');
-    if (!dossierLines.length) return;
-    dossierLines.forEach((el, idx) => {
-      const text = el.getAttribute('data-type') || '';
-      typeText(el, text, 18, 1200 + idx * 60);
-    });
-  }
+  // Печать запускается только при появлении секции
+  function runTypingOnce(section) {
+    if (!section || section.dataset.typed === '1') return;
+    section.dataset.typed = '1';
 
-  function runAllTyping() {
-    document.querySelectorAll('[data-type]').forEach((el, idx) => {
-      if (el.closest('#dossier')) return;
-      const text = el.getAttribute('data-type');
-      typeText(el, text, 8, 200 + idx * 80);
-    });
-  }
-
-  function typeTiles() {
-    document.querySelectorAll('.tile').forEach((tile, idx) => {
-      const label = tile.dataset.label || '';
-      const titleEl = tile.querySelector('.tile__title');
-      if (!titleEl) return;
-      typeText(titleEl, label, 22, 800 + idx * 150);
-    });
-  }
-
-  runAllTyping();
-  typeTiles();
-  runDossierTyping();
-
-  (function revealTiles() {
-    const tilesAll = document.querySelectorAll('.tile');
-    if (!animationsEnabled()) {
-      tilesAll.forEach(t => t.classList.add('visible'));
-      return;
+    if (section.id === 'dossier') {
+      const lines = section.querySelectorAll('.about-sign__text p[data-type]');
+      lines.forEach((el, idx) => {
+        const text = el.getAttribute('data-type') || '';
+        typeText(el, text, 14, 300 + idx * 200);
+      });
+    } else if (section.id === 'aboutSign') {
+      const heading = section.querySelector('.about-sign__heading');
+      if (heading && heading.getAttribute('data-type')) {
+        typeText(heading, heading.getAttribute('data-type'), 40, 200);
+      }
+      const textEl = section.querySelector('.about-sign__text');
+      if (textEl && textEl.getAttribute('data-type')) {
+        typeText(textEl, textEl.getAttribute('data-type'), 6, 800);
+      }
     }
-    tilesAll.forEach((t, idx) => {
-      setTimeout(() => t.classList.add('visible'), 400 + idx * 150);
-    });
+  }
+
+  // Сразу печатаем только превью и тайтлы
+  document.querySelectorAll('.site-preview__title[data-type]').forEach((el, idx) => {
+    typeText(el, el.getAttribute('data-type'), 60, 400 + idx * 100);
+  });
+
+  const projectsTitleEl = document.querySelector('.projects-title');
+  if (projectsTitleEl && projectsTitleEl.getAttribute('data-type')) {
+    typeText(projectsTitleEl, projectsTitleEl.getAttribute('data-type'), 60, 900);
+  }
+
+  (function typeTilesIfVisible() {
+    const tilesBlock = document.getElementById('tilesBlock');
+    if (!tilesBlock) return;
+    const tileObs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting && !tilesBlock.dataset.typed) {
+          tilesBlock.dataset.typed = '1';
+          document.querySelectorAll('.tile').forEach((tile, idx) => {
+            const label = tile.dataset.label || '';
+            const titleEl = tile.querySelector('.tile__title');
+            if (!titleEl) return;
+            typeText(titleEl, label, 22, idx * 140);
+            if (animationsEnabled()) {
+              setTimeout(() => tile.classList.add('visible'), 200 + idx * 120);
+            } else {
+              tile.classList.add('visible');
+            }
+          });
+          tileObs.unobserve(tilesBlock);
+        }
+      });
+    }, { threshold: 0.15 });
+    tileObs.observe(tilesBlock);
   })();
 
   /* ===== Модалки ===== */
@@ -1563,7 +1856,7 @@
     setTimeout(() => { overlay.style.display = 'none'; }, 450);
   }
 
-  /* ===== Юзер UI ===== */
+  /* ===== Юзер ===== */
   const openLoginBtn = document.getElementById('openLogin');
   const openRegisterBtn = document.getElementById('openRegister');
   const menuUser = document.getElementById('menuUser');
@@ -1602,7 +1895,14 @@
     }
   }
 
-  /* ===== Инфо-панель в настройках ===== */
+  function genderLabel(val) {
+    if (!val) return t('notSet');
+    if (val === 'male') return t('male');
+    if (val === 'female') return t('female');
+    if (val === 'other') return t('other');
+    return val;
+  }
+
   function updateInfoPanel() {
     const nameEl = document.getElementById('infoName');
     const genderEl = document.getElementById('infoGender');
@@ -1611,12 +1911,11 @@
     if (!nameEl) return;
 
     nameEl.textContent = currentUser || '—';
-    genderEl.textContent = getCookie('artemis_gender') || '—';
+    genderEl.textContent = genderLabel(getCookie('artemis_gender'));
     idEl.textContent = currentUser ? ('#' + currentUser.toLowerCase().replace(/[^a-z0-9]/g, '')) : '—';
-    langEl.textContent = getCookie('artemis_lang') === 'en' ? 'English' : 'Русский';
+    langEl.textContent = currentLang() === 'en' ? 'English' : 'Русский';
   }
 
-  /* ===== Сохранение настроек в Firebase ===== */
   async function saveUserSetting(key, value) {
     if (!currentUser || !fbUpdateUser) return;
     try {
@@ -1702,21 +2001,21 @@
     const pass = regPass.value;
     const pass2 = regPass2.value;
 
-    if (!name) { regError.textContent = 'Введите имя'; return; }
-    if (name.length < 3) { regError.textContent = 'Имя — минимум 3 символа'; return; }
-    if (pass.length < 3) { regError.textContent = 'Пароль — минимум 3 символа'; return; }
-    if (pass !== pass2) { regError.textContent = 'Пароли не совпадают'; return; }
+    if (!name) { regError.textContent = t('enterName'); return; }
+    if (name.length < 3) { regError.textContent = t('nameShort'); return; }
+    if (pass.length < 3) { regError.textContent = t('pwdMin'); return; }
+    if (pass !== pass2) { regError.textContent = t('pwdMismatch'); return; }
 
     regSubmit.disabled = true;
     regError.style.color = '#9a9a9a';
-    regError.textContent = 'Проверка...';
+    regError.textContent = t('check');
 
     try {
       await window.__firebaseReady;
       const existing = await fbGetUser(name);
       if (existing) {
         regError.style.color = '#ff6b6b';
-        regError.textContent = 'Такое имя уже занято';
+        regError.textContent = t('nameTaken');
         regSubmit.disabled = false;
         return;
       }
@@ -1727,7 +2026,7 @@
       const ok = await fbCreateUser(name, pass, theme, anim);
       if (!ok) {
         regError.style.color = '#ff6b6b';
-        regError.textContent = 'Такое имя уже занято';
+        regError.textContent = t('nameTaken');
         regSubmit.disabled = false;
         return;
       }
@@ -1740,7 +2039,7 @@
     } catch (err) {
       console.error(err);
       regError.style.color = '#ff6b6b';
-      regError.textContent = 'Ошибка соединения';
+      regError.textContent = t('errConn');
     }
     regSubmit.disabled = false;
   });
@@ -1777,24 +2076,24 @@
     const name = loginName.value.trim();
     const pass = loginPass.value;
 
-    if (!name || !pass) { loginError.textContent = 'Заполните все поля'; return; }
+    if (!name || !pass) { loginError.textContent = t('fillAll'); return; }
 
     loginSubmit.disabled = true;
     loginError.style.color = '#9a9a9a';
-    loginError.textContent = 'Проверка...';
+    loginError.textContent = t('check');
 
     try {
       await window.__firebaseReady;
       const user = await fbGetUser(name);
       if (!user) {
         loginError.style.color = '#ff6b6b';
-        loginError.textContent = 'Такого пользователя нет';
+        loginError.textContent = t('errConn');
         loginSubmit.disabled = false;
         return;
       }
       if (user.pass !== pass) {
         loginError.style.color = '#ff6b6b';
-        loginError.textContent = 'Неверный пароль';
+        loginError.textContent = 'Неверный пароль / Wrong password';
         loginSubmit.disabled = false;
         return;
       }
@@ -1807,13 +2106,18 @@
       applyTheme(user.theme === 'light', true);
       applyAnimSetting(user.anim !== 'off');
 
+      if (user.gender) setCookie('artemis_gender', user.gender, 365);
+      if (user.lang) setCookie('artemis_lang', user.lang, 365);
+
+      applyLanguage();
+
       closeLoginModal();
       burger.classList.add('open');
       menu.classList.add('open');
     } catch (err) {
       console.error(err);
       loginError.style.color = '#ff6b6b';
-      loginError.textContent = 'Ошибка соединения';
+      loginError.textContent = t('errConn');
     }
     loginSubmit.disabled = false;
   });
@@ -1852,6 +2156,14 @@
   const savePrivacyBtn = document.getElementById('savePrivacyBtn');
   const privacyErr = document.getElementById('privacyErr');
 
+  const passHeader = document.getElementById('passHeader');
+  const passBody = document.getElementById('passBody');
+  const passArrow = document.getElementById('passArrow');
+  const newPass = document.getElementById('newPass');
+  const newPass2 = document.getElementById('newPass2');
+  const savePassBtn = document.getElementById('savePassBtn');
+  const passErr = document.getElementById('passErr');
+
   function openSettingsModal() {
     const curName = getCookie('artemis_user');
     if (curName) privacyName.value = curName;
@@ -1864,8 +2176,12 @@
 
     updateAnimToggle(animationsEnabled(), true);
     privacyErr.textContent = '';
+    passErr.textContent = '';
     privacyBody.classList.remove('open');
     privacyArrow.style.transform = 'rotate(0deg)';
+    passBody.classList.remove('open');
+    passArrow.style.transform = 'rotate(0deg)';
+
     if (currentUserAvatar) {
       setAvatar(currentUserAvatar);
     } else {
@@ -1920,18 +2236,6 @@
   function updateAnimToggle(on, skipSave) {
     applyAnimSetting(on);
     if (!skipSave) saveUserSetting('anim', on ? 'on' : 'off');
-
-    if (on && !skipSave) {
-      runAllTyping();
-      typeTiles();
-      runDossierTyping();
-      document.querySelectorAll('.tile').forEach(t => t.classList.remove('visible'));
-      setTimeout(() => {
-        document.querySelectorAll('.tile').forEach((t, idx) => {
-          setTimeout(() => t.classList.add('visible'), idx * 150);
-        });
-      }, 50);
-    }
   }
 
   animToggle.addEventListener('click', () => updateAnimToggle(!animOn));
@@ -1942,23 +2246,26 @@
     }
   });
 
-  privacyHeader.addEventListener('click', () => {
-    const isOpen = privacyBody.classList.contains('open');
+  function toggleAccordion(body, arrow) {
+    const isOpen = body.classList.contains('open');
     if (isOpen) {
-      privacyBody.classList.remove('open');
-      privacyArrow.style.transform = 'rotate(0deg)';
+      body.classList.remove('open');
+      arrow.style.transform = 'rotate(0deg)';
     } else {
-      privacyBody.classList.add('open');
-      privacyArrow.style.transform = 'rotate(90deg)';
+      body.classList.add('open');
+      arrow.style.transform = 'rotate(90deg)';
     }
-  });
+  }
+
+  privacyHeader.addEventListener('click', () => toggleAccordion(privacyBody, privacyArrow));
+  passHeader.addEventListener('click', () => toggleAccordion(passBody, passArrow));
 
   savePrivacyBtn.addEventListener('click', async () => {
     const newNameVal = privacyName.value.trim();
     const newGender = privacyGender.value;
     const newLang = privacyLang.value;
 
-    if (!newNameVal) { privacyErr.textContent = 'Введите имя'; return; }
+    if (!newNameVal) { privacyErr.textContent = t('enterName'); return; }
 
     try {
       if (newNameVal !== currentUser) {
@@ -1966,11 +2273,11 @@
         const existing = await fbGetUser(newNameVal);
         if (existing) {
           privacyErr.style.color = '#ff6b6b';
-          privacyErr.textContent = 'Такое имя уже занято';
+          privacyErr.textContent = t('nameTaken');
           return;
         }
         const oldUser = await fbGetUser(currentUser);
-        if (!oldUser) { privacyErr.textContent = 'Ошибка: юзер не найден'; return; }
+        if (!oldUser) { privacyErr.textContent = t('errSave'); return; }
 
         await fbCreateUser(newNameVal, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on');
         if (oldUser.avatar) {
@@ -1991,13 +2298,34 @@
       setCookie('artemis_lang', newLang, 365);
 
       updateInfoPanel();
+      applyLanguage();
       privacyErr.style.color = '#3ddc84';
-      privacyErr.textContent = 'Сохранено';
+      privacyErr.textContent = t('saved');
       setTimeout(() => { privacyErr.textContent = ''; privacyErr.style.color = '#ff6b6b'; }, 1500);
     } catch (e) {
       console.error(e);
       privacyErr.style.color = '#ff6b6b';
-      privacyErr.textContent = 'Ошибка сохранения';
+      privacyErr.textContent = t('errSave');
+    }
+  });
+
+  savePassBtn.addEventListener('click', async () => {
+    const p1 = newPass.value;
+    const p2 = newPass2.value;
+    if (p1.length < 3) { passErr.textContent = t('pwdMin'); return; }
+    if (p1 !== p2) { passErr.textContent = t('pwdMismatch'); return; }
+
+    try {
+      await window.__firebaseReady;
+      await fbUpdateUser(currentUser, { pass: p1 });
+      passErr.style.color = '#3ddc84';
+      passErr.textContent = t('pwdSaved');
+      newPass.value = '';
+      newPass2.value = '';
+      setTimeout(() => { passErr.textContent = ''; passErr.style.color = '#ff6b6b'; }, 1500);
+    } catch (e) {
+      console.error(e);
+      passErr.textContent = t('errSave');
     }
   });
 
@@ -2012,32 +2340,32 @@
   /* ===== Проекты ===== */
   const projects = {
     android: [
-      { name: 'ARTEMIS', meta: 'Android · Приложение — 2026 · v11.2', action: 'none', year: 2026 },
-      { name: 'ARTEMIS PZP', meta: 'Android · Приложение — 2026 · v11.2', action: 'none', year: 2026 },
-      { name: 'ARTEMIS NFC', meta: 'Android · Приложение — 2026 · v11.2', action: 'none', year: 2026 }
+      { name: 'ARTEMIS', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 },
+      { name: 'ARTEMIS PZP', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 },
+      { name: 'ARTEMIS NFC', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 }
     ],
     windows: [
-      { name: 'Computer Assembly', meta: 'Windows · Приложение — 2025 · v1', action: 'download', desc: 'Приложение для сборки, проверки компьютера, покупки компонентов.', year: 2025 },
-      { name: 'Notes', meta: 'Windows · Приложение — 2025 · v1', action: 'download', desc: 'Заметки.', year: 2025 },
-      { name: 'Python Compiler', meta: 'Windows · Приложение — 2025 · v1', action: 'download', desc: 'Компилятор Python с удобным графическим интерфейсом.', year: 2025 },
-      { name: 'Artificial intelligence VK bot', meta: 'Windows · Бот — 2024 · v1', action: 'download', desc: 'Искусственный интеллект ВК бот.', year: 2024 },
-      { name: 'Artificial intelligence', meta: 'Windows · Приложение — 2024 · v1', action: 'download', desc: 'Искусственный Интеллект с Голосовым Интерфейсом.', year: 2024 },
-      { name: 'Connection', meta: 'Windows · Приложение — 2024 · v1', action: 'download', desc: 'Соединение 2 файлов Python между собой.', year: 2024 },
-      { name: 'System', meta: 'Windows · Приложение — 2024 · v1', action: 'download', desc: 'Конфигурация компьютера.', year: 2024 },
-      { name: 'Youtube unblocking', meta: 'Windows · Приложение — 2024 · v1', action: 'download', desc: 'Разблокировка Ютуба.', year: 2024 },
-      { name: 'BL Assistant', meta: 'Windows · Приложение', action: 'none', year: 2024 }
+      { name: 'Computer Assembly', meta: 'Windows · App — 2025 · v1', action: 'download', desc: 'App for building, checking PC, buying components.', year: 2025 },
+      { name: 'Notes', meta: 'Windows · App — 2025 · v1', action: 'download', desc: 'Notes.', year: 2025 },
+      { name: 'Python Compiler', meta: 'Windows · App — 2025 · v1', action: 'download', desc: 'Python compiler with GUI.', year: 2025 },
+      { name: 'Artificial intelligence VK bot', meta: 'Windows · Bot — 2024 · v1', action: 'download', desc: 'AI VK bot.', year: 2024 },
+      { name: 'Artificial intelligence', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'AI with voice interface.', year: 2024 },
+      { name: 'Connection', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'Connect 2 Python files.', year: 2024 },
+      { name: 'System', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'PC configuration.', year: 2024 },
+      { name: 'Youtube unblocking', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'YouTube unblock.', year: 2024 },
+      { name: 'BL Assistant', meta: 'Windows · App', action: 'none', year: 2024 }
     ],
     script: [
-      { name: 'Python Compiler', meta: 'Windows · Приложение — 2025 · v1', action: 'download', desc: 'Компилятор Python с удобным графическим интерфейсом.', year: 2025 },
-      { name: 'Connection', meta: 'Windows · Приложение — 2024 · v1', action: 'download', desc: 'Соединение 2 файлов Python между собой.', year: 2024 }
+      { name: 'Python Compiler', meta: 'Windows · App — 2025 · v1', action: 'download', desc: 'Python compiler with GUI.', year: 2025 },
+      { name: 'Connection', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'Connect 2 Python files.', year: 2024 }
     ],
     bot: [
-      { name: 'Artificial intelligence VK bot', meta: 'Windows · Бот — 2024 · v1', action: 'download', desc: 'Искусственный интеллект ВК бот.', year: 2024 },
-      { name: 'TG clothing bot', meta: 'Windows · Бот', action: 'none', year: 2024 }
+      { name: 'Artificial intelligence VK bot', meta: 'Windows · Bot — 2024 · v1', action: 'download', desc: 'AI VK bot.', year: 2024 },
+      { name: 'TG clothing bot', meta: 'Windows · Bot', action: 'none', year: 2024 }
     ],
     games: [
-      { name: 'Game for remodeling', meta: 'Windows · Игра — 2024 · v1', action: 'download', desc: 'Это игра исходник для масштабирования в PvP на Python.', year: 2024 },
-      { name: 'Snake', meta: 'Windows · Игра — 2024 · v1', action: 'download', desc: 'Змейка.', year: 2024 }
+      { name: 'Game for remodeling', meta: 'Windows · Game — 2024 · v1', action: 'download', desc: 'Game source for PvP scaling on Python.', year: 2024 },
+      { name: 'Snake', meta: 'Windows · Game — 2024 · v1', action: 'download', desc: 'Snake.', year: 2024 }
     ]
   };
 
@@ -2073,7 +2401,7 @@
       if (p.action !== 'download') {
         const act = document.createElement('div');
         act.className = 'project-card__action project-card__action--none';
-        act.setAttribute('data-type', 'Нет релиза');
+        act.setAttribute('data-type', t('noRelease'));
         card.appendChild(act);
       }
       if (p.desc) {
@@ -2108,16 +2436,16 @@
         const btn = document.createElement('a');
         btn.className = 'project-card__download';
         btn.href = '#';
-        btn.textContent = 'Скачать';
+        btn.textContent = t('download');
         btn.addEventListener('click', (ev) => {
           ev.preventDefault(); ev.stopPropagation();
-          alert('Скачивание: ' + p.name);
+          alert(t('download') + ': ' + p.name);
         });
         wrap.appendChild(btn);
 
         const downloadCount = document.createElement('div');
         downloadCount.className = 'project-card__download-count';
-        downloadCount.textContent = 'Скачано: 0';
+        downloadCount.textContent = t('downloaded') + ': 0';
         wrap.appendChild(downloadCount);
 
         card.appendChild(wrap);
@@ -2153,13 +2481,13 @@
           if (stats.dislikes && stats.dislikes.includes(currentUser)) {
             dislikeBtn.classList.add('active');
           }
-        }).catch(e => console.warn('Не удалось загрузить статистику:', e));
+        }).catch(e => console.warn('stats:', e));
       }
 
       likeBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (!currentUser) {
-          alert('Войдите, чтобы оценивать проекты');
+          alert('Войдите / Log in');
           return;
         }
         if (fbToggleReaction) {
@@ -2171,16 +2499,14 @@
               likeBtn.classList.toggle('active', result.likes.includes(currentUser));
               dislikeBtn.classList.toggle('active', result.dislikes.includes(currentUser));
             }
-          } catch (e) {
-            console.warn(e);
-          }
+          } catch (e) { console.warn(e); }
         }
       });
 
       dislikeBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (!currentUser) {
-          alert('Войдите, чтобы оценивать проекты');
+          alert('Войдите / Log in');
           return;
         }
         if (fbToggleReaction) {
@@ -2192,9 +2518,7 @@
               likeBtn.classList.toggle('active', result.likes.includes(currentUser));
               dislikeBtn.classList.toggle('active', result.dislikes.includes(currentUser));
             }
-          } catch (e) {
-            console.warn(e);
-          }
+          } catch (e) { console.warn(e); }
         }
       });
     });
@@ -2333,7 +2657,7 @@
     if (!wrap.contains(e.target)) wrap.classList.remove('open');
   });
 
-  /* ===== Анимация плавающей кнопки ===== */
+  /* ===== Плавающая кнопка соцсетей ===== */
   const START_TOP = 30, MAX_OFFSET = 40, RETURN_EASING = 0.06;
   let offset = 0, lastScrollY = window.scrollY, idleFrames = 0;
   function loop() {
@@ -2357,7 +2681,7 @@
   }
   requestAnimationFrame(loop);
 
-  /* ===== Кнопка «Наверх» ===== */
+  /* ===== Наверх ===== */
   const backToTopBtn = document.getElementById('backToTop');
   const footer = document.querySelector('.site-footer');
 
@@ -2403,7 +2727,7 @@
   updateCurrentDate();
   setInterval(updateCurrentDate, 60000);
 
-  /* ===== Определение OS ===== */
+  /* ===== OS ===== */
   function detectOS() {
     const ua = navigator.userAgent || '';
     if (/android/i.test(ua)) return 'Android';
@@ -2416,20 +2740,18 @@
   const osInfoEl = document.getElementById('osInfo');
   if (osInfoEl) osInfoEl.textContent = detectOS();
 
-  /* ===== Переворот картинки в Цифровом теге ===== */
+  /* ===== Переворот картинки в цифровом теге ===== */
   (function initTagFlip() {
     const media = document.getElementById('tagMedia');
-    const img = document.getElementById('tagImage');
-    if (!media || !img) return;
+    if (!media) return;
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting && !media.classList.contains('revealed')) {
-          media.classList.add('revealed');
-          img.classList.add('revealed');
+        if (entry.isIntersecting) {
           setTimeout(() => {
-            img.style.transform = 'rotateY(180deg)';
-          }, 200);
+            media.classList.add('revealed');
+          }, 400);
+          observer.unobserve(media);
         }
       });
     }, { threshold: 0.4 });
@@ -2446,14 +2768,16 @@
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('loaded');
+          runTypingOnce(entry.target);
           lazyObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.12 });
 
     lazySections.forEach(section => {
       if (!animationsEnabled()) {
         section.classList.add('loaded');
+        runTypingOnce(section);
       } else {
         lazyObserver.observe(section);
       }
@@ -2464,12 +2788,16 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      window.location.href = 'mailto:order@example.com?subject=Заказ';
+      window.location.href = 'mailto:order@example.com?subject=Заказ / Order';
     });
   }
 
   /* ===== Инициализация ===== */
   (async () => {
+    // Язык и инфо-панель сразу
+    applyLanguage();
+    updateInfoPanel();
+
     await window.__firebaseReady;
     const savedName = getCookie('artemis_user');
     if (!savedName) {
@@ -2488,14 +2816,17 @@
       updateMenuAvatar();
       applyTheme(user.theme === 'light', true);
       updateAnimToggle(user.anim !== 'off', true);
+      if (user.gender) setCookie('artemis_gender', user.gender, 365);
+      if (user.lang) setCookie('artemis_lang', user.lang, 365);
+      applyLanguage();
     } catch (e) {
-      console.warn('Не удалось подтянуть юзера из Firebase:', e);
+      console.warn('Firebase:', e);
       updateAnimToggle(animationsEnabled(), true);
     }
   })();
 </script>
 
-<!-- ===== Firebase: онлайн-счётчик + база пользователей ===== -->
+<!-- ===== Firebase ===== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onDisconnect, set, onValue, get, remove, update }
