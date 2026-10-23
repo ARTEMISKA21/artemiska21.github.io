@@ -1040,47 +1040,33 @@
     display: none !important;
   }
 
-  .order-btn--centered {
-    left: 50% !important;
-    right: auto !important;
-    top: 50% !important;
-    width: 420px !important;
-    max-width: calc(100% - 40px) !important;
-    height: 200px !important;
-    transform: translate(-50%, -50%) !important;
-    border-radius: 16px !important;
-    border: 1px solid #5a5a5a !important;
-    background: #1a1a1a !important;
-    cursor: default !important;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.7) !important;
-    transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                top 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                width 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                height 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                border-radius 0.9s ease,
-                background 0.4s ease, border-color 0.4s ease !important;
-  }
-  .order-btn--centered .order-btn__inner {
-    padding: 20px;
-    gap: 0;
-    writing-mode: horizontal-tb;
-  }
-  .order-btn--centered .order-btn__text {
-    writing-mode: horizontal-tb;
-    transform: none;
+  /* ===== Пустая секция, появляющаяся при нажатии "Заказ" ===== */
+  .order-section {
+    width: 100%;
+    background: #1a1a1a;
+    padding: 50px 40px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-height: 260px;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(20px);
+    transition: background 0.4s ease, opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .order-btn--centered .order-btn__stripe {
-    width: 60px;
-    height: 3px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  .order-section.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
-  body.light .order-btn--centered {
-    background: #eaeaea !important;
-    border-color: #d8d8d8 !important;
+  .order-section__inner {
+    width: 100%;
+    max-width: 1100px;
+    min-height: 160px;
+  }
+  body.light .order-section {
+    background: #eaeaea;
+  }
+  @media (max-width: 700px) {
+    .order-section { padding: 30px 20px; min-height: 200px; }
   }
 </style>
 
@@ -2879,7 +2865,8 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      if (orderBtn.classList.contains('order-btn--centered')) return;
+      if (orderBtn.dataset.done === '1') return;
+      orderBtn.dataset.done = '1';
 
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
@@ -2891,15 +2878,29 @@
 
       targets.forEach(el => el.classList.add('fade-out'));
 
+      let orderSection = document.getElementById('orderSection');
+      if (!orderSection) {
+        orderSection = document.createElement('section');
+        orderSection.id = 'orderSection';
+        orderSection.className = 'order-section';
+        orderSection.innerHTML = '<div class="order-section__inner"></div>';
+        const footer = document.querySelector('.site-footer');
+        if (footer && footer.parentNode) {
+          footer.parentNode.insertBefore(orderSection, footer);
+        } else {
+          document.body.appendChild(orderSection);
+        }
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => orderSection.classList.add('visible'));
+      });
+
       setTimeout(() => {
         targets.forEach(el => {
           el.classList.remove('fade-out');
           el.classList.add('hidden-by-order');
         });
-
-        orderBtn.classList.add('order-btn--centered');
-        orderBtn.title = '';
-        orderBtn.setAttribute('aria-label', 'Заказ');
+        orderBtn.style.display = 'none';
       }, 750);
     });
   }
