@@ -8,23 +8,8 @@
   "background_color": "#111111",
   "theme_color": "#1a1a1a",
   "icons": [
-    {
-      "src": "ARTEMIS.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "ARTEMIS.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "ARTEMIS.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "ARTEMIS.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "ARTEMIS.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "ARTEMIS.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
