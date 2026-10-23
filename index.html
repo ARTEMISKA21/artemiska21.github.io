@@ -759,17 +759,30 @@
     color: #888;
   }
 
-  /* ===== Профиль в настройках — по центру ===== */
+  /* ===== Профиль в настройках — аватарка слева, инфо справа ===== */
   .profile-settings-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     padding: 16px;
     background: #2a2a2a;
     border-radius: 12px;
     margin-bottom: 14px;
-    text-align: center;
+    text-align: left;
+  }
+  .profile-settings-header__avatar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .profile-settings-header .profile-info-list {
+    flex: 1 1 auto;
+    align-items: flex-start;
+  }
+  .profile-settings-header .profile-info-list__row {
+    justify-content: flex-start;
   }
   .avatar-upload__circle {
     width: 84px;
@@ -844,6 +857,19 @@
   }
   body.light .profile-info-list__value {
     color: #222;
+  }
+  @media (max-width: 480px) {
+    .profile-settings-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .profile-settings-header .profile-info-list {
+      align-items: center;
+    }
+    .profile-settings-header .profile-info-list__row {
+      justify-content: center;
+    }
   }
 
   .privacy-section {
@@ -1008,6 +1034,25 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* ===== Блок, который появляется при нажатии на "Заказ" ===== */
+  .order-placeholder {
+    width: 100%;
+    min-height: 200px;
+    background: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+    transition: background 0.4s ease, border-color 0.4s ease;
+    box-sizing: border-box;
+  }
+  body.light .order-placeholder {
+    background: #eaeaea;
+    border-top-color: #d8d8d8;
+    border-bottom-color: #d8d8d8;
+  }
+  .hidden-by-order {
+    display: none !important;
+  }
 </style>
 
 <div class="custom-cursor" id="customCursor"></div>
@@ -1106,7 +1151,7 @@
 
     <div class="about-sign__text type-target" data-type="С 2022 года данный знак является официальным и неотъемлемым символом автора, известного как: ARTEMIS. Знак используется как личная эмблема (аналог «подписи» или «клейма») и сопровождает все публикуемые материалы, проекты и продукты деятельности автора. Использование знака третьими лицами без согласия правообладателя запрещено.
 
-В соответствии со ст. 1259 Гражданского кодекса РФ, данный знак охраняется как объект авторского права, поскольку является результатом творческого труда автора и выражен в объективной форме (в форме изображения). Согласно п. 4 ст. 1259 ГК РФ, для возникновения, осуществления и защиты авторских прав не требуется регистрация произведения или соблюдение каких-либо иных формальностей. Авторские права на знак действуют в течение жизни автора и 70 лет после его смерти."></div>
+В соответствии со ст. 1259 Гражданского кодекса РФ, данный знак охраняется как объект авторского права, поскольку является результатом творческого труда автора и выражен в объективной форме (в форме изображения). Согласно п. 4 ст. 1259 ГК РФ, для возникновения, осуществления и защиты авторских прав не требуется регистрация произведения или соблюдение каких-либо иных формальностей. Авторские права на знак действуют в течение жизни автора и 70 лет после его смерти." data-i18n="tagText"></div>
 
   </div>
 </section>
@@ -1119,11 +1164,11 @@
     </div>
 
     <div class="about-sign__text">
-      <p data-type="Я — кодер. Пишу код, вожусь с софтом и всем, что с этим связано."></p>
-      <p data-type="В электронике тоже кой-чего смыслю и могу собрать что-нибудь из этой сферы. Не основное моё дело, но интерес и знания имею."></p>
-      <p data-type="Тружусь на себя и ради себя."></p>
-      <p data-type="Известен как ARTEMIS."></p>
-      <p data-type="Люблю копаться в том, как всё устроено изнутри. Где граница — вижу, и за неё не захожу, ибо знать силу и применять её — не одно и то же."></p>
+      <p data-type="Я — кодер. Пишу код, вожусь с софтом и всем, что с этим связано." data-i18n="dossierP1"></p>
+      <p data-type="В электронике тоже кой-чего смыслю и могу собрать что-нибудь из этой сферы. Не основное моё дело, но интерес и знания имею." data-i18n="dossierP2"></p>
+      <p data-type="Тружусь на себя и ради себя." data-i18n="dossierP3"></p>
+      <p data-type="Известен как ARTEMIS." data-i18n="dossierP4"></p>
+      <p data-type="Люблю копаться в том, как всё устроено изнутри. Где граница — вижу, и за неё не захожу, ибо знать силу и применять её — не одно и то же." data-i18n="dossierP5"></p>
     </div>
 
   </div>
@@ -1259,9 +1304,11 @@
       <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="settings">Настройки</h2>
 
       <div class="profile-settings-header">
-        <div class="avatar-upload__circle" id="avatarCircle">
-          <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
-          <img id="avatarPreview" src="" alt="Аватар" style="display:none;">
+        <div class="profile-settings-header__avatar">
+          <div class="avatar-upload__circle" id="avatarCircle">
+            <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
+            <img id="avatarPreview" src="" alt="Аватар" style="display:none;">
+          </div>
         </div>
         <div class="profile-info-list">
           <div class="profile-info-list__row">
@@ -1545,7 +1592,13 @@
       nameShort: 'Имя — минимум 3 символа',
       wrongPass: 'Неверный пароль',
       needLogin: 'Войдите, чтобы оценивать проекты',
-      needLoginDownload: 'Зарегистрируйтесь или войдите, чтобы скачать'
+      needLoginDownload: 'Зарегистрируйтесь или войдите, чтобы скачать',
+      dossierP1: 'Я — кодер. Пишу код, вожусь с софтом и всем, что с этим связано.',
+      dossierP2: 'В электронике тоже кой-чего смыслю и могу собрать что-нибудь из этой сферы. Не основное моё дело, но интерес и знания имею.',
+      dossierP3: 'Тружусь на себя и ради себя.',
+      dossierP4: 'Известен как ARTEMIS.',
+      dossierP5: 'Люблю копаться в том, как всё устроено изнутри. Где граница — вижу, и за неё не захожу, ибо знать силу и применять её — не одно и то же.',
+      tagText: 'С 2022 года данный знак является официальным и неотъемлемым символом автора, известного как: ARTEMIS. Знак используется как личная эмблема (аналог «подписи» или «клейма») и сопровождает все публикуемые материалы, проекты и продукты деятельности автора. Использование знака третьими лицами без согласия правообладателя запрещено.\n\nВ соответствии со ст. 1259 Гражданского кодекса РФ, данный знак охраняется как объект авторского права, поскольку является результатом творческого труда автора и выражен в объективной форме (в форме изображения). Согласно п. 4 ст. 1259 ГК РФ, для возникновения, осуществления и защиты авторских прав не требуется регистрация произведения или соблюдение каких-либо иных формальностей. Авторские права на знак действуют в течение жизни автора и 70 лет после его смерти.'
     },
     en: {
       login: 'Log in',
@@ -1598,7 +1651,13 @@
       nameShort: 'Name — at least 3 chars',
       wrongPass: 'Wrong password',
       needLogin: 'Log in to rate projects',
-      needLoginDownload: 'Sign up or log in to download'
+      needLoginDownload: 'Sign up or log in to download',
+      dossierP1: 'I am a coder. I write code, tinker with software and everything related to it.',
+      dossierP2: 'I also have some understanding of electronics and can assemble things from that field. It is not my main occupation, but I have the interest and knowledge.',
+      dossierP3: 'I work for myself and for my own sake.',
+      dossierP4: 'Known as ARTEMIS.',
+      dossierP5: 'I like to dig into how everything works inside. I see the boundary — and I do not cross it, for knowing power and applying it are not the same thing.',
+      tagText: 'Since 2022, this sign has been the official and integral symbol of the author known as ARTEMIS. The sign is used as a personal emblem (analogous to a "signature" or "brand") and accompanies all published materials, projects and products of the author\'s activity. Use of the sign by third parties without the consent of the copyright holder is prohibited.\n\nIn accordance with Art. 1259 of the Civil Code of the Russian Federation, this sign is protected as an object of copyright, since it is the result of the author\'s creative work and is expressed in an objective form (in the form of an image). According to paragraph 4 of Art. 1259 of the Civil Code of the Russian Federation, for the emergence, exercise and protection of copyright, registration of the work or compliance with any other formalities is not required. Copyright in the sign is valid for the life of the author and 70 years after his death.'
     }
   };
 
@@ -1646,10 +1705,37 @@
     if (openSettingsBtn) openSettingsBtn.textContent = t('settings');
     if (logoutBtn) logoutBtn.textContent = t('logout');
 
+    // Досье — абзацы
+    document.querySelectorAll('#dossier .about-sign__text p[data-i18n]').forEach(p => {
+      const key = p.getAttribute('data-i18n');
+      const txt = t(key);
+      p.setAttribute('data-type', txt);
+      p.textContent = txt;
+    });
+
+    // Цифровой тег — текст
+    const tagTextEl = document.querySelector('#aboutSign .about-sign__text');
+    if (tagTextEl) {
+      const txt = t('tagText');
+      tagTextEl.setAttribute('data-type', txt);
+      tagTextEl.textContent = txt;
+    }
+
+    // Сброс флага typing, чтобы при смене языка текст перепечатался
+    const aboutSignSection = document.getElementById('aboutSign');
+    const dossierSection = document.getElementById('dossier');
+    if (aboutSignSection) aboutSignSection.dataset.typed = '';
+    if (dossierSection) dossierSection.dataset.typed = '';
+
     updateInfoPanel();
 
     if (selectedTile && panel && panel.classList.contains('open')) {
       renderProjects(selectedTile.dataset.category);
+    }
+
+    if (typeof runTypingOnce === 'function') {
+      if (aboutSignSection && aboutSignSection.classList.contains('loaded')) runTypingOnce(aboutSignSection);
+      if (dossierSection && dossierSection.classList.contains('loaded')) runTypingOnce(dossierSection);
     }
   }
 
@@ -2450,7 +2536,6 @@
         typeText(el, text, 14, 150 + i * 80);
       });
 
-      // Загружаем статистику (лайки + скачивания) для всех — даже незалогиненных
       if (fbGetProjectStats) {
         fbGetProjectStats(p.name).then(stats => {
           if (!stats) return;
@@ -2766,7 +2851,29 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      window.location.href = 'mailto:order@example.com?subject=Заказ / Order';
+      // Скрываем проекты (заголовок + плитки + панель), цифровой тег и досье
+      const projectsTitle = document.querySelector('.projects-title');
+      const tilesBlock = document.getElementById('tilesBlock');
+      const projectsPanel = document.getElementById('projectsPanel');
+      const aboutSign = document.getElementById('aboutSign');
+      const dossier = document.getElementById('dossier');
+
+      [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].forEach(el => {
+        if (el) el.classList.add('hidden-by-order');
+      });
+
+      // Создаём пустой блок, если его ещё нет
+      if (!document.getElementById('orderPlaceholder')) {
+        const placeholder = document.createElement('div');
+        placeholder.id = 'orderPlaceholder';
+        placeholder.className = 'order-placeholder';
+        const footer = document.querySelector('.site-footer');
+        if (footer && footer.parentNode) {
+          footer.parentNode.insertBefore(placeholder, footer);
+        } else {
+          document.body.appendChild(placeholder);
+        }
+      }
     });
   }
 
@@ -2864,7 +2971,6 @@
     return snap.exists() ? snap.val() : null;
   };
 
-  // Генерация следующего числового ID через транзакцию
   async function nextUserId() {
     const counterRef = ref(db, 'meta/nextUserId');
     const result = await runTransaction(counterRef, (current) => {
@@ -2885,7 +2991,6 @@
       try { userId = await nextUserId(); } catch (e) { console.warn('id:', e); userId = null; }
     }
     if (!userId) {
-      // fallback
       const allSnap = await get(ref(db, 'users'));
       const allUsers = allSnap.val() || {};
       let maxId = 999;
