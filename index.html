@@ -358,13 +358,18 @@
   .about-sign__inner { display: flex; gap: 40px; align-items: flex-start; justify-content: center; width: 100%; max-width: 1100px; }
   .about-sign__left { flex: 0 0 340px; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
   .about-sign__heading { color: #d8d8d8; font-size: 18px; font-weight: 600; letter-spacing: 1.5px; text-align: center; width: 100%; transition: color 0.4s ease; min-height: 22px; }
-  .about-sign__media { width: 100%; aspect-ratio: 1 / 1; border-radius: 20px; overflow: hidden; background: #2a2a2a; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: background 0.4s ease; }
-  .about-sign__media img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
+  .about-sign__media { width: 100%; aspect-ratio: 1 / 1; border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: background 0.4s ease; position: relative; }
+  .about-sign__media img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; opacity: 0; transition: opacity 0.8s ease; }
+  .about-sign__media img.revealed { opacity: 1; }
   .about-sign__text { flex: 1 1 0; max-width: 620px; color: #d8d8d8; font-size: 15px; line-height: 1.65; padding-top: 36px; transition: color 0.4s ease; }
   .about-sign__text p { margin: 0 0 16px; }
   .about-sign__text p:last-child { margin-bottom: 0; }
-  .about-sign__arrow { font-size: 60px; color: #b8b8b8; line-height: 1; padding: 0 20px; user-select: none; align-self: center; transition: color 0.4s ease; }
+  .about-sign__arrow { font-size: 60px; color: #b8b8b8; line-height: 1; padding: 0 20px; user-select: none; align-self: center; transition: color 0.4s ease; animation: arrowSlide 2.5s ease-in-out infinite; }
   body.light .about-sign__arrow { color: #666; }
+  @keyframes arrowSlide {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(15px); }
+  }
   .type-target { white-space: pre-wrap; }
 
   .dossier { padding: 80px 40px 90px; background: #1a1a1a; display: flex; justify-content: center; transition: background 0.4s ease; position: relative; overflow: hidden; }
@@ -393,7 +398,11 @@
     .about-sign__left { flex: 0 0 auto; width: 100%; max-width: 320px; }
     .about-sign__heading { font-size: 16px; }
     .about-sign__text { font-size: 14px; max-width: 100%; padding-top: 0; }
-    .about-sign__arrow { font-size: 40px; padding: 10px 0; transform: rotate(90deg); }
+    .about-sign__arrow { font-size: 40px; padding: 10px 0; transform: rotate(90deg); animation: arrowSlideVertical 2.5s ease-in-out infinite; }
+    @keyframes arrowSlideVertical {
+      0%, 100% { transform: rotate(90deg) translateX(0); }
+      50% { transform: rotate(90deg) translateX(10px); }
+    }
     .dossier .about-sign__left { margin-bottom: 16px; }
   }
   @media (max-width: 700px) {
@@ -483,7 +492,7 @@
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999999; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; opacity: 0; transition: opacity 0.3s ease; }
   .modal-overlay.open { display: flex; opacity: 1; }
-  .modal-box { width: 100%; max-width: 380px; background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 24px; box-sizing: border-box; color: #e0e0e0; box-shadow: 0 20px 60px rgba(0,0,0,0.8); font-family: Arial, sans-serif; transform: scaleY(0.01); opacity: 0; transform-origin: center center; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; }
+  .modal-box { width: 100%; max-width: 380px; background: #1e1e1e; border: 1px solid #333; border-radius: 16px; padding: 24px; box-sizing: border-box; color: #e0e0e0; box-shadow: 0 20px 60px rgba(0,0,0,0.8); font-family: Arial, sans-serif; transform: scaleY(0.01); opacity: 0; transform-origin: center center; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; position: relative; }
   .modal-box.open { transform: scaleY(1); opacity: 1; }
   .modal-box__content { opacity: 0; transition: opacity 0.3s ease 0.2s; }
   .modal-box.open .modal-box__content { opacity: 1; }
@@ -491,7 +500,6 @@
 
   /* ===== Кастомный курсор (только для ПК) ===== */
   @media (hover: hover) and (pointer: fine) {
-    /* Скрываем системный курсор у всех элементов, кроме полей ввода */
     body,
     a, button, .tile, .project-card, .burger, .social-button, .social-item,
     .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle,
@@ -500,7 +508,6 @@
     *:not(input):not(textarea):not(select):not([contenteditable="true"]) {
       cursor: none !important;
     }
-    /* Возвращаем системный text для полей ввода */
     input, textarea, select, [contenteditable="true"] {
       cursor: text !important;
     }
@@ -649,16 +656,15 @@
     color: #888;
   }
 
-  /* ===== Аватарка в настройках ===== */
-  .avatar-upload {
+  /* ===== Аватарка в настройках (новый дизайн) ===== */
+  .profile-settings-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
     padding: 14px;
     background: #2a2a2a;
-    border-radius: 10px;
-    margin-bottom: 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
   }
   .avatar-upload__circle {
     width: 72px;
@@ -673,6 +679,7 @@
     overflow: hidden;
     transition: border-color 0.25s ease, background 0.25s ease;
     position: relative;
+    flex-shrink: 0;
   }
   .avatar-upload__circle:hover {
     border-color: #7a7a7a;
@@ -690,12 +697,30 @@
     line-height: 1;
     user-select: none;
   }
-  .avatar-upload__label {
+  .profile-info-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     font-size: 12px;
-    color: #9a9a9a;
-    letter-spacing: 0.5px;
   }
-  body.light .avatar-upload {
+  .profile-info-list__row {
+    display: flex;
+    gap: 6px;
+  }
+  .profile-info-list__label {
+    color: #9a9a9a;
+    min-width: 50px;
+  }
+  .profile-info-list__value {
+    color: #e0e0e0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  body.light .profile-settings-header {
     background: #f0f0f0;
   }
   body.light .avatar-upload__circle {
@@ -709,8 +734,205 @@
   body.light .avatar-upload__placeholder {
     color: #777;
   }
-  body.light .avatar-upload__label {
+  body.light .profile-info-list__label {
     color: #888;
+  }
+  body.light .profile-info-list__value {
+    color: #222;
+  }
+
+  /* ===== Аккордеон Конфиденциальность ===== */
+  .privacy-section {
+    padding: 12px 14px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .privacy-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .privacy-section__title {
+    font-size: 14px;
+    color: #e0e0e0;
+  }
+  .privacy-section__arrow {
+    font-size: 18px;
+    color: #9a9a9a;
+    transition: transform 0.3s ease;
+  }
+  .privacy-section__body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, margin-top 0.3s ease;
+  }
+  .privacy-section__body.open {
+    max-height: 400px;
+    margin-top: 12px;
+  }
+  .privacy-section__row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .privacy-section__row:last-child {
+    margin-bottom: 0;
+  }
+  .privacy-section__row label {
+    font-size: 12px;
+    color: #9a9a9a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .privacy-section__row input,
+  .privacy-section__row select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    background: #1e1e1e;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    color: #e8e8e8;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  body.light .privacy-section {
+    background: #f0f0f0;
+  }
+  body.light .privacy-section__title {
+    color: #333;
+  }
+  body.light .privacy-section__row label {
+    color: #888;
+  }
+  body.light .privacy-section__row input,
+  body.light .privacy-section__row select {
+    background: #fff;
+    border-color: #d0d0d0;
+    color: #222;
+  }
+
+  /* ===== Кнопка закрытия настроек ===== */
+  .settings-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: 2px solid #555;
+    color: #e0e0e0;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, border-color 0.25s ease;
+    transform-origin: center;
+  }
+  .settings-close-btn:hover {
+    transform: rotate(360deg);
+    background: rgba(80,80,80,0.8);
+    border-color: #888;
+  }
+  body.light .settings-close-btn {
+    background: rgba(255,255,255,0.8);
+    border-color: #ccc;
+    color: #333;
+  }
+  body.light .settings-close-btn:hover {
+    background: rgba(255,255,255,1);
+    border-color: #999;
+  }
+
+  /* ===== Кнопка Заказ ===== */
+  .order-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9997;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 8px;
+    background: #4a4a4a;
+    border: 1px solid #5a5a5a;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    cursor: pointer;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.4);
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  }
+  .order-btn:hover {
+    background: #5a5a5a;
+    border-color: #6a6a6a;
+    transform: translateY(-50%) translateX(-3px);
+  }
+  .order-btn__stripe {
+    width: 4px;
+    height: 30px;
+    border-radius: 2px;
+    background: #8a8a8a;
+  }
+  .order-btn__text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: #e0e0e0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  body.light .order-btn {
+    background: #d8d8d8;
+    border-color: #c0c0c0;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.15);
+  }
+  body.light .order-btn:hover {
+    background: #c8c8c8;
+    border-color: #aaa;
+  }
+  body.light .order-btn__stripe {
+    background: #888;
+  }
+  body.light .order-btn__text {
+    color: #333;
+  }
+  @media (max-width: 600px) {
+    .order-btn {
+      padding: 12px 6px;
+      gap: 6px;
+    }
+    .order-btn__stripe {
+      height: 22px;
+      width: 3px;
+    }
+    .order-btn__text {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+    }
+  }
+
+  /* ===== Ленивая загрузка ===== */
+  .lazy-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .lazy-section.loaded {
+    opacity: 1;
+    transform: translateY(0);
   }
 </style>
 
@@ -797,13 +1019,13 @@
 </div>
 
 <!-- ===== Блок "О знаке" ===== -->
-<section class="about-sign" id="aboutSign">
+<section class="about-sign lazy-section" id="aboutSign">
   <div class="about-sign__inner">
 
     <div class="about-sign__left">
       <div class="about-sign__heading" data-type="Цифровой тег:"></div>
-      <div class="about-sign__media">
-        <img src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;">
+      <div class="about-sign__media" id="tagMedia">
+        <img src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;" id="tagImage">
       </div>
     </div>
 
@@ -817,7 +1039,7 @@
 </section>
 
 <!-- ===== Блок "Досье" ===== -->
-<section class="about-sign dossier" id="dossier">
+<section class="about-sign dossier lazy-section" id="dossier">
   <div class="about-sign__inner">
 
     <div class="about-sign__left">
@@ -834,6 +1056,12 @@
 
   </div>
 </section>
+
+<!-- ===== Кнопка Заказ ===== -->
+<div class="order-btn" id="orderBtn" title="Заказ">
+  <span class="order-btn__stripe"></span>
+  <span class="order-btn__text">Заказ</span>
+</div>
 
 <!-- ===== Финальный блок сайта ===== -->
 <footer class="site-footer">
@@ -857,7 +1085,7 @@
       <span class="site-footer__wave">•၊၊||၊|။||||။၊|။•</span>
       <span class="site-footer__time">2:08</span>
     </a>
-    <div class="site-footer__date">15/10/2026</div>
+    <div class="site-footer__date" id="currentDate"></div>
   </div>
 </footer>
 
@@ -957,20 +1185,40 @@
 
 <!-- ===== Модальное окно настроек ===== -->
 <div class="modal-overlay" id="settingsModal">
-  <div class="modal-box" id="settingsBox" style="max-width:420px; max-height:90vh; overflow-y:auto;">
+  <div class="modal-box" id="settingsBox" style="max-width:440px; max-height:90vh; overflow-y:auto;">
+    <button class="settings-close-btn" id="settingsClose" aria-label="Закрыть">✕</button>
+
     <div class="modal-box__content">
       <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;">Настройки</h2>
 
-      <!-- Аватарка -->
-      <div class="avatar-upload" id="avatarUpload">
+      <!-- Профиль: аватар слева, инфо справа -->
+      <div class="profile-settings-header">
         <div class="avatar-upload__circle" id="avatarCircle">
           <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
           <img id="avatarPreview" src="" alt="Аватар" style="display:none;">
         </div>
-        <span class="avatar-upload__label">Аватар</span>
+        <div class="profile-info-list">
+          <div class="profile-info-list__row">
+            <span class="profile-info-list__label">Имя:</span>
+            <span class="profile-info-list__value" id="infoName">—</span>
+          </div>
+          <div class="profile-info-list__row">
+            <span class="profile-info-list__label">Пол:</span>
+            <span class="profile-info-list__value" id="infoGender">—</span>
+          </div>
+          <div class="profile-info-list__row">
+            <span class="profile-info-list__label">ID:</span>
+            <span class="profile-info-list__value" id="infoId">—</span>
+          </div>
+          <div class="profile-info-list__row">
+            <span class="profile-info-list__label">Язык:</span>
+            <span class="profile-info-list__value" id="infoLang">Русский</span>
+          </div>
+        </div>
         <input type="file" id="avatarInput" accept="image/*" style="display:none;">
       </div>
 
+      <!-- Анимации -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:#2a2a2a; border-radius:10px; margin-bottom:12px;">
         <span style="font-size:14px; color:#e0e0e0;">Анимации</span>
         <div id="animToggle" role="switch" aria-checked="true" tabindex="0" style="position:relative; width:52px; height:28px; border-radius:14px; background:#4a4a4a; cursor:pointer; transition:background 0.3s ease; flex-shrink:0;">
@@ -978,43 +1226,45 @@
         </div>
       </div>
 
-      <div style="padding:12px 14px; background:#2a2a2a; border-radius:10px; margin-bottom:12px;">
-        <div id="changeNameHeader" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;">
-          <span style="font-size:14px; color:#e0e0e0;">Изменить: имя</span>
-          <span id="changeNameArrow" style="font-size:18px; color:#9a9a9a; transition:transform 0.3s ease;">›</span>
+      <!-- Конфиденциальность -->
+      <div class="privacy-section">
+        <div class="privacy-section__header" id="privacyHeader">
+          <span class="privacy-section__title">Конфиденциальность</span>
+          <span class="privacy-section__arrow" id="privacyArrow">›</span>
         </div>
-        <div id="changeNameBody" style="max-height:0; overflow:hidden; transition:max-height 0.35s ease, margin-top 0.3s ease;">
-          <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-            <input id="newName" type="text" placeholder="Новое имя" style="width:100%; padding:10px 12px; font-size:14px; background:#1e1e1e; border:1px solid #3a3a3a; border-radius:8px; color:#e8e8e8; outline:none; box-sizing:border-box;">
-            <button id="saveNameBtn" type="button" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
-              Сохранить имя
+        <div class="privacy-section__body" id="privacyBody">
+          <div class="privacy-section__row">
+            <label>Имя</label>
+            <input id="privacyName" type="text" placeholder="Ваше имя">
+          </div>
+          <div class="privacy-section__row">
+            <label>Пол</label>
+            <select id="privacyGender">
+              <option value="">Не указан</option>
+              <option value="male">Мужской</option>
+              <option value="female">Женский</option>
+              <option value="other">Другой</option>
+            </select>
+          </div>
+          <div class="privacy-section__row">
+            <label>Язык</label>
+            <select id="privacyLang">
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="privacy-section__row">
+            <button id="savePrivacyBtn" type="button" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
+              Сохранить
             </button>
-            <p id="nameErr" style="color:#ff6b6b; font-size:12px; margin:0; min-height:14px;"></p>
+            <p id="privacyErr" style="color:#ff6b6b; font-size:12px; margin:0; min-height:14px;"></p>
           </div>
         </div>
       </div>
 
-      <div style="padding:12px 14px; background:#2a2a2a; border-radius:10px; margin-bottom:12px;">
-        <div id="changePassHeader" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;">
-          <span style="font-size:14px; color:#e0e0e0;">Изменить: пароль</span>
-          <span id="changePassArrow" style="font-size:18px; color:#9a9a9a; transition:transform 0.3s ease;">›</span>
-        </div>
-        <div id="changePassBody" style="max-height:0; overflow:hidden; transition:max-height 0.35s ease, margin-top 0.3s ease;">
-          <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
-            <input id="newPass" type="password" placeholder="Новый пароль" autocomplete="new-password" style="width:100%; padding:10px 12px; font-size:14px; background:#1e1e1e; border:1px solid #3a3a3a; border-radius:8px; color:#e8e8e8; outline:none; box-sizing:border-box;">
-            <input id="newPass2" type="password" placeholder="Повтор пароля" autocomplete="new-password" style="width:100%; padding:10px 12px; font-size:14px; background:#1e1e1e; border:1px solid #3a3a3a; border-radius:8px; color:#e8e8e8; outline:none; box-sizing:border-box;">
-            <button id="savePassBtn" type="button" style="padding:10px 14px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #5a5a5a; background:#4a4a4a; color:#fff; cursor:pointer;">
-              Сохранить пароль
-            </button>
-            <p id="passErr" style="color:#ff6b6b; font-size:12px; margin:0; min-height:14px;"></p>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px; margin-top:6px;">
-        <button id="settingsClose" type="button" style="flex:1; padding:11px 14px; font-size:14px; font-weight:600; border-radius:10px; border:1px solid #444; background:transparent; color:#c8c8c8; cursor:pointer;">
-          Закрыть
-        </button>
+      <!-- OS внизу -->
+      <div style="text-align:center; padding:8px 0 4px; font-size:12px; color:#7a7a7a; letter-spacing:0.5px;">
+        OS: <span id="osInfo" style="color:#b0b0b0; font-weight:600;">—</span>
       </div>
     </div>
   </div>
@@ -1052,7 +1302,7 @@
     }
     animateCursor();
 
-    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle';
+    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn';
     const textTargets = 'input, textarea, select, [contenteditable="true"]';
 
     document.addEventListener('mouseover', (e) => {
@@ -1099,7 +1349,7 @@
     }
   });
 
-  /* ===== Плавный скролл к якорям (кастомный easing) ===== */
+  /* ===== Плавный скролл к якорям ===== */
   function smoothScrollTo(targetY, duration = 900) {
     const startY = window.scrollY;
     const diff = targetY - startY;
@@ -1265,7 +1515,7 @@
     document.querySelectorAll('[data-type]').forEach((el, idx) => {
       if (el.closest('#dossier')) return;
       const text = el.getAttribute('data-type');
-      typeText(el, text, 18, 300 + idx * 200);
+      typeText(el, text, 8, 200 + idx * 80);
     });
   }
 
@@ -1339,6 +1589,7 @@
     openRegisterBtn.style.display = 'none';
     openLoginBtn.style.display = 'none';
     updateMenuAvatar();
+    updateInfoPanel();
   }
 
   function updateMenuAvatar() {
@@ -1349,6 +1600,20 @@
     } else {
       menuUserAvatar.style.display = 'none';
     }
+  }
+
+  /* ===== Инфо-панель в настройках ===== */
+  function updateInfoPanel() {
+    const nameEl = document.getElementById('infoName');
+    const genderEl = document.getElementById('infoGender');
+    const idEl = document.getElementById('infoId');
+    const langEl = document.getElementById('infoLang');
+    if (!nameEl) return;
+
+    nameEl.textContent = currentUser || '—';
+    genderEl.textContent = getCookie('artemis_gender') || '—';
+    idEl.textContent = currentUser ? ('#' + currentUser.toLowerCase().replace(/[^a-z0-9]/g, '')) : '—';
+    langEl.textContent = getCookie('artemis_lang') === 'en' ? 'English' : 'Русский';
   }
 
   /* ===== Сохранение настроек в Firebase ===== */
@@ -1563,6 +1828,8 @@
   logoutBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     deleteCookie('artemis_user');
+    deleteCookie('artemis_gender');
+    deleteCookie('artemis_lang');
     showUser(null);
     currentUserAvatar = null;
     setAvatar(null);
@@ -1576,38 +1843,35 @@
   const animToggle = document.getElementById('animToggle');
   const animThumb = document.getElementById('animThumb');
 
-  const changeNameHeader = document.getElementById('changeNameHeader');
-  const changeNameBody = document.getElementById('changeNameBody');
-  const changeNameArrow = document.getElementById('changeNameArrow');
-  const newName = document.getElementById('newName');
-  const saveNameBtn = document.getElementById('saveNameBtn');
-  const nameErr = document.getElementById('nameErr');
-
-  const changePassHeader = document.getElementById('changePassHeader');
-  const changePassBody = document.getElementById('changePassBody');
-  const changePassArrow = document.getElementById('changePassArrow');
-  const newPass = document.getElementById('newPass');
-  const newPass2 = document.getElementById('newPass2');
-  const savePassBtn = document.getElementById('savePassBtn');
-  const passErr = document.getElementById('passErr');
+  const privacyHeader = document.getElementById('privacyHeader');
+  const privacyBody = document.getElementById('privacyBody');
+  const privacyArrow = document.getElementById('privacyArrow');
+  const privacyName = document.getElementById('privacyName');
+  const privacyGender = document.getElementById('privacyGender');
+  const privacyLang = document.getElementById('privacyLang');
+  const savePrivacyBtn = document.getElementById('savePrivacyBtn');
+  const privacyErr = document.getElementById('privacyErr');
 
   function openSettingsModal() {
     const curName = getCookie('artemis_user');
-    if (curName) newName.value = curName;
+    if (curName) privacyName.value = curName;
+
+    const savedGender = getCookie('artemis_gender');
+    if (savedGender) privacyGender.value = savedGender;
+
+    const savedLang = getCookie('artemis_lang') || 'ru';
+    privacyLang.value = savedLang;
+
     updateAnimToggle(animationsEnabled(), true);
-    nameErr.textContent = '';
-    passErr.textContent = '';
-    newPass.value = '';
-    newPass2.value = '';
-    changeNameBody.style.maxHeight = '0px';
-    changePassBody.style.maxHeight = '0px';
-    changeNameArrow.style.transform = 'rotate(0deg)';
-    changePassArrow.style.transform = 'rotate(0deg)';
+    privacyErr.textContent = '';
+    privacyBody.classList.remove('open');
+    privacyArrow.style.transform = 'rotate(0deg)';
     if (currentUserAvatar) {
       setAvatar(currentUserAvatar);
     } else {
       setAvatar(null);
     }
+    updateInfoPanel();
     openModalOverlay(settingsModal, settingsBox);
   }
   function closeSettingsModal() { closeModalOverlay(settingsModal, settingsBox); }
@@ -1678,81 +1942,62 @@
     }
   });
 
-  changeNameHeader.addEventListener('click', () => {
-    const isOpen = changeNameBody.style.maxHeight !== '0px' && changeNameBody.style.maxHeight !== '';
+  privacyHeader.addEventListener('click', () => {
+    const isOpen = privacyBody.classList.contains('open');
     if (isOpen) {
-      changeNameBody.style.maxHeight = '0px';
-      changeNameArrow.style.transform = 'rotate(0deg)';
+      privacyBody.classList.remove('open');
+      privacyArrow.style.transform = 'rotate(0deg)';
     } else {
-      changeNameBody.style.maxHeight = '200px';
-      changeNameArrow.style.transform = 'rotate(90deg)';
+      privacyBody.classList.add('open');
+      privacyArrow.style.transform = 'rotate(90deg)';
     }
   });
 
-  saveNameBtn.addEventListener('click', async () => {
-    const val = newName.value.trim();
-    if (!val) { nameErr.textContent = 'Введите новое имя'; return; }
-    if (val === currentUser) { nameErr.style.color = '#3ddc84'; nameErr.textContent = 'Это ваше текущее имя'; setTimeout(()=>{nameErr.textContent='';nameErr.style.color='#ff6b6b';}, 1500); return; }
+  savePrivacyBtn.addEventListener('click', async () => {
+    const newNameVal = privacyName.value.trim();
+    const newGender = privacyGender.value;
+    const newLang = privacyLang.value;
+
+    if (!newNameVal) { privacyErr.textContent = 'Введите имя'; return; }
 
     try {
-      await window.__firebaseReady;
-      const existing = await fbGetUser(val);
-      if (existing) {
-        nameErr.style.color = '#ff6b6b';
-        nameErr.textContent = 'Такое имя уже занято';
-        return;
-      }
-      const oldUser = await fbGetUser(currentUser);
-      if (!oldUser) { nameErr.textContent = 'Ошибка: юзер не найден'; return; }
+      if (newNameVal !== currentUser) {
+        await window.__firebaseReady;
+        const existing = await fbGetUser(newNameVal);
+        if (existing) {
+          privacyErr.style.color = '#ff6b6b';
+          privacyErr.textContent = 'Такое имя уже занято';
+          return;
+        }
+        const oldUser = await fbGetUser(currentUser);
+        if (!oldUser) { privacyErr.textContent = 'Ошибка: юзер не найден'; return; }
 
-      await fbCreateUser(val, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on');
-      if (oldUser.avatar) {
-        await fbUpdateUser(val, { avatar: oldUser.avatar });
-      }
-      await fbDeleteUser(currentUser);
+        await fbCreateUser(newNameVal, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on');
+        if (oldUser.avatar) {
+          await fbUpdateUser(newNameVal, { avatar: oldUser.avatar });
+        }
+        await fbUpdateUser(newNameVal, { gender: newGender, lang: newLang });
+        await fbDeleteUser(currentUser);
 
-      setCookie('artemis_user', val, 365);
-      showUser(val);
-      menuUserName.textContent = val;
-      newName.value = val;
-      nameErr.style.color = '#3ddc84';
-      nameErr.textContent = 'Имя сохранено';
-      setTimeout(() => { nameErr.textContent = ''; nameErr.style.color = '#ff6b6b'; }, 1500);
+        setCookie('artemis_user', newNameVal, 365);
+        showUser(newNameVal);
+        menuUserName.textContent = newNameVal;
+      } else {
+        await window.__firebaseReady;
+        await fbUpdateUser(currentUser, { gender: newGender, lang: newLang });
+      }
+
+      setCookie('artemis_gender', newGender, 365);
+      setCookie('artemis_lang', newLang, 365);
+
+      updateInfoPanel();
+      privacyErr.style.color = '#3ddc84';
+      privacyErr.textContent = 'Сохранено';
+      setTimeout(() => { privacyErr.textContent = ''; privacyErr.style.color = '#ff6b6b'; }, 1500);
     } catch (e) {
       console.error(e);
-      nameErr.style.color = '#ff6b6b';
-      nameErr.textContent = 'Ошибка сохранения';
-    }
-  });
-
-  changePassHeader.addEventListener('click', () => {
-    const isOpen = changePassBody.style.maxHeight !== '0px' && changePassBody.style.maxHeight !== '';
-    if (isOpen) {
-      changePassBody.style.maxHeight = '0px';
-      changePassArrow.style.transform = 'rotate(0deg)';
-    } else {
-      changePassBody.style.maxHeight = '260px';
-      changePassArrow.style.transform = 'rotate(90deg)';
-    }
-  });
-
-  savePassBtn.addEventListener('click', async () => {
-    const p1 = newPass.value;
-    const p2 = newPass2.value;
-    if (p1.length < 3) { passErr.textContent = 'Пароль — минимум 3 символа'; return; }
-    if (p1 !== p2) { passErr.textContent = 'Пароли не совпадают'; return; }
-
-    try {
-      await window.__firebaseReady;
-      await fbUpdateUser(currentUser, { pass: p1 });
-      passErr.style.color = '#3ddc84';
-      passErr.textContent = 'Пароль сохранён';
-      newPass.value = '';
-      newPass2.value = '';
-      setTimeout(() => { passErr.textContent = ''; passErr.style.color = '#ff6b6b'; }, 1500);
-    } catch (e) {
-      console.error(e);
-      passErr.textContent = 'Ошибка сохранения';
+      privacyErr.style.color = '#ff6b6b';
+      privacyErr.textContent = 'Ошибка сохранения';
     }
   });
 
@@ -2144,6 +2389,84 @@
   backToTopBtn.addEventListener('click', () => {
     smoothScrollTo(0, 900);
   });
+
+  /* ===== Текущая дата ===== */
+  function updateCurrentDate() {
+    const el = document.getElementById('currentDate');
+    if (!el) return;
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    el.textContent = dd + '/' + mm + '/' + yyyy;
+  }
+  updateCurrentDate();
+  setInterval(updateCurrentDate, 60000);
+
+  /* ===== Определение OS ===== */
+  function detectOS() {
+    const ua = navigator.userAgent || '';
+    if (/android/i.test(ua)) return 'Android';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
+    if (/Win/i.test(ua)) return 'Windows';
+    if (/Mac/i.test(ua)) return 'macOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Unknown';
+  }
+  const osInfoEl = document.getElementById('osInfo');
+  if (osInfoEl) osInfoEl.textContent = detectOS();
+
+  /* ===== Переворот картинки в Цифровом теге ===== */
+  (function initTagFlip() {
+    const media = document.getElementById('tagMedia');
+    const img = document.getElementById('tagImage');
+    if (!media || !img) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !media.classList.contains('revealed')) {
+          media.classList.add('revealed');
+          img.classList.add('revealed');
+          setTimeout(() => {
+            img.style.transform = 'rotateY(180deg)';
+          }, 200);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    observer.observe(media);
+  })();
+
+  /* ===== Ленивая загрузка ===== */
+  (function initLazy() {
+    const lazySections = document.querySelectorAll('.lazy-section');
+    if (!lazySections.length) return;
+
+    const lazyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('loaded');
+          lazyObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    lazySections.forEach(section => {
+      if (!animationsEnabled()) {
+        section.classList.add('loaded');
+      } else {
+        lazyObserver.observe(section);
+      }
+    });
+  })();
+
+  /* ===== Кнопка Заказ ===== */
+  const orderBtn = document.getElementById('orderBtn');
+  if (orderBtn) {
+    orderBtn.addEventListener('click', () => {
+      window.location.href = 'mailto:order@example.com?subject=Заказ';
+    });
+  }
 
   /* ===== Инициализация ===== */
   (async () => {
