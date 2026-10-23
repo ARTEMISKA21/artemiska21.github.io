@@ -555,7 +555,6 @@
   .modal-box.open .modal-box__content { opacity: 1; }
   @media (max-width: 600px) { .modal-box { padding: 20px; } }
 
-  /* ===== Настройки: модалка со скроллом внутри, крестик снаружи ===== */
   #settingsBox {
     position: relative;
     overflow: visible !important;
@@ -567,7 +566,6 @@
     padding-right: 6px;
   }
 
-  /* ===== Кнопка закрытия настроек (половина за блоком) ===== */
   .settings-close-btn {
     position: absolute;
     top: -22px;
@@ -607,7 +605,6 @@
     border-color: #999;
   }
 
-  /* ===== Кастомный курсор (только для ПК) ===== */
   @media (hover: hover) and (pointer: fine) {
     body,
     a, button, .tile, .project-card, .burger, .social-button, .social-item,
@@ -650,7 +647,6 @@
     }
   }
 
-  /* ===== Кнопка «Наверх» ===== */
   .back-to-top {
     position: fixed;
     right: 30px;
@@ -701,7 +697,6 @@
     }
   }
 
-  /* ===== Кнопки лайк/дизлайк ===== */
   .project-card__reactions {
     display: flex;
     gap: 10px;
@@ -765,7 +760,6 @@
     color: #888;
   }
 
-  /* ===== Профиль в настройках ===== */
   .profile-settings-header {
     display: flex;
     align-items: center;
@@ -850,7 +844,6 @@
     color: #222;
   }
 
-  /* ===== Аккордеон Конфиденциальность ===== */
   .privacy-section {
     padding: 12px 14px;
     background: #2a2a2a;
@@ -926,7 +919,7 @@
     color: #222;
   }
 
-  /* ===== Кнопка Заказ ===== */
+  /* ===== Кнопка Заказ (растягивается влево, без пустоты справа) ===== */
   .order-btn {
     position: fixed;
     right: 0;
@@ -935,8 +928,7 @@
     z-index: 9997;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: flex-end;
     padding: 0;
     background: #4a4a4a;
     border: 1px solid #5a5a5a;
@@ -944,14 +936,16 @@
     border-radius: 10px 0 0 10px;
     cursor: pointer;
     box-shadow: -4px 0 16px rgba(0,0,0,0.4);
-    transition: background 0.25s ease, border-color 0.25s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    transition: background 0.25s ease, border-color 0.25s ease, width 0.35s cubic-bezier(0.22,1,0.36,1);
     overflow: hidden;
     height: 130px;
+    width: 44px;
+    box-sizing: border-box;
   }
   .order-btn:hover {
     background: #5a5a5a;
     border-color: #6a6a6a;
-    transform: translateY(-50%) translateX(-8px);
+    width: 100px;
   }
   .order-btn__inner {
     display: flex;
@@ -961,6 +955,7 @@
     padding: 14px 10px;
     height: 100%;
     box-sizing: border-box;
+    width: 100%;
   }
   .order-btn__text {
     writing-mode: vertical-rl;
@@ -996,13 +991,13 @@
     color: #333;
   }
   @media (max-width: 600px) {
-    .order-btn { height: 110px; }
+    .order-btn { height: 110px; width: 38px; }
+    .order-btn:hover { width: 84px; }
     .order-btn__inner { padding: 10px 8px; gap: 8px; }
     .order-btn__stripe { height: 30px; width: 3px; }
     .order-btn__text { font-size: 12px; letter-spacing: 1.5px; }
   }
 
-  /* ===== Ленивая загрузка ===== */
   .lazy-section {
     opacity: 0;
     transform: translateY(30px);
@@ -1276,7 +1271,6 @@
     <div class="modal-box__content">
       <h2 style="font-size:20px; font-weight:700; margin:0 0 18px; text-align:center; color:#fff;" data-i18n="settings">Настройки</h2>
 
-      <!-- Профиль: аватар слева, инфо справа -->
       <div class="profile-settings-header">
         <div class="avatar-upload__circle" id="avatarCircle">
           <span class="avatar-upload__placeholder" id="avatarPlaceholder">+</span>
@@ -1303,7 +1297,6 @@
         <input type="file" id="avatarInput" accept="image/*" style="display:none;">
       </div>
 
-      <!-- Анимации -->
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:#2a2a2a; border-radius:10px; margin-bottom:12px;">
         <span style="font-size:14px; color:#e0e0e0;" data-i18n="animations">Анимации</span>
         <div id="animToggle" role="switch" aria-checked="true" tabindex="0" style="position:relative; width:52px; height:28px; border-radius:14px; background:#4a4a4a; cursor:pointer; transition:background 0.3s ease; flex-shrink:0;">
@@ -1311,7 +1304,6 @@
         </div>
       </div>
 
-      <!-- Конфиденциальность -->
       <div class="privacy-section">
         <div class="privacy-section__header" id="privacyHeader">
           <span class="privacy-section__title" data-i18n="privacy">Конфиденциальность</span>
@@ -1347,7 +1339,6 @@
         </div>
       </div>
 
-      <!-- Изменить пароль -->
       <div class="privacy-section" id="passSection">
         <div class="privacy-section__header" id="passHeader">
           <span class="privacy-section__title" data-i18n="changePass">Изменить пароль</span>
@@ -1371,7 +1362,6 @@
         </div>
       </div>
 
-      <!-- OS внизу -->
       <div style="text-align:center; padding:8px 0 4px; font-size:12px; color:#7a7a7a; letter-spacing:0.5px;">
         <span data-i18n="os">OS</span>: <span id="osInfo" style="color:#b0b0b0; font-weight:600;">—</span>
       </div>
@@ -1380,7 +1370,6 @@
 </div>
 
 <script>
-  /* ===== Кастомный курсор ===== */
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -1439,7 +1428,6 @@
     });
   })();
 
-  /* ===== Бургер ===== */
   const burger = document.getElementById('burger');
   const menu = document.getElementById('menu');
   burger.addEventListener('click', (e) => {
@@ -1458,7 +1446,6 @@
     }
   });
 
-  /* ===== Плавный скролл ===== */
   function smoothScrollTo(targetY, duration = 900) {
     const startY = window.scrollY;
     const diff = targetY - startY;
@@ -1494,7 +1481,6 @@
     });
   });
 
-  /* ===== Cookies ===== */
   function setCookie(name, value, days) {
     const d = new Date();
     d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -1508,7 +1494,6 @@
     document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
   }
 
-  /* ===== Firebase bridge ===== */
   let fbGetUser = null;
   let fbCreateUser = null;
   let fbUpdateUser = null;
@@ -1520,7 +1505,6 @@
     window.__resolveFirebaseReady = resolve;
   });
 
-  /* ===== i18n: словари ===== */
   const I18N = {
     ru: {
       login: 'Войти',
@@ -1546,7 +1530,6 @@
       gender: 'Пол',
       id: 'ID',
       lang: 'Язык',
-      language: 'Язык',
       male: 'Мужской',
       female: 'Женский',
       other: 'Другой',
@@ -1571,7 +1554,8 @@
       enterName: 'Введите имя',
       fillAll: 'Заполните все поля',
       check: 'Проверка...',
-      nameShort: 'Имя — минимум 3 символа'
+      nameShort: 'Имя — минимум 3 символа',
+      wrongPass: 'Неверный пароль'
     },
     en: {
       login: 'Log in',
@@ -1597,7 +1581,6 @@
       gender: 'Gender',
       id: 'ID',
       lang: 'Language',
-      language: 'Language',
       male: 'Male',
       female: 'Female',
       other: 'Other',
@@ -1622,7 +1605,8 @@
       enterName: 'Enter name',
       fillAll: 'Fill all fields',
       check: 'Checking...',
-      nameShort: 'Name — at least 3 chars'
+      nameShort: 'Name — at least 3 chars',
+      wrongPass: 'Wrong password'
     }
   };
 
@@ -1636,24 +1620,16 @@
   }
 
   function applyLanguage() {
-    const lang = currentLang();
-
-    // Все элементы с data-i18n
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (!key) return;
       const txt = t(key);
-      if (el.tagName === 'OPTION') {
-        el.textContent = txt;
-      } else {
-        el.textContent = txt;
-      }
+      el.textContent = txt;
       if (el.hasAttribute('data-type')) {
         el.setAttribute('data-type', txt);
       }
     });
 
-    // data-type с переопределением
     const setData = (sel, key) => {
       const el = document.querySelector(sel);
       if (!el) return;
@@ -1669,7 +1645,6 @@
       dossierHeading.textContent = t('dossierTitle');
     }
 
-    // Кнопки входа/регистрации
     const openLogin = document.getElementById('openLogin');
     const openRegister = document.getElementById('openRegister');
     if (openLogin) openLogin.textContent = t('login');
@@ -1679,16 +1654,13 @@
     if (openSettingsBtn) openSettingsBtn.textContent = t('settings');
     if (logoutBtn) logoutBtn.textContent = t('logout');
 
-    // Info-панель
     updateInfoPanel();
 
-    // Перерисовать проекты, если открыта панель
     if (selectedTile && panel && panel.classList.contains('open')) {
       renderProjects(selectedTile.dataset.category);
     }
   }
 
-  /* ===== Переключатель темы ===== */
   const themeToggle = document.getElementById('themeToggle');
 
   function applyTheme(isLight, skipSave) {
@@ -1755,7 +1727,6 @@
     }
   });
 
-  /* ===== Анимации ===== */
   const ANIMATIONS_ENABLED_KEY = 'artemis_animations';
 
   function animationsEnabled() {
@@ -1778,7 +1749,6 @@
     setTimeout(type, startDelay);
   }
 
-  // Печать запускается только при появлении секции
   function runTypingOnce(section) {
     if (!section || section.dataset.typed === '1') return;
     section.dataset.typed = '1';
@@ -1801,7 +1771,6 @@
     }
   }
 
-  // Сразу печатаем только превью и тайтлы
   document.querySelectorAll('.site-preview__title[data-type]').forEach((el, idx) => {
     typeText(el, el.getAttribute('data-type'), 60, 400 + idx * 100);
   });
@@ -1836,7 +1805,6 @@
     tileObs.observe(tilesBlock);
   })();
 
-  /* ===== Модалки ===== */
   const registerModal = document.getElementById('registerModal');
   const registerBox = document.getElementById('registerBox');
   const loginModal = document.getElementById('loginModal');
@@ -1856,7 +1824,6 @@
     setTimeout(() => { overlay.style.display = 'none'; }, 450);
   }
 
-  /* ===== Юзер ===== */
   const openLoginBtn = document.getElementById('openLogin');
   const openRegisterBtn = document.getElementById('openRegister');
   const menuUser = document.getElementById('menuUser');
@@ -1921,11 +1888,10 @@
     try {
       await fbUpdateUser(currentUser, { [key]: value });
     } catch (e) {
-      console.warn('Не удалось сохранить настройку:', e);
+      console.warn('save:', e);
     }
   }
 
-  /* ===== Аватарка ===== */
   const avatarCircle = document.getElementById('avatarCircle');
   const avatarPlaceholder = document.getElementById('avatarPlaceholder');
   const avatarPreview = document.getElementById('avatarPreview');
@@ -1959,14 +1925,13 @@
         try {
           await fbUpdateUser(currentUser, { avatar: dataUrl });
         } catch (e) {
-          console.warn('Не удалось сохранить аватар:', e);
+          console.warn('avatar:', e);
         }
       }
     };
     reader.readAsDataURL(file);
   });
 
-  /* ===== Регистрация ===== */
   const regCancel = document.getElementById('regCancel');
   const regSubmit = document.getElementById('regSubmit');
   const regName = document.getElementById('regName');
@@ -2044,7 +2009,6 @@
     regSubmit.disabled = false;
   });
 
-  /* ===== Вход ===== */
   const loginCancel = document.getElementById('loginCancel');
   const loginSubmit = document.getElementById('loginSubmit');
   const loginName = document.getElementById('loginName');
@@ -2093,7 +2057,7 @@
       }
       if (user.pass !== pass) {
         loginError.style.color = '#ff6b6b';
-        loginError.textContent = 'Неверный пароль / Wrong password';
+        loginError.textContent = t('wrongPass');
         loginSubmit.disabled = false;
         return;
       }
@@ -2122,7 +2086,6 @@
     loginSubmit.disabled = false;
   });
 
-  /* ===== Меню пользователя ===== */
   menuUser.addEventListener('click', (e) => {
     e.stopPropagation();
     profileMenu.classList.toggle('visible');
@@ -2140,7 +2103,6 @@
     profileMenu.classList.remove('visible');
   });
 
-  /* ===== Настройки ===== */
   const openSettingsBtn = document.getElementById('openSettings');
   const settingsClose = document.getElementById('settingsClose');
 
@@ -2337,7 +2299,6 @@
     }
   });
 
-  /* ===== Проекты ===== */
   const projects = {
     android: [
       { name: 'ARTEMIS', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 },
@@ -2646,7 +2607,6 @@
     block.style.minHeight = '';
   }
 
-  /* ===== Соцсети ===== */
   const wrap = document.getElementById('socialWrap');
   const sBtn = document.getElementById('socialBtn');
   sBtn.addEventListener('click', (e) => {
@@ -2657,7 +2617,6 @@
     if (!wrap.contains(e.target)) wrap.classList.remove('open');
   });
 
-  /* ===== Плавающая кнопка соцсетей ===== */
   const START_TOP = 30, MAX_OFFSET = 40, RETURN_EASING = 0.06;
   let offset = 0, lastScrollY = window.scrollY, idleFrames = 0;
   function loop() {
@@ -2681,7 +2640,6 @@
   }
   requestAnimationFrame(loop);
 
-  /* ===== Наверх ===== */
   const backToTopBtn = document.getElementById('backToTop');
   const footer = document.querySelector('.site-footer');
 
@@ -2714,7 +2672,6 @@
     smoothScrollTo(0, 900);
   });
 
-  /* ===== Текущая дата ===== */
   function updateCurrentDate() {
     const el = document.getElementById('currentDate');
     if (!el) return;
@@ -2727,7 +2684,6 @@
   updateCurrentDate();
   setInterval(updateCurrentDate, 60000);
 
-  /* ===== OS ===== */
   function detectOS() {
     const ua = navigator.userAgent || '';
     if (/android/i.test(ua)) return 'Android';
@@ -2740,7 +2696,6 @@
   const osInfoEl = document.getElementById('osInfo');
   if (osInfoEl) osInfoEl.textContent = detectOS();
 
-  /* ===== Переворот картинки в цифровом теге ===== */
   (function initTagFlip() {
     const media = document.getElementById('tagMedia');
     if (!media) return;
@@ -2759,7 +2714,6 @@
     observer.observe(media);
   })();
 
-  /* ===== Ленивая загрузка ===== */
   (function initLazy() {
     const lazySections = document.querySelectorAll('.lazy-section');
     if (!lazySections.length) return;
@@ -2784,7 +2738,6 @@
     });
   })();
 
-  /* ===== Кнопка Заказ ===== */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -2792,9 +2745,7 @@
     });
   }
 
-  /* ===== Инициализация ===== */
   (async () => {
-    // Язык и инфо-панель сразу
     applyLanguage();
     updateInfoPanel();
 
@@ -2826,7 +2777,6 @@
   })();
 </script>
 
-<!-- ===== Firebase ===== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onDisconnect, set, onValue, get, remove, update }
