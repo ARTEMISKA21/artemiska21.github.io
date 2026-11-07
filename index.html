@@ -87,7 +87,6 @@
     stroke: #222222 !important;
   }
 
-  /* ===== Превью: сильнее закруглённые углы ===== */
   .site-preview {
     position: relative;
     width: 100%;
@@ -147,11 +146,9 @@
     transform-origin: 50% 100%;
     will-change: transform;
   }
-  /* Наведение ТОЛЬКО на конкретную букву — поднимается только она */
   .site-preview__letter:hover {
     transform: translateY(-10px);
   }
-  /* S при наведении: поднимается и «падает» вправо по диагонали */
   .site-preview__letter--s:hover {
     transform: translate(14px, -6px) rotate(28deg);
   }
@@ -1146,7 +1143,6 @@
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
 
-  /* Пустой блок без обводки, текст по центру */
   .order-block {
     width: 100%;
     max-width: 1100px;
@@ -1258,23 +1254,24 @@
     gap: 12px;
   }
 
-  /* ===== Секция статистики (отдельная, после футера) ===== */
+  /* ===== Секция статистики ===== */
   .stats-section {
     width: 100%;
     background: #1a1a1a;
     padding: 50px 40px;
     box-sizing: border-box;
-    display: flex;
+    display: none;
     justify-content: center;
     min-height: 260px;
     opacity: 0;
     transition: background 0.4s ease, opacity 0.6s ease;
   }
-  .stats-section.visible { opacity: 1; }
+  .stats-section.visible {
+    opacity: 1;
+  }
   .stats-section__inner {
     width: 100%;
     max-width: 1100px;
-    min-height: 160px;
     color: #d8d8d8;
     font-family: Arial, sans-serif;
   }
@@ -1347,7 +1344,7 @@
     border-radius: 4px 4px 0 0;
     min-height: 4px;
     position: relative;
-    transition: background 0.4s ease;
+    transition: height 0.5s ease, background 0.4s ease;
   }
   body.light .stats-chart__bar {
     background: linear-gradient(to top, #15803d 0%, #22c55e 100%);
@@ -1427,6 +1424,18 @@
   @media (max-width: 700px) {
     .stats-section { padding: 30px 20px; min-height: 200px; }
     .stats-section__bottom { grid-template-columns: 1fr; }
+  }
+
+  /* Слот для морфинга: занимает место строки «Онлайн» */
+  .stats-online-slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 60px;
+    min-height: 18px;
+    color: #e8e8e8;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ===== Капча ===== */
@@ -2195,7 +2204,6 @@
       tagTextEl.textContent = txt;
     }
 
-    // Пересобираем буквы ARTEMIS после смены языка
     buildPreviewLetters();
 
     const aboutSignSection = document.getElementById('aboutSign');
@@ -2215,7 +2223,6 @@
     }
   }
 
-  // ===== Буквы ARTEMIS: разбиваем на span для анимации =====
   const previewTitleEl = document.getElementById('previewTitle');
   function buildPreviewLetters() {
     if (!previewTitleEl) return;
@@ -2345,7 +2352,6 @@
     }
   }
 
-  // Инициализация букв ARTEMIS (один раз)
   buildPreviewLetters();
 
   const projectsTitleEl = document.querySelector('.projects-title');
@@ -2507,7 +2513,6 @@
     reader.readAsDataURL(file);
   });
 
-  // ===== Капча =====
   const captchaExpr = document.getElementById('captchaExpr');
   const captchaInput = document.getElementById('captchaInput');
   const captchaRefresh = document.getElementById('captchaRefresh');
@@ -3508,7 +3513,7 @@
     });
   }
 
-  /* ===== Статистика: реальные данные ===== */
+  /* ===== Статистика ===== */
   function countAllProjects() {
     let n = 0;
     for (const key in projects) {
@@ -3517,7 +3522,6 @@
     return n;
   }
 
-  // Формируем готовую разметку сразу — чтобы координаты и контент существовали ДО морфинга
   function buildStatsHTML(onlineCountVal) {
     const monthsShort = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
     const bars = monthsShort.map(m => `<div class="stats-chart__bar" data-m="${m}" data-v="0" style="height:4px"></div>`).join('');
@@ -3536,7 +3540,7 @@
           </div>
           <div class="stats-section__row">
             <span class="stats-section__label">${t('onlineValue')}</span>
-            <span class="stats-section__value" id="statsOnline">${onlineCountVal}</span>
+            <span class="stats-section__value stats-online-slot" id="statsOnlineSlot">${onlineCountVal}</span>
           </div>
         </div>
 
@@ -3633,12 +3637,16 @@
       if (onlineIndicator.dataset.done === '1') return;
       onlineIndicator.dataset.done = '1';
 
+      const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '0';
+
       let statsSection = document.getElementById('statsSection');
       if (!statsSection) {
         statsSection = document.createElement('section');
         statsSection.id = 'statsSection';
         statsSection.className = 'stats-section';
-        const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '0';
+        statsSection.style.display = 'flex';       // показываем, чтобы измерить
+        statsSection.style.opacity = '0';
+        statsSection.style.visibility = 'hidden';
         statsSection.innerHTML = buildStatsHTML(onlineCountVal);
         const footerEl = document.querySelector('.site-footer');
         if (footerEl && footerEl.parentNode) {
@@ -3646,28 +3654,35 @@
         } else {
           document.body.appendChild(statsSection);
         }
+      } else {
+        statsSection.style.display = 'flex';
+        statsSection.style.opacity = '0';
+        statsSection.style.visibility = 'hidden';
       }
-      statsSection.style.transition = 'opacity 0.6s ease';
-      statsSection.style.opacity = '0';
-      statsSection.style.display = 'flex';
-      statsSection.style.visibility = 'hidden';
 
+      // Принудительный reflow — координаты уже финальные
       void statsSection.offsetHeight;
+
+      // Слот, в который летит индикатор (только маленький прямоугольник, не весь .inner)
+      const slot = statsSection.querySelector('#statsOnlineSlot');
 
       onlineIndicator.style.zIndex = '99999';
       onlineIndicator.style.background = 'transparent';
       onlineIndicator.style.border = 'none';
       onlineIndicator.style.padding = '0';
 
-      const statsInner = statsSection.querySelector('.stats-section__inner');
       morphIntoSection(
         onlineIndicator,
-        statsInner || statsSection,
+        slot || statsSection,
         'site-footer__online--morph',
         'site-footer__online--settled',
         () => {
+          // Скрываем летящий индикатор, но сама секция уже готова и видима
           onlineIndicator.style.display = 'none';
+          statsSection.style.visibility = 'visible';
+          statsSection.style.opacity = '1';
           statsSection.classList.add('visible');
+          // Заполняем данные сразу (синхронно)
           fillStatsFromFirebase(statsSection);
           const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
           window.scrollTo({ top: y, behavior: 'smooth' });
