@@ -515,7 +515,8 @@
   .site-footer__wave { font-size: 18px; color: inherit; letter-spacing: 1px; }
   .site-footer__time { font-variant-numeric: tabular-nums; color: inherit; }
   .site-footer__date { font-size: 13px; color: #8a8a8a; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; transition: color 0.4s ease; }
-  .site-footer__online { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #c8c8c8; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.4s ease; }
+  .site-footer__online { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #c8c8c8; letter-spacing: 0.5px; margin-bottom: 4px; transition: color 0.4s ease; cursor: pointer; }
+  .site-footer__online:hover { color: #e8e8e8; }
   .site-footer__online-dot { width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 8px rgba(61, 220, 132, 0.8); animation: onlinePulse 2s infinite; flex-shrink: 0; }
   @keyframes onlinePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.85); } }
   .site-footer__online-count { font-weight: 600; color: #e8e8e8; font-variant-numeric: tabular-nums; transition: color 0.4s ease; }
@@ -635,7 +636,7 @@
     a, button, .tile, .project-card, .burger, .social-button, .social-item,
     .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle,
     .menu, .menu a, .menu__register, .menu__login, .menu__user,
-    .profile-menu__item, .project-card__reaction,
+    .profile-menu__item, .project-card__reaction, .site-footer__online,
     *:not(input):not(textarea):not(select):not([contenteditable="true"]) {
       cursor: none !important;
     }
@@ -1099,7 +1100,7 @@
     display: none !important;
   }
 
-  /* ===== Пустая секция, появляющаяся при нажатии "Заказ" ===== */
+  /* ===== Секция, появляющаяся после морфинга «Лаунчер» ===== */
   .order-section {
     width: 100%;
     background: #1a1a1a;
@@ -1109,13 +1110,9 @@
     justify-content: center;
     min-height: 260px;
     opacity: 0;
-    transform: translateY(20px);
-    transition: background 0.4s ease, opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background 0.4s ease, opacity 0.6s ease;
   }
-  .order-section.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .order-section.visible { opacity: 1; }
   .order-section__inner {
     width: 100%;
     max-width: 1100px;
@@ -1128,23 +1125,21 @@
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
 
-  /* ===== Морфинг кнопки "Заказ" в блок ===== */
+  /* ===== Морфинг «Лаунчер»: без scale, честные left/top/width/height ===== */
   .order-btn--morph {
-    /* координаты и размеры задаются из JS через transform */
     transition:
-      transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      top 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.95s cubic-bezier(0.22, 1, 0.36, 1),
       border-radius 0.95s ease,
       background 0.7s ease,
       border-color 0.7s ease !important;
     cursor: default !important;
-    transform-origin: center center;
-    will-change: transform;
+    will-change: left, top, width, height;
   }
-  .order-btn--morph:hover {
-    width: auto !important;
-  }
+  .order-btn--morph:hover { width: auto !important; }
 
-  /* внутренняя разметка: колонка -> строка */
   .order-btn--morph .order-btn__inner {
     flex-direction: column;
     justify-content: center;
@@ -1154,7 +1149,6 @@
     transition: padding 0.95s ease, gap 0.95s ease;
   }
   .order-btn--morph .order-btn__text {
-    /* writing-mode НЕ меняем до конца анимации — иначе нет интерполяции */
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1162,6 +1156,7 @@
                 font-size 0.95s ease;
     letter-spacing: 2px;
     font-size: 14px;
+    opacity: 1;
   }
   .order-btn--morph .order-btn__stripe {
     width: 4px;
@@ -1169,7 +1164,6 @@
     transition: width 0.95s ease, height 0.95s ease, opacity 0.4s ease;
   }
 
-  /* финальное состояние блока: текст сверху, горизонтально, по центру */
   .order-btn--morph.order-btn--settled .order-btn__inner {
     flex-direction: column;
     justify-content: flex-start;
@@ -1178,15 +1172,98 @@
     padding: 24px 20px;
   }
   .order-btn--morph.order-btn--settled .order-btn__text {
-    writing-mode: horizontal-tb;       /* переключаем ПОСЛЕ поворота */
+    writing-mode: horizontal-tb;
     transform: rotate(0deg);
     letter-spacing: 3px;
     font-size: 15px;
+    opacity: 1;
   }
   .order-btn--morph.order-btn--settled .order-btn__stripe {
     width: 60px;
     height: 3px;
     opacity: 0.6;
+  }
+
+  /* ===== Морфинг «Онлайн: N»: тот же подход ===== */
+  .site-footer__online--morph {
+    transition:
+      left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      top 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 0.95s ease,
+      background 0.7s ease,
+      border-color 0.7s ease,
+      padding 0.95s ease !important;
+    cursor: default !important;
+    will-change: left, top, width, height;
+    box-sizing: border-box;
+    overflow: hidden;
+    justify-content: flex-start !important;
+  }
+  .site-footer__online--settled {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    font-size: 14px !important;
+    padding: 20px !important;
+    gap: 12px;
+  }
+
+  /* ===== Секция статистики ===== */
+  .stats-section {
+    width: 100%;
+    background: #1a1a1a;
+    padding: 50px 40px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-height: 260px;
+    opacity: 0;
+    transition: background 0.4s ease, opacity 0.6s ease;
+  }
+  .stats-section.visible { opacity: 1; }
+  .stats-section__inner {
+    width: 100%;
+    max-width: 1100px;
+    min-height: 160px;
+    color: #d8d8d8;
+    font-family: Arial, sans-serif;
+  }
+  .stats-section__title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4ade80;
+    margin: 0 0 18px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  .stats-section__title::before { content: "$ "; opacity: 0.7; }
+  .stats-section__title::after {
+    content: "_";
+    display: inline-block;
+    margin-left: 6px;
+    animation: cursorBlink 1s steps(1) infinite;
+  }
+  .stats-section__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.12);
+    font-size: 14px;
+  }
+  .stats-section__row:last-child { border-bottom: none; }
+  .stats-section__label { color: #9a9a9a; }
+  .stats-section__value { color: #e8e8e8; font-weight: 600; font-variant-numeric: tabular-nums; }
+  body.light .stats-section { background: #eaeaea; }
+  body.light .stats-section__inner { color: #333; }
+  body.light .stats-section__title { color: #16a34a; }
+  body.light .stats-section__row { border-bottom-color: rgba(0,0,0,0.12); }
+  body.light .stats-section__label { color: #777; }
+  body.light .stats-section__value { color: #111; }
+  @media (max-width: 700px) {
+    .stats-section { padding: 30px 20px; min-height: 200px; }
   }
 </style>
 
@@ -1326,7 +1403,7 @@
 
   <div class="site-footer__right">
 
-    <div class="site-footer__online">
+    <div class="site-footer__online" id="onlineIndicator" title="Статистика">
       <span class="site-footer__online-dot"></span>
       <span data-i18n="online">Онлайн:</span>
       <span class="site-footer__online-count" id="onlineCount">—</span>
@@ -1567,7 +1644,7 @@
     }
     animateCursor();
 
-    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn';
+    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn, .site-footer__online';
     const textTargets = 'input, textarea, select, [contenteditable="true"]';
 
     document.addEventListener('mouseover', (e) => {
@@ -1712,6 +1789,11 @@
       newPassword: 'Новый пароль',
       os: 'OS',
       order: 'Лаунчер',
+      stats: 'Статистика',
+      onlineValue: 'Онлайн',
+      totalUsers: 'Пользователей',
+      totalProjects: 'Проектов',
+      totalDownloads: 'Скачиваний',
       ps: 'P.S.:',
       quote: 'Покуда песок не остолбенел вне времени — узри в ближнем зерцало.',
       pwdMin: 'Пароль — минимум 3 символа',
@@ -1773,6 +1855,11 @@
       newPassword: 'New password',
       os: 'OS',
       order: 'Launcher',
+      stats: 'Statistics',
+      onlineValue: 'Online',
+      totalUsers: 'Users',
+      totalProjects: 'Projects',
+      totalDownloads: 'Downloads',
       ps: 'P.S.:',
       quote: 'While the sand has not frozen outside of time — behold the mirror in your neighbor.',
       pwdMin: 'Password — at least 3 chars',
@@ -2988,6 +3075,104 @@
     });
   })();
 
+  /* ===== Универсальный морфинг элемента в секцию БЕЗ scale =====
+     el        — элемент-источник
+     section   — целевая секция (уже в DOM, невидима)
+     morphCls  — класс-модификатор на время морфинга
+     settledCls— класс финального состояния
+     onDone    — колбэк после завершения
+  */
+  function morphIntoSection(el, section, morphCls, settledCls, onDone) {
+    section.style.transition = 'opacity 0.6s ease';
+    section.style.transform = 'none';
+    section.style.opacity = '0';
+    section.style.display = 'block';
+    section.style.visibility = 'hidden';
+
+    const startRect = el.getBoundingClientRect();
+    const targetRect = section.getBoundingClientRect();
+
+    // 1. Фиксируем элемент ровно на его месте
+    el.style.position = 'fixed';
+    el.style.left = startRect.left + 'px';
+    el.style.top = startRect.top + 'px';
+    el.style.width = startRect.width + 'px';
+    el.style.height = startRect.height + 'px';
+    el.style.right = 'auto';
+    el.style.bottom = 'auto';
+    el.style.zIndex = '99999';
+    void el.offsetWidth;
+
+    el.classList.add(morphCls);
+    const isLight = document.body.classList.contains('light');
+
+    // 2. Запускаем анимацию реальных left/top/width/height.
+    //    Расширение строго от центра: каждый кадр пересчитываем left/width
+    //    так, чтобы центр оставался на месте.
+    const startCx = startRect.left + startRect.width / 2;
+    const startCy = startRect.top + startRect.height / 2;
+    const targetCx = targetRect.left + targetRect.width / 2;
+    const targetCy = targetRect.top + targetRect.height / 2;
+
+    const duration = 950;
+    const t0 = performance.now();
+    const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    function step(now) {
+      const p = Math.min((now - t0) / duration, 1);
+      const k = ease(p);
+      // ширина/высота — линейно по k
+      const w = startRect.width + (targetRect.width - startRect.width) * k;
+      const h = startRect.height + (targetRect.height - startRect.height) * k;
+      // центр плавно смещается от стартового к целевому
+      const cx = startCx + (targetCx - startCx) * k;
+      const cy = startCy + (targetCy - startCy) * k;
+      el.style.width = w + 'px';
+      el.style.height = h + 'px';
+      el.style.left = (cx - w / 2) + 'px';
+      el.style.top = (cy - h / 2) + 'px';
+      if (p < 1) requestAnimationFrame(step);
+      else finish();
+    }
+
+    // Меняем фон/бордер/радиус отдельным CSS-transition на самом элементе
+    el.style.transition = 'background 0.7s ease, border-color 0.7s ease, border-radius 0.95s ease';
+    requestAnimationFrame(() => {
+      el.style.borderRadius = '16px';
+      el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
+      el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
+    });
+
+    // Поворот текста (если есть .order-btn__text) — вертикаль -> горизонталь
+    const textEl = el.querySelector('.order-btn__text');
+    if (textEl) {
+      textEl.style.transition = 'transform 0.95s cubic-bezier(0.22, 1, 0.36, 1)';
+      requestAnimationFrame(() => { textEl.style.transform = 'rotate(0deg)'; });
+    }
+
+    function finish() {
+      // Фиксируем финальный прямоугольник ровно по секции
+      el.style.transition = 'none';
+      el.style.left = targetRect.left + 'px';
+      el.style.top = targetRect.top + 'px';
+      el.style.width = targetRect.width + 'px';
+      el.style.height = targetRect.height + 'px';
+      el.classList.add(settledCls);
+
+      // Секция становится видимой, кнопка остаётся внутри как контент
+      section.style.visibility = 'visible';
+      requestAnimationFrame(() => { section.style.opacity = '1'; });
+
+      // Запускаем onDone, если он есть (например, чтобы наполнить секцию)
+      if (onDone) {
+        setTimeout(onDone, 120);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  /* ===== Морфинг «Лаунчер» -> секция ===== */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -3001,113 +3186,119 @@
       const dossier = document.getElementById('dossier');
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      // 1. Создаём секцию, но НЕ показываем её (opacity:0, без transform-сдвига)
+      // Создаём секцию-приёмник
       let orderSection = document.getElementById('orderSection');
       if (!orderSection) {
         orderSection = document.createElement('section');
         orderSection.id = 'orderSection';
         orderSection.className = 'order-section';
         orderSection.innerHTML = '<div class="order-section__inner"></div>';
-        const footer = document.querySelector('.site-footer');
-        if (footer && footer.parentNode) {
-          footer.parentNode.insertBefore(orderSection, footer);
+        const footerEl = document.querySelector('.site-footer');
+        if (footerEl && footerEl.parentNode) {
+          footerEl.parentNode.insertBefore(orderSection, footerEl);
         } else {
           document.body.appendChild(orderSection);
         }
       }
-      // убираем вертикальный сдвиг, чтобы координаты были точными
-      orderSection.style.transition = 'opacity 0.6s ease';
-      orderSection.style.transform = 'none';
-      orderSection.style.opacity = '0';
-      orderSection.style.display = 'block';
-      orderSection.style.visibility = 'hidden';
 
-      // 2. Прячем остальные блоки
+      // Прячем остальные блоки
       targets.forEach(el => el.classList.add('fade-out'));
-
       setTimeout(() => {
         targets.forEach(el => {
           el.classList.remove('fade-out');
           el.classList.add('hidden-by-order');
         });
 
-        // 3. Измеряем финальный прямоугольник секции (она уже в потоке, но невидима)
-        const targetRect = orderSection.getBoundingClientRect();
-        const btnRect = orderBtn.getBoundingClientRect();
-
-        // 4. Фиксируем кнопку ровно там, где она была, и дальше двигаем только transform'ом
-        const startW = btnRect.width;
-        const startH = btnRect.height;
-        const startCx = btnRect.left + startW / 2;
-        const startCy = btnRect.top + startH / 2;
-
-        orderBtn.style.position = 'fixed';
-        orderBtn.style.left = '0';
-        orderBtn.style.top = '0';
-        orderBtn.style.width = startW + 'px';
-        orderBtn.style.height = startH + 'px';
-        orderBtn.style.right = 'auto';
-        orderBtn.style.bottom = 'auto';
-        orderBtn.style.transform =
-          `translate(${startCx - startW / 2}px, ${startCy - startH / 2}px)`;
-        orderBtn.style.borderRadius = '10px 0 0 10px';
-        void orderBtn.offsetWidth;
-
-        orderBtn.classList.add('order-btn--morph');
-
-        const isLight = document.body.classList.contains('light');
-        const targetCx = targetRect.left + targetRect.width / 2;
-        const targetCy = targetRect.top + targetRect.height / 2;
-
-        // 5. Анимируем ТОЛЬКО transform: масштаб + перенос.
-        //    Так расширение идёт симметрично от центра в обе стороны.
-        requestAnimationFrame(() => {
-          const scaleX = targetRect.width / startW;
-          const scaleY = targetRect.height / startH;
-          orderBtn.style.transform =
-            `translate(${targetCx - startW / 2}px, ${targetCy - startH / 2}px) ` +
-            `scale(${scaleX}, ${scaleY})`;
-          orderBtn.style.borderRadius = '16px';
-          orderBtn.style.background = isLight ? '#eaeaea' : '#1a1a1a';
-          orderBtn.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
-        });
-
-        // 6. Пока идёт рост — текст плавно поворачивается из вертикали в горизонталь
-        //    (transform: rotate(180deg) -> rotate(0deg)), writing-mode не трогаем
-        requestAnimationFrame(() => {
-          orderBtn.querySelector('.order-btn__text').style.transform = 'rotate(0deg)';
-        });
-
-        // 7. После завершения роста: сбрасываем scale (чтобы текст не был растянут),
-        //    переключаем writing-mode и фиксируем финальное состояние
-        setTimeout(() => {
-          // компенсируем scale: задаём реальные размеры и обнуляем transform
-          orderBtn.style.transition = 'none';
-          orderBtn.style.width = targetRect.width + 'px';
-          orderBtn.style.height = targetRect.height + 'px';
-          orderBtn.style.transform =
-            `translate(${targetRect.left}px, ${targetRect.top}px)`;
-          orderBtn.classList.add('order-btn--settled');
-          // принудительный reflow, чтобы writing-mode применился без transition
-          void orderBtn.offsetWidth;
-          orderBtn.style.transition =
-            'background 0.4s ease, border-color 0.4s ease';
-
-          // 8. Показываем секцию (кнопка уже точно на её месте)
-          orderSection.style.visibility = 'visible';
-          requestAnimationFrame(() => {
-            orderSection.style.opacity = '1';
-          });
-
-          // 9. Убираем кнопку — секция остаётся как «блок»
-          setTimeout(() => {
-            orderBtn.style.display = 'none';
+        // Запускаем морфинг
+        morphIntoSection(
+          orderBtn,
+          orderSection,
+          'order-btn--morph',
+          'order-btn--settled',
+          () => {
+            // После превращения: кнопка остаётся внутри секции,
+            // но уже как обычный блок (не fixed). Переносим её в секцию.
+            orderBtn.style.position = 'static';
+            orderBtn.style.left = '';
+            orderBtn.style.top = '';
+            orderBtn.style.width = '100%';
+            orderBtn.style.height = 'auto';
+            orderBtn.style.zIndex = '';
+            orderBtn.style.transform = '';
+            orderBtn.style.overflow = 'visible';
+            orderBtn.style.cursor = 'default';
+            // Перемещаем кнопку внутрь секции
+            const inner = orderSection.querySelector('.order-section__inner');
+            if (inner && orderBtn.parentNode !== inner) {
+              inner.appendChild(orderBtn);
+            }
+            // Показываем секцию
             orderSection.classList.add('visible');
             const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
             window.scrollTo({ top: y, behavior: 'smooth' });
-          }, 120);
-        }, 980); // = длительность transform-перехода
+          }
+        );
       }, 750);
+    });
+  }
+
+  /* ===== Морфинг «Онлайн: N» -> секция «Статистика» ===== */
+  const onlineIndicator = document.getElementById('onlineIndicator');
+  if (onlineIndicator) {
+    onlineIndicator.addEventListener('click', () => {
+      if (onlineIndicator.dataset.done === '1') return;
+      onlineIndicator.dataset.done = '1';
+
+      // Создаём секцию статистики
+      let statsSection = document.getElementById('statsSection');
+      if (!statsSection) {
+        statsSection = document.createElement('section');
+        statsSection.id = 'statsSection';
+        statsSection.className = 'stats-section';
+        const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '—';
+        statsSection.innerHTML = `
+          <div class="stats-section__inner">
+            <h2 class="stats-section__title">${t('stats')}</h2>
+            <div class="stats-section__row">
+              <span class="stats-section__label">${t('onlineValue')}</span>
+              <span class="stats-section__value">${onlineCountVal}</span>
+            </div>
+            <div class="stats-section__row">
+              <span class="stats-section__label">${t('totalProjects')}</span>
+              <span class="stats-section__value">—</span>
+            </div>
+            <div class="stats-section__row">
+              <span class="stats-section__label">${t('totalDownloads')}</span>
+              <span class="stats-section__value">—</span>
+            </div>
+          </div>
+        `;
+        const footerEl = document.querySelector('.site-footer');
+        if (footerEl && footerEl.parentNode) {
+          footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
+        } else {
+          document.body.appendChild(statsSection);
+        }
+      }
+
+      // Прячем сам индикатор через морфинг
+      onlineIndicator.style.zIndex = '99999';
+      onlineIndicator.style.background = 'transparent';
+      onlineIndicator.style.border = 'none';
+      onlineIndicator.style.padding = '0';
+
+      morphIntoSection(
+        onlineIndicator,
+        statsSection,
+        'site-footer__online--morph',
+        'site-footer__online--settled',
+        () => {
+          onlineIndicator.style.display = 'none';
+          statsSection.classList.add('visible');
+          const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      );
     });
   }
 
