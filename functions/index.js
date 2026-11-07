@@ -22,20 +22,16 @@ exports.register = functions.https.onCall(async (data) => {
   const pass = String(data.pass || '');
   if (name.length < 3) throw new functions.https.HttpsError('invalid-argument', 'nameShort');
   if (pass.length < 3) throw new functions.https.HttpsError('invalid-argument', 'pwdMin');
-
   const key = normName(name);
   const ref = db.ref('users/' + key);
   const snap = await ref.once('value');
   if (snap.exists()) throw new functions.https.HttpsError('already-exists', 'nameTaken');
-
   const id = await nextUserId();
   const passHash = await bcrypt.hash(pass, 10);
   await ref.set({
     name, id, passHash,
-    theme: data.theme || 'dark',
-    anim: data.anim || 'on',
-    gender: '', lang: 'ru', avatar: '',
-    created: Date.now()
+    theme: data.theme || 'dark', anim: data.anim || 'on',
+    gender: '', lang: 'ru', avatar: '', created: Date.now()
   });
   const token = jwt.sign({ name, id }, JWT_SECRET, { expiresIn: TOKEN_TTL });
   return { token, name, id };
@@ -50,8 +46,7 @@ exports.login = functions.https.onCall(async (data) => {
   if (!ok) throw new functions.https.HttpsError('permission-denied', 'wrongPass');
   const token = jwt.sign({ name: u.name, id: u.id }, JWT_SECRET, { expiresIn: TOKEN_TTL });
   return { token, user: {
-    name: u.name, id: u.id,
-    theme: u.theme || 'dark', anim: u.anim || 'on',
+    name: u.name, id: u.id, theme: u.theme || 'dark', anim: u.anim || 'on',
     gender: u.gender || '', lang: u.lang || 'ru', avatar: u.avatar || ''
   }};
 });
@@ -63,8 +58,7 @@ exports.me = functions.https.onCall(async (data) => {
   if (!snap.exists()) throw new functions.https.HttpsError('not-found', 'errConn');
   const u = snap.val();
   return {
-    name: u.name, id: u.id,
-    theme: u.theme || 'dark', anim: u.anim || 'on',
+    name: u.name, id: u.id, theme: u.theme || 'dark', anim: u.anim || 'on',
     gender: u.gender || '', lang: u.lang || 'ru', avatar: u.avatar || ''
   };
 });
