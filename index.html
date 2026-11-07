@@ -1130,35 +1130,60 @@
 
   /* ===== Морфинг кнопки "Заказ" в блок ===== */
   .order-btn--morph {
-    transition: left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-                top 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-                width 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-                height 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-                border-radius 0.95s ease,
-                background 0.7s ease,
-                border-color 0.7s ease !important;
+    /* координаты и размеры задаются из JS через transform */
+    transition:
+      transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 0.95s ease,
+      background 0.7s ease,
+      border-color 0.7s ease !important;
     cursor: default !important;
+    transform-origin: center center;
+    will-change: transform;
   }
   .order-btn--morph:hover {
     width: auto !important;
   }
+
+  /* внутренняя разметка: колонка -> строка */
   .order-btn--morph .order-btn__inner {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 12px;
     transition: padding 0.95s ease, gap 0.95s ease;
-    writing-mode: horizontal-tb;
-    padding: 20px;
-    gap: 0;
   }
   .order-btn--morph .order-btn__text {
-    writing-mode: horizontal-tb;
-    transform: rotate(0deg);
-    opacity: 1;
-    transition: writing-mode 0s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-                opacity 0.5s ease 0.2s, letter-spacing 0.9s ease, font-size 0.9s ease;
+    /* writing-mode НЕ меняем до конца анимации — иначе нет интерполяции */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+                letter-spacing 0.95s ease,
+                font-size 0.95s ease;
     letter-spacing: 2px;
     font-size: 14px;
   }
   .order-btn--morph .order-btn__stripe {
-    transition: width 0.9s ease, height 0.9s ease, opacity 0.4s ease;
+    width: 4px;
+    height: 40px;
+    transition: width 0.95s ease, height 0.95s ease, opacity 0.4s ease;
+  }
+
+  /* финальное состояние блока: текст сверху, горизонтально, по центру */
+  .order-btn--morph.order-btn--settled .order-btn__inner {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    padding: 24px 20px;
+  }
+  .order-btn--morph.order-btn--settled .order-btn__text {
+    writing-mode: horizontal-tb;       /* переключаем ПОСЛЕ поворота */
+    transform: rotate(0deg);
+    letter-spacing: 3px;
+    font-size: 15px;
+  }
+  .order-btn--morph.order-btn--settled .order-btn__stripe {
     width: 60px;
     height: 3px;
     opacity: 0.6;
@@ -2976,6 +3001,7 @@
       const dossier = document.getElementById('dossier');
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
+      // 1. Создаём секцию, но НЕ показываем её (opacity:0, без transform-сдвига)
       let orderSection = document.getElementById('orderSection');
       if (!orderSection) {
         orderSection = document.createElement('section');
@@ -2989,7 +3015,14 @@
           document.body.appendChild(orderSection);
         }
       }
+      // убираем вертикальный сдвиг, чтобы координаты были точными
+      orderSection.style.transition = 'opacity 0.6s ease';
+      orderSection.style.transform = 'none';
+      orderSection.style.opacity = '0';
+      orderSection.style.display = 'block';
+      orderSection.style.visibility = 'hidden';
 
+      // 2. Прячем остальные блоки
       targets.forEach(el => el.classList.add('fade-out'));
 
       setTimeout(() => {
@@ -2998,39 +3031,82 @@
           el.classList.add('hidden-by-order');
         });
 
+        // 3. Измеряем финальный прямоугольник секции (она уже в потоке, но невидима)
         const targetRect = orderSection.getBoundingClientRect();
         const btnRect = orderBtn.getBoundingClientRect();
 
+        // 4. Фиксируем кнопку ровно там, где она была, и дальше двигаем только transform'ом
+        const startW = btnRect.width;
+        const startH = btnRect.height;
+        const startCx = btnRect.left + startW / 2;
+        const startCy = btnRect.top + startH / 2;
+
         orderBtn.style.position = 'fixed';
-        orderBtn.style.left = btnRect.left + 'px';
-        orderBtn.style.top = btnRect.top + 'px';
-        orderBtn.style.width = btnRect.width + 'px';
-        orderBtn.style.height = btnRect.height + 'px';
+        orderBtn.style.left = '0';
+        orderBtn.style.top = '0';
+        orderBtn.style.width = startW + 'px';
+        orderBtn.style.height = startH + 'px';
         orderBtn.style.right = 'auto';
-        orderBtn.style.transform = 'none';
+        orderBtn.style.bottom = 'auto';
+        orderBtn.style.transform =
+          `translate(${startCx - startW / 2}px, ${startCy - startH / 2}px)`;
         orderBtn.style.borderRadius = '10px 0 0 10px';
         void orderBtn.offsetWidth;
 
         orderBtn.classList.add('order-btn--morph');
 
         const isLight = document.body.classList.contains('light');
+        const targetCx = targetRect.left + targetRect.width / 2;
+        const targetCy = targetRect.top + targetRect.height / 2;
 
+        // 5. Анимируем ТОЛЬКО transform: масштаб + перенос.
+        //    Так расширение идёт симметрично от центра в обе стороны.
         requestAnimationFrame(() => {
-          orderBtn.style.left = targetRect.left + 'px';
-          orderBtn.style.top = targetRect.top + 'px';
-          orderBtn.style.width = targetRect.width + 'px';
-          orderBtn.style.height = targetRect.height + 'px';
+          const scaleX = targetRect.width / startW;
+          const scaleY = targetRect.height / startH;
+          orderBtn.style.transform =
+            `translate(${targetCx - startW / 2}px, ${targetCy - startH / 2}px) ` +
+            `scale(${scaleX}, ${scaleY})`;
           orderBtn.style.borderRadius = '16px';
           orderBtn.style.background = isLight ? '#eaeaea' : '#1a1a1a';
           orderBtn.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
         });
 
+        // 6. Пока идёт рост — текст плавно поворачивается из вертикали в горизонталь
+        //    (transform: rotate(180deg) -> rotate(0deg)), writing-mode не трогаем
+        requestAnimationFrame(() => {
+          orderBtn.querySelector('.order-btn__text').style.transform = 'rotate(0deg)';
+        });
+
+        // 7. После завершения роста: сбрасываем scale (чтобы текст не был растянут),
+        //    переключаем writing-mode и фиксируем финальное состояние
         setTimeout(() => {
-          orderSection.classList.add('visible');
-          orderBtn.style.display = 'none';
-          const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }, 1000);
+          // компенсируем scale: задаём реальные размеры и обнуляем transform
+          orderBtn.style.transition = 'none';
+          orderBtn.style.width = targetRect.width + 'px';
+          orderBtn.style.height = targetRect.height + 'px';
+          orderBtn.style.transform =
+            `translate(${targetRect.left}px, ${targetRect.top}px)`;
+          orderBtn.classList.add('order-btn--settled');
+          // принудительный reflow, чтобы writing-mode применился без transition
+          void orderBtn.offsetWidth;
+          orderBtn.style.transition =
+            'background 0.4s ease, border-color 0.4s ease';
+
+          // 8. Показываем секцию (кнопка уже точно на её месте)
+          orderSection.style.visibility = 'visible';
+          requestAnimationFrame(() => {
+            orderSection.style.opacity = '1';
+          });
+
+          // 9. Убираем кнопку — секция остаётся как «блок»
+          setTimeout(() => {
+            orderBtn.style.display = 'none';
+            orderSection.classList.add('visible');
+            const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }, 120);
+        }, 980); // = длительность transform-перехода
       }, 750);
     });
   }
