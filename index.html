@@ -1266,9 +1266,7 @@
     opacity: 0;
     transition: background 0.4s ease, opacity 0.6s ease;
   }
-  .stats-section.visible {
-    opacity: 1;
-  }
+  .stats-section.visible { opacity: 1; }
   .stats-section__inner {
     width: 100%;
     max-width: 1100px;
@@ -1426,7 +1424,6 @@
     .stats-section__bottom { grid-template-columns: 1fr; }
   }
 
-  /* Слот для морфинга: занимает место строки «Онлайн» */
   .stats-online-slot {
     display: inline-flex;
     align-items: center;
@@ -1986,6 +1983,7 @@
     document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
   }
 
+  /* ===== Функции Firebase заменены на Cloud Functions ===== */
   let fbGetUser = null;
   let fbCreateUser = null;
   let fbUpdateUser = null;
@@ -1994,6 +1992,12 @@
   let fbToggleReaction = null;
   let fbIncrementDownload = null;
   let fbGetAllProjectDownloads = null;
+  let fbRegister = null;
+  let fbLogin = null;
+  let fbMe = null;
+  let fbUpdateProfile = null;
+  let fbChangePassword = null;
+  let fbChangeName = null;
 
   window.__firebaseReady = new Promise((resolve) => {
     window.__resolveFirebaseReady = resolve;
@@ -2414,8 +2418,17 @@
   let currentUserAvatar = null;
   let currentUserId = null;
 
-  function showUser(name) {
+  /* ===== Сессия через токен ===== */
+  function saveToken(t) { localStorage.setItem('artemis_token', t || ''); }
+  function getToken()    { return localStorage.getItem('artemis_token') || ''; }
+  function clearToken()  { localStorage.removeItem('artemis_token'); }
+
+  function showUser(name, userObj) {
     currentUser = name || null;
+    if (userObj) {
+      currentUserAvatar = userObj.avatar || null;
+      currentUserId = userObj.id || null;
+    }
     if (!name) {
       menuUser.classList.remove('visible');
       profileMenu.classList.remove('visible');
@@ -2465,9 +2478,9 @@
   }
 
   async function saveUserSetting(key, value) {
-    if (!currentUser || !fbUpdateUser) return;
+    if (!currentUser || !fbUpdateProfile) return;
     try {
-      await fbUpdateUser(currentUser, { [key]: value });
+      await fbUpdateProfile(getToken(), { [key]: value });
     } catch (e) {
       console.warn('save:', e);
     }
@@ -2502,9 +2515,9 @@
     reader.onload = async (ev) => {
       const dataUrl = ev.target.result;
       setAvatar(dataUrl);
-      if (currentUser && fbUpdateUser) {
+      if (currentUser && fbUpdateProfile) {
         try {
-          await fbUpdateUser(currentUser, { avatar: dataUrl });
+          await fbUpdateProfile(getToken(), { avatar: dataUrl });
         } catch (e) {
           console.warn('avatar:', e);
         }
@@ -2583,41 +2596,18 @@
 
     try {
       await window.__firebaseReady;
-      const existing = await fbGetUser(name);
-      if (existing) {
-        regError.style.color = '#ff6b6b';
-        regError.textContent = t('nameTaken');
-        regSubmit.disabled = false;
-        newCaptcha();
-        return;
-      }
-
       const theme = document.body.classList.contains('light') ? 'light' : 'dark';
       const anim = animationsEnabled() ? 'on' : 'off';
-
-      const created = await fbCreateUser(name, pass, theme, anim);
-      if (!created) {
-        regError.style.color = '#ff6b6b';
-        regError.textContent = t('nameTaken');
-        regSubmit.disabled = false;
-        newCaptcha();
-        return;
-      }
-
-      setCookie('artemis_user', name, 365);
-      showUser(name);
-      const freshUser = await fbGetUser(name);
-      if (freshUser && freshUser.id) {
-        currentUserId = freshUser.id;
-        updateInfoPanel();
-      }
+      const res = await fbRegister(name, pass, theme, anim);
+      saveToken(res.token);
+      showUser(res.name, { id: res.id });
       closeRegisterModal();
       burger.classList.add('open');
       menu.classList.add('open');
     } catch (err) {
       console.error(err);
       regError.style.color = '#ff6b6b';
-      regError.textContent = t('errConn');
+      regError.textContent = (err && err.message) ? String(err.message) : t('errConn');
       newCaptcha();
     }
     regSubmit.disabled = false;
@@ -2662,42 +2652,22 @@
 
     try {
       await window.__firebaseReady;
-      const user = await fbGetUser(name);
-      if (!user) {
-        loginError.style.color = '#ff6b6b';
-        loginError.textContent = t('errConn');
-        loginSubmit.disabled = false;
-        return;
-      }
-      if (user.pass !== pass) {
-        loginError.style.color = '#ff6b6b';
-        loginError.textContent = t('wrongPass');
-        loginSubmit.disabled = false;
-        return;
-      }
-
-      setCookie('artemis_user', name, 365);
-      showUser(name);
-      currentUserAvatar = user.avatar || null;
-      currentUserId = user.id || null;
-      updateMenuAvatar();
-      updateInfoPanel();
-
-      applyTheme(user.theme === 'light', true);
-      applyAnimSetting(user.anim !== 'off');
-
-      if (user.gender) setCookie('artemis_gender', user.gender, 365);
-      if (user.lang) setCookie('artemis_lang', user.lang, 365);
-
+      const res = await fbLogin(name, pass);
+      saveToken(res.token);
+      const u = res.user;
+      showUser(u.name, u);
+      applyTheme(u.theme === 'light', true);
+      applyAnimSetting(u.anim !== 'off');
+      if (u.gender) setCookie('artemis_gender', u.gender, 365);
+      if (u.lang) setCookie('artemis_lang', u.lang, 365);
       applyLanguage();
-
       closeLoginModal();
       burger.classList.add('open');
       menu.classList.add('open');
     } catch (err) {
       console.error(err);
       loginError.style.color = '#ff6b6b';
-      loginError.textContent = t('errConn');
+      loginError.textContent = (err && err.message) ? String(err.message) : t('errConn');
     }
     loginSubmit.disabled = false;
   });
@@ -2710,7 +2680,7 @@
   const logoutBtn = document.getElementById('logoutBtn');
   logoutBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    deleteCookie('artemis_user');
+    clearToken();
     deleteCookie('artemis_gender');
     deleteCookie('artemis_lang');
     showUser(null);
@@ -2744,7 +2714,7 @@
   const passErr = document.getElementById('passErr');
 
   function openSettingsModal() {
-    const curName = getCookie('artemis_user');
+    const curName = currentUser || '';
     if (curName) privacyName.value = curName;
 
     const savedGender = getCookie('artemis_gender');
@@ -2852,39 +2822,16 @@
     if (!newNameVal) { privacyErr.textContent = t('enterName'); return; }
 
     try {
+      await window.__firebaseReady;
       if (newNameVal !== currentUser) {
-        await window.__firebaseReady;
-        const existing = await fbGetUser(newNameVal);
-        if (existing) {
-          privacyErr.style.color = '#ff6b6b';
-          privacyErr.textContent = t('nameTaken');
-          return;
-        }
-        const oldUser = await fbGetUser(currentUser);
-        if (!oldUser) { privacyErr.textContent = t('errSave'); return; }
-
-        const created = await fbCreateUser(newNameVal, oldUser.pass, oldUser.theme || 'dark', oldUser.anim || 'on', oldUser.id);
-        if (created) {
-          if (oldUser.avatar) await fbUpdateUser(newNameVal, { avatar: oldUser.avatar });
-          await fbUpdateUser(newNameVal, { gender: newGender, lang: newLang });
-          await fbDeleteUser(currentUser);
-        } else {
-          privacyErr.style.color = '#ff6b6b';
-          privacyErr.textContent = t('nameTaken');
-          return;
-        }
-
-        setCookie('artemis_user', newNameVal, 365);
-        showUser(newNameVal);
-        menuUserName.textContent = newNameVal;
-      } else {
-        await window.__firebaseReady;
-        await fbUpdateUser(currentUser, { gender: newGender, lang: newLang });
+        const res = await fbChangeName(getToken(), newNameVal);
+        saveToken(res.token);
+        showUser(res.name, { id: res.id });
+        menuUserName.textContent = res.name;
       }
-
+      await fbUpdateProfile(getToken(), { gender: newGender, lang: newLang });
       setCookie('artemis_gender', newGender, 365);
       setCookie('artemis_lang', newLang, 365);
-
       updateInfoPanel();
       applyLanguage();
       privacyErr.style.color = '#3ddc84';
@@ -2893,7 +2840,7 @@
     } catch (e) {
       console.error(e);
       privacyErr.style.color = '#ff6b6b';
-      privacyErr.textContent = t('errSave');
+      privacyErr.textContent = (e && e.message) ? String(e.message) : t('errSave');
     }
   });
 
@@ -2905,7 +2852,7 @@
 
     try {
       await window.__firebaseReady;
-      await fbUpdateUser(currentUser, { pass: p1 });
+      await fbChangePassword(getToken(), p1);
       passErr.style.color = '#3ddc84';
       passErr.textContent = t('pwdSaved');
       newPass.value = '';
@@ -3094,7 +3041,7 @@
         }
         if (fbToggleReaction) {
           try {
-            const result = await fbToggleReaction(p.name, currentUser, 'like');
+            const result = await fbToggleReaction(p.name, 'like');
             if (result) {
               likeBtn.querySelector('.like-count').textContent = result.likes.length;
               dislikeBtn.querySelector('.dislike-count').textContent = result.dislikes.length;
@@ -3113,7 +3060,7 @@
         }
         if (fbToggleReaction) {
           try {
-            const result = await fbToggleReaction(p.name, currentUser, 'dislike');
+            const result = await fbToggleReaction(p.name, 'dislike');
             if (result) {
               likeBtn.querySelector('.like-count').textContent = result.likes.length;
               dislikeBtn.querySelector('.dislike-count').textContent = result.dislikes.length;
@@ -3513,7 +3460,6 @@
     });
   }
 
-  /* ===== Статистика ===== */
   function countAllProjects() {
     let n = 0;
     for (const key in projects) {
@@ -3644,7 +3590,7 @@
         statsSection = document.createElement('section');
         statsSection.id = 'statsSection';
         statsSection.className = 'stats-section';
-        statsSection.style.display = 'flex';       // показываем, чтобы измерить
+        statsSection.style.display = 'flex';
         statsSection.style.opacity = '0';
         statsSection.style.visibility = 'hidden';
         statsSection.innerHTML = buildStatsHTML(onlineCountVal);
@@ -3660,10 +3606,8 @@
         statsSection.style.visibility = 'hidden';
       }
 
-      // Принудительный reflow — координаты уже финальные
       void statsSection.offsetHeight;
 
-      // Слот, в который летит индикатор (только маленький прямоугольник, не весь .inner)
       const slot = statsSection.querySelector('#statsOnlineSlot');
 
       onlineIndicator.style.zIndex = '99999';
@@ -3677,12 +3621,10 @@
         'site-footer__online--morph',
         'site-footer__online--settled',
         () => {
-          // Скрываем летящий индикатор, но сама секция уже готова и видима
           onlineIndicator.style.display = 'none';
           statsSection.style.visibility = 'visible';
           statsSection.style.opacity = '1';
           statsSection.classList.add('visible');
-          // Заполняем данные сразу (синхронно)
           fillStatsFromFirebase(statsSection);
           const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
           window.scrollTo({ top: y, behavior: 'smooth' });
@@ -3696,30 +3638,22 @@
     updateInfoPanel();
 
     await window.__firebaseReady;
-    const savedName = getCookie('artemis_user');
-    if (!savedName) {
+    const token = getToken();
+    if (!token) {
       updateAnimToggle(animationsEnabled(), true);
       return;
     }
     try {
-      const user = await fbGetUser(savedName);
-      if (!user) {
-        deleteCookie('artemis_user');
-        updateAnimToggle(animationsEnabled(), true);
-        return;
-      }
-      showUser(savedName);
-      currentUserAvatar = user.avatar || null;
-      currentUserId = user.id || null;
-      updateMenuAvatar();
-      updateInfoPanel();
+      const user = await fbMe(token);
+      showUser(user.name, user);
       applyTheme(user.theme === 'light', true);
       updateAnimToggle(user.anim !== 'off', true);
       if (user.gender) setCookie('artemis_gender', user.gender, 365);
       if (user.lang) setCookie('artemis_lang', user.lang, 365);
       applyLanguage();
     } catch (e) {
-      console.warn('Firebase:', e);
+      console.warn('Me:', e);
+      clearToken();
       updateAnimToggle(animationsEnabled(), true);
     }
   })();
@@ -3735,8 +3669,10 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onDisconnect, set, onValue, get, remove, update, runTransaction }
+  import { getDatabase, ref, onDisconnect, set, onValue, get, runTransaction }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getFunctions, httpsCallable }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBFFGTfZOJW7rfP3X0bdLOU_VE1gKseQK4",
@@ -3750,7 +3686,10 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const functions = getFunctions(app);
+  const call = (name) => httpsCallable(functions, name);
 
+  /* онлайн-счётчик остаётся открытым (не PII) */
   (async () => {
     try {
       const clientId = 'u_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
@@ -3782,117 +3721,31 @@
     }
   })();
 
-  function normName(name) {
-    return String(name || '').trim().toLowerCase();
-  }
+  /* ===== Cloud Functions (закрывают users/meta/secrets) ===== */
+  window.fbRegister = async (name, pass, theme, anim) =>
+    (await call('register')({ name, pass, theme, anim })).data;
+  window.fbLogin = async (name, pass) =>
+    (await call('login')({ name, pass })).data;
+  window.fbMe = async (token) =>
+    (await call('me')({ token })).data;
+  window.fbUpdateProfile = async (token, patch) =>
+    (await call('updateProfile')({ token, ...patch })).data;
+  window.fbChangePassword = async (token, pass) =>
+    (await call('changePassword')({ token, pass })).data;
+  window.fbChangeName = async (token, newName) =>
+    (await call('changeName')({ token, newName })).data;
+  window.fbToggleReaction = async (projectName, reaction) =>
+    (await call('toggleReaction')({ token: localStorage.getItem('artemis_token') || '', projectName, reaction })).data;
+  window.fbIncrementDownload = async (projectName) =>
+    (await call('incrementDownload')({ token: localStorage.getItem('artemis_token') || '', projectName })).data;
 
-  window.fbGetUser = async function(name) {
-    const key = normName(name);
-    if (!key) return null;
-    const snap = await get(ref(db, 'users/' + key));
-    return snap.exists() ? snap.val() : null;
-  };
-
-  async function nextUserId() {
-    const counterRef = ref(db, 'meta/nextUserId');
-    const result = await runTransaction(counterRef, (current) => {
-      if (current === null) return 1000;
-      return current + 1;
-    });
-    return result.snapshot.val();
-  }
-
-  window.fbCreateUser = async function(name, pass, theme, anim, forcedId) {
-    const key = normName(name);
-    if (!key) return false;
-    const snap = await get(ref(db, 'users/' + key));
-    if (snap.exists()) return false;
-
-    let userId = forcedId;
-    if (!userId) {
-      try { userId = await nextUserId(); } catch (e) { console.warn('id:', e); userId = null; }
-    }
-    if (!userId) {
-      const allSnap = await get(ref(db, 'users'));
-      const allUsers = allSnap.val() || {};
-      let maxId = 999;
-      for (const k in allUsers) {
-        const v = allUsers[k];
-        if (v && typeof v.id === 'number' && v.id > maxId) maxId = v.id;
-      }
-      userId = maxId + 1;
-    }
-
-    const data = {
-      name: String(name).trim(),
-      pass: String(pass),
-      theme: theme || 'dark',
-      anim: anim || 'on',
-      id: userId,
-      created: Date.now()
-    };
-    await set(ref(db, 'users/' + key), data);
-    return data;
-  };
-
-  window.fbUpdateUser = async function(name, patch) {
-    const key = normName(name);
-    if (!key) return;
-    await update(ref(db, 'users/' + key), patch);
-  };
-
-  window.fbDeleteUser = async function(name) {
-    const key = normName(name);
-    if (!key) return;
-    await remove(ref(db, 'users/' + key));
-  };
-
-  function projectKey(name) {
-    return String(name || '').trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '_');
-  }
-
+  /* ===== Публичное чтение projects для статистики ===== */
   window.fbGetProjectStats = async function(projectName) {
-    const key = projectKey(projectName);
+    const key = String(projectName || '').trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '_');
     if (!key) return null;
     const snap = await get(ref(db, 'projects/' + key));
     const data = snap.exists() ? snap.val() : {};
-    return {
-      likes: data.likes || [],
-      dislikes: data.dislikes || [],
-      downloads: data.downloads || 0
-    };
-  };
-
-  window.fbToggleReaction = async function(projectName, userName, reaction) {
-    const key = projectKey(projectName);
-    if (!key || !userName) return null;
-    const snap = await get(ref(db, 'projects/' + key));
-    let data = snap.exists() ? snap.val() : { likes: [], dislikes: [] };
-    if (!data.likes) data.likes = [];
-    if (!data.dislikes) data.dislikes = [];
-
-    data.likes = data.likes.filter(u => u !== userName);
-    data.dislikes = data.dislikes.filter(u => u !== userName);
-
-    if (reaction === 'like') {
-      data.likes.push(userName);
-    } else if (reaction === 'dislike') {
-      data.dislikes.push(userName);
-    }
-
-    await set(ref(db, 'projects/' + key), data);
-    return { likes: data.likes, dislikes: data.dislikes, downloads: data.downloads || 0 };
-  };
-
-  window.fbIncrementDownload = async function(projectName) {
-    const key = projectKey(projectName);
-    if (!key) return 0;
-    const downloadsRef = ref(db, 'projects/' + key + '/downloads');
-    const result = await runTransaction(downloadsRef, (current) => {
-      if (current === null) return 1;
-      return current + 1;
-    });
-    return result.snapshot.val() || 0;
+    return { likes: data.likes || [], dislikes: data.dislikes || [], downloads: data.downloads || 0 };
   };
 
   window.fbGetAllProjectDownloads = async function() {
@@ -3900,13 +3753,15 @@
     return snap.exists() ? snap.val() : {};
   };
 
-  fbGetUser = window.fbGetUser;
-  fbCreateUser = window.fbCreateUser;
-  fbUpdateUser = window.fbUpdateUser;
-  fbDeleteUser = window.fbDeleteUser;
-  fbGetProjectStats = window.fbGetProjectStats;
+  fbRegister = window.fbRegister;
+  fbLogin = window.fbLogin;
+  fbMe = window.fbMe;
+  fbUpdateProfile = window.fbUpdateProfile;
+  fbChangePassword = window.fbChangePassword;
+  fbChangeName = window.fbChangeName;
   fbToggleReaction = window.fbToggleReaction;
   fbIncrementDownload = window.fbIncrementDownload;
+  fbGetProjectStats = window.fbGetProjectStats;
   fbGetAllProjectDownloads = window.fbGetAllProjectDownloads;
 
   window.__resolveFirebaseReady();
