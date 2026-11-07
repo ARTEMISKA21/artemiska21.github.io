@@ -992,6 +992,15 @@
     color: #333;
   }
 
+  /* Светлая тема для самого переключателя анимаций */
+  body.light #animToggle {
+    background: #d8d8d8 !important; /* Светло-серый фон дорожки */
+  }
+  body.light #animThumb {
+    background: #ffffff !important; /* Белый ползунок */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
   .order-btn {
     position: fixed;
     right: 0;
@@ -1275,9 +1284,9 @@
   </div>
 </section>
 
-<div class="order-btn" id="orderBtn" title="Заказ">
+<div class="order-btn" id="orderBtn" title="Лаунчер">
   <div class="order-btn__inner">
-    <span class="order-btn__text" data-i18n="order">Заказ</span>
+    <span class="order-btn__text" data-i18n="order">Лаунчер</span>
     <span class="order-btn__stripe"></span>
   </div>
 </div>
@@ -1677,7 +1686,7 @@
       passwordRepeat: 'Повтор пароля',
       newPassword: 'Новый пароль',
       os: 'OS',
-      order: 'Заказ',
+      order: 'Лаунчер',
       ps: 'P.S.:',
       quote: 'Покуда песок не остолбенел вне времени — узри в ближнем зерцало.',
       pwdMin: 'Пароль — минимум 3 символа',
@@ -1738,7 +1747,7 @@
       passwordRepeat: 'Repeat password',
       newPassword: 'New password',
       os: 'OS',
-      order: 'Order',
+      order: 'Launcher',
       ps: 'P.S.:',
       quote: 'While the sand has not frozen outside of time — behold the mirror in your neighbor.',
       pwdMin: 'Password — at least 3 chars',
@@ -2502,9 +2511,7 @@
 
   const projects = {
     android: [
-      { name: 'ARTEMIS', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 },
-      { name: 'ARTEMIS PZP', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 },
-      { name: 'ARTEMIS NFC', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 }
+      { name: 'ARTEMIS', meta: 'Android · App — 2026 · v11.2', action: 'none', year: 2026 }
     ],
     windows: [
       { name: 'Computer Assembly', meta: 'Windows · App — 2025 · v1', action: 'download', desc: 'App for building, checking PC, buying components.', year: 2025 },
@@ -2522,8 +2529,7 @@
       { name: 'Connection', meta: 'Windows · App — 2024 · v1', action: 'download', desc: 'Connect 2 Python files.', year: 2024 }
     ],
     bot: [
-      { name: 'Artificial intelligence VK bot', meta: 'Windows · Bot — 2024 · v1', action: 'download', desc: 'AI VK bot.', year: 2024 },
-      { name: 'TG clothing bot', meta: 'Windows · Bot', action: 'none', year: 2024 }
+      { name: 'Artificial intelligence VK bot', meta: 'Windows · Bot — 2024 · v1', action: 'download', desc: 'AI VK bot.', year: 2024 }
     ],
     games: [
       { name: 'Game for remodeling', meta: 'Windows · Game — 2024 · v1', action: 'download', desc: 'Game source for PvP scaling on Python.', year: 2024 },
