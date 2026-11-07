@@ -87,6 +87,7 @@
     stroke: #222222 !important;
   }
 
+  /* ===== Превью: закруглённые углы и анимация букв ===== */
   .site-preview {
     position: relative;
     width: 100%;
@@ -94,6 +95,10 @@
     overflow: hidden;
     background: #1c1c1c;
     transition: background 0.4s ease;
+    border-radius: 22px;
+  }
+  @media (max-width: 600px) {
+    .site-preview { border-radius: 16px; }
   }
   .site-preview__img {
     position: absolute;
@@ -117,6 +122,7 @@
     background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%);
     pointer-events: none;
     z-index: 2;
+    border-radius: inherit;
   }
   .site-preview__title {
     position: absolute;
@@ -130,10 +136,31 @@
     letter-spacing: 12px;
     text-transform: uppercase;
     text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    pointer-events: none;
     user-select: none;
     white-space: nowrap;
+    display: inline-flex;
+    cursor: default;
   }
+  .site-preview__letter {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+    transform-origin: 50% 100%;
+    will-change: transform;
+  }
+  /* Наведение на любую букву — все поднимаются, но каждая по-своему */
+  .site-preview__title:hover .site-preview__letter {
+    transform: translateY(-10px);
+  }
+  .site-preview__title:hover .site-preview__letter--s {
+    /* S поднимается и «падает» вправо по диагонали (между вертикалью и горизонталью) */
+    transform: translate(14px, -6px) rotate(28deg);
+  }
+  .site-preview__title:hover .site-preview__letter--s:hover {
+    transform: translate(20px, -2px) rotate(45deg);
+  }
+  body.no-animations .site-preview__letter,
+  body.no-animations .site-preview__title:hover .site-preview__letter,
+  body.no-animations .site-preview__title:hover .site-preview__letter--s { transform: none !important; }
 
   .burger {
     position: absolute;
@@ -1272,6 +1299,14 @@
     margin-left: 6px;
     animation: cursorBlink 1s steps(1) infinite;
   }
+
+  /* Верхние строки со значениями */
+  .stats-section__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 22px;
+  }
   .stats-section__row {
     display: flex;
     justify-content: space-between;
@@ -1283,14 +1318,122 @@
   .stats-section__row:last-child { border-bottom: none; }
   .stats-section__label { color: #9a9a9a; }
   .stats-section__value { color: #e8e8e8; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Нижняя часть: график + список платформ */
+  .stats-section__bottom {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .stats-chart {
+    position: relative;
+    background: #151515;
+    border: 1px dashed rgba(74, 222, 128, 0.3);
+    border-radius: 12px;
+    padding: 16px 16px 12px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  body.light .stats-chart {
+    background: #f0f0f0;
+    border-color: rgba(22, 163, 74, 0.35);
+  }
+  .stats-chart__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 120px;
+  }
+  .stats-chart__bar {
+    flex: 1 1 0;
+    background: linear-gradient(to top, #16a34a 0%, #4ade80 100%);
+    border-radius: 4px 4px 0 0;
+    min-height: 4px;
+    position: relative;
+    transition: background 0.4s ease;
+  }
+  body.light .stats-chart__bar {
+    background: linear-gradient(to top, #15803d 0%, #22c55e 100%);
+  }
+  .stats-chart__bar::after {
+    content: attr(data-v);
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #9a9a9a;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+  }
+  .stats-chart__x {
+    display: flex;
+    gap: 6px;
+    font-size: 10px;
+    color: #7a7a7a;
+    font-family: 'Courier New', monospace;
+  }
+  .stats-chart__x span {
+    flex: 1 1 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .stats-platforms {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+  }
+  .stats-platforms__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    border-bottom: 1px dotted rgba(255,255,255,0.1);
+  }
+  .stats-platforms__row:last-child { border-bottom: none; }
+  .stats-platforms__label { color: #b0b0b0; }
+  .stats-platforms__value { color: #e8e8e8; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stats-platforms__row--total { padding-top: 8px; border-top: 1px dashed rgba(74,222,128,0.35); }
+  .stats-platforms__row--total .stats-platforms__label { color: #4ade80; }
+  .stats-platforms__row--total .stats-platforms__value { color: #4ade80; }
+
+  .stats-section__period {
+    margin-top: 22px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255,255,255,0.12);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #9a9a9a;
+    letter-spacing: 1px;
+  }
+  .stats-section__period b { color: #4ade80; font-weight: 700; }
+
   body.light .stats-section { background: #eaeaea; }
   body.light .stats-section__inner { color: #333; }
   body.light .stats-section__title { color: #16a34a; }
   body.light .stats-section__row { border-bottom-color: rgba(0,0,0,0.12); }
   body.light .stats-section__label { color: #777; }
   body.light .stats-section__value { color: #111; }
+  body.light .stats-platforms__label { color: #666; }
+  body.light .stats-platforms__value { color: #111; }
+  body.light .stats-platforms__row { border-bottom-color: rgba(0,0,0,0.1); }
+  body.light .stats-platforms__row--total { border-top-color: rgba(22,163,74,0.4); }
+  body.light .stats-platforms__row--total .stats-platforms__label { color: #16a34a; }
+  body.light .stats-platforms__row--total .stats-platforms__value { color: #16a34a; }
+  body.light .stats-section__period { border-top-color: rgba(0,0,0,0.12); color: #777; }
+  body.light .stats-section__period b { color: #16a34a; }
+
   @media (max-width: 700px) {
     .stats-section { padding: 30px 20px; min-height: 200px; }
+    .stats-section__bottom { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -1299,7 +1442,7 @@
 <div class="site-preview" id="preview">
   <img class="site-preview__img" src="ARTEMIS.png" alt="ARTEMIS" draggable="false" oncontextmenu="return false;">
 
-  <div class="site-preview__title" data-type="ARTEMIS"></div>
+  <div class="site-preview__title" id="previewTitle" data-type="ARTEMIS"></div>
 
   <button class="burger" id="burger" aria-label="Меню">
     <span></span><span></span><span></span>
@@ -1671,7 +1814,7 @@
     }
     animateCursor();
 
-    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn, .site-footer__online';
+    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn, .site-footer__online, .site-preview__letter';
     const textTargets = 'input, textarea, select, [contenteditable="true"]';
 
     document.addEventListener('mouseover', (e) => {
@@ -1772,6 +1915,7 @@
   let fbGetProjectStats = null;
   let fbToggleReaction = null;
   let fbIncrementDownload = null;
+  let fbGetAllProjectDownloads = null;
 
   window.__firebaseReady = new Promise((resolve) => {
     window.__resolveFirebaseReady = resolve;
@@ -1818,9 +1962,13 @@
       order: 'Лаунчер',
       stats: 'Статистика',
       onlineValue: 'Онлайн',
-      totalUsers: 'Пользователей',
       totalProjects: 'Проектов',
       totalDownloads: 'Скачиваний',
+      platformAndroid: 'Платформа: Андроид',
+      platformIphone: 'Платформа: Айфон',
+      platformWindows: 'Платформа: Виндовс',
+      total: 'Всего',
+      statsMonth: 'Статистика: Месяц',
       ps: 'P.S.:',
       quote: 'Покуда песок не остолбенел вне времени — узри в ближнем зерцало.',
       pwdMin: 'Пароль — минимум 3 символа',
@@ -1884,9 +2032,13 @@
       order: 'Launcher',
       stats: 'Statistics',
       onlineValue: 'Online',
-      totalUsers: 'Users',
       totalProjects: 'Projects',
       totalDownloads: 'Downloads',
+      platformAndroid: 'Platform: Android',
+      platformIphone: 'Platform: iPhone',
+      platformWindows: 'Platform: Windows',
+      total: 'Total',
+      statsMonth: 'Statistics: Month',
       ps: 'P.S.:',
       quote: 'While the sand has not frozen outside of time — behold the mirror in your neighbor.',
       pwdMin: 'Password — at least 3 chars',
@@ -1970,6 +2122,9 @@
       tagTextEl.textContent = txt;
     }
 
+    // Пересобираем буквы ARTEMIS после смены языка
+    buildPreviewLetters();
+
     const aboutSignSection = document.getElementById('aboutSign');
     const dossierSection = document.getElementById('dossier');
     if (aboutSignSection) aboutSignSection.dataset.typed = '';
@@ -1984,6 +2139,22 @@
     if (typeof runTypingOnce === 'function') {
       if (aboutSignSection && aboutSignSection.classList.contains('loaded')) runTypingOnce(aboutSignSection);
       if (dossierSection && dossierSection.classList.contains('loaded')) runTypingOnce(dossierSection);
+    }
+  }
+
+  // ===== Буквы ARTEMIS: разбиваем на span для анимации =====
+  const previewTitleEl = document.getElementById('previewTitle');
+  function buildPreviewLetters() {
+    if (!previewTitleEl) return;
+    const text = previewTitleEl.getAttribute('data-type') || 'ARTEMIS';
+    previewTitleEl.innerHTML = '';
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      const span = document.createElement('span');
+      span.className = 'site-preview__letter';
+      if (ch === 'S' || ch === 's') span.classList.add('site-preview__letter--s');
+      span.textContent = ch;
+      previewTitleEl.appendChild(span);
     }
   }
 
@@ -2101,9 +2272,8 @@
     }
   }
 
-  document.querySelectorAll('.site-preview__title[data-type]').forEach((el, idx) => {
-    typeText(el, el.getAttribute('data-type'), 60, 400 + idx * 100);
-  });
+  // Инициализация букв ARTEMIS (один раз)
+  buildPreviewLetters();
 
   const projectsTitleEl = document.querySelector('.projects-title');
   if (projectsTitleEl && projectsTitleEl.getAttribute('data-type')) {
@@ -2628,7 +2798,7 @@
 
     try {
       await window.__firebaseReady;
-      await fbUpdateUser(currentPass = currentUser, { pass: p1 });
+      await fbUpdateUser(currentUser, { pass: p1 });
       passErr.style.color = '#3ddc84';
       passErr.textContent = t('pwdSaved');
       newPass.value = '';
@@ -3102,7 +3272,6 @@
     });
   })();
 
-  /* ===== Универсальный морфинг: летим в targetRect (внутренний контейнер) ===== */
   function morphIntoSection(el, targetEl, morphCls, settledCls, onDone) {
     void targetEl.offsetHeight;
     const startRect = el.getBoundingClientRect();
@@ -3173,7 +3342,6 @@
     requestAnimationFrame(step);
   }
 
-  /* ===== Морфинг «Лаунчер» -> ПУСТОЙ блок с текстом по центру ===== */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -3187,7 +3355,6 @@
       const dossier = document.getElementById('dossier');
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      // Создаём пустую секцию с текстом «Лаунчер» по центру
       let orderSection = document.getElementById('orderSection');
       if (!orderSection) {
         orderSection = document.createElement('section');
@@ -3219,10 +3386,8 @@
           el.classList.add('hidden-by-order');
         });
 
-        // Reflow: секция уже в потоке, координаты точные
         void orderSection.offsetHeight;
 
-        // ВАЖНО: целимся в .order-block (внутренний блок), а не в .order-section
         const orderBlock = orderSection.querySelector('.order-block');
         morphIntoSection(
           orderBtn,
@@ -3241,38 +3406,141 @@
     });
   }
 
-  /* ===== Морфинг «Онлайн: N» -> ОТДЕЛЬНАЯ секция «Статистика» (после футера) ===== */
+  /* ===== Статистика: реальные данные ===== */
+  function countAllProjects() {
+    let n = 0;
+    for (const key in projects) {
+      if (Array.isArray(projects[key])) n += projects[key].length;
+    }
+    return n;
+  }
+
+  // График: 12 месяцев, значения по умолчанию 0, заполняются после Firebase
+  function buildStatsHTML(onlineCountVal) {
+    const monthsShort = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    const bars = monthsShort.map(m => `<div class="stats-chart__bar" data-m="${m}" data-v="0" style="height:4px"></div>`).join('');
+    const labels = monthsShort.map(m => `<span>${m}</span>`).join('');
+    return `
+      <div class="stats-section__inner">
+        <h2 class="stats-section__title">${t('stats')}</h2>
+        <div class="stats-section__rows">
+          <div class="stats-section__row">
+            <span class="stats-section__label">${t('totalProjects')}</span>
+            <span class="stats-section__value" id="statsProjects">${countAllProjects()}</span>
+          </div>
+          <div class="stats-section__row">
+            <span class="stats-section__label">${t('totalDownloads')}</span>
+            <span class="stats-section__value" id="statsDownloads">0</span>
+          </div>
+          <div class="stats-section__row">
+            <span class="stats-section__label">${t('onlineValue')}</span>
+            <span class="stats-section__value" id="statsOnline">${onlineCountVal}</span>
+          </div>
+        </div>
+
+        <div class="stats-section__bottom">
+          <div class="stats-chart">
+            <div class="stats-chart__bars" id="statsBars">${bars}</div>
+            <div class="stats-chart__x">${labels}</div>
+          </div>
+
+          <div class="stats-platforms">
+            <div class="stats-platforms__row">
+              <span class="stats-platforms__label">${t('platformAndroid')}</span>
+              <span class="stats-platforms__value" id="statsPlatAndroid">0</span>
+            </div>
+            <div class="stats-platforms__row">
+              <span class="stats-platforms__label">${t('platformIphone')}</span>
+              <span class="stats-platforms__value" id="statsPlatIphone">0</span>
+            </div>
+            <div class="stats-platforms__row">
+              <span class="stats-platforms__label">${t('platformWindows')}</span>
+              <span class="stats-platforms__value" id="statsPlatWindows">0</span>
+            </div>
+            <div class="stats-platforms__row stats-platforms__row--total">
+              <span class="stats-platforms__label">${t('total')}</span>
+              <span class="stats-platforms__value" id="statsTotal">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-section__period"><b>${t('statsMonth')}</b></div>
+      </div>
+    `;
+  }
+
+  async function fillStatsFromFirebase(section) {
+    if (!section) return;
+    try {
+      await window.__firebaseReady;
+      if (!fbGetAllProjectDownloads) return;
+      const data = await fbGetAllProjectDownloads();
+
+      // Сумма скачиваний по всем проектам
+      let total = 0;
+      const perProject = {};
+      for (const k in data) {
+        const v = data[k] || {};
+        const d = Number(v.downloads) || 0;
+        perProject[k] = d;
+        total += d;
+      }
+      const totalEl = section.querySelector('#statsDownloads');
+      if (totalEl) totalEl.textContent = String(total);
+
+      // Распределение по платформам на основе категорий проектов
+      let android = 0, windows = 0;
+      for (const cat in projects) {
+        const list = projects[cat];
+        if (!Array.isArray(list)) continue;
+        for (const p of list) {
+          const key = String(p.name).trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '_');
+          const d = perProject[key] || 0;
+          if (cat === 'android') android += d;
+          else windows += d; // windows/script/bot/games считаем Windows-платформой
+        }
+      }
+      const aEl = section.querySelector('#statsPlatAndroid');
+      const iEl = section.querySelector('#statsPlatIphone');
+      const wEl = section.querySelector('#statsPlatWindows');
+      const tEl = section.querySelector('#statsTotal');
+      if (aEl) aEl.textContent = String(android);
+      if (iEl) iEl.textContent = '0';
+      if (wEl) wEl.textContent = String(windows);
+      if (tEl) tEl.textContent = String(android + windows);
+
+      // График по месяцам: распределяем скачивания по месяцам примерно равномерно
+      const bars = section.querySelectorAll('#statsBars .stats-chart__bar');
+      if (bars.length) {
+        const n = bars.length;
+        const per = Math.floor(total / n);
+        let rem = total - per * n;
+        const maxVal = Math.max(per + 1, 1);
+        bars.forEach((bar, i) => {
+          const v = per + (i < rem ? 1 : 0);
+          const h = Math.max(4, Math.round((v / maxVal) * 110));
+          bar.style.height = h + 'px';
+          bar.setAttribute('data-v', String(v));
+        });
+      }
+    } catch (e) {
+      console.warn('fillStats:', e);
+    }
+  }
+
   const onlineIndicator = document.getElementById('onlineIndicator');
   if (onlineIndicator) {
     onlineIndicator.addEventListener('click', () => {
       if (onlineIndicator.dataset.done === '1') return;
       onlineIndicator.dataset.done = '1';
 
-      // Создаём ОТДЕЛЬНУЮ секцию, НЕ трогаем футер
       let statsSection = document.getElementById('statsSection');
       if (!statsSection) {
         statsSection = document.createElement('section');
         statsSection.id = 'statsSection';
         statsSection.className = 'stats-section';
-        const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '—';
-        statsSection.innerHTML = `
-          <div class="stats-section__inner">
-            <h2 class="stats-section__title">${t('stats')}</h2>
-            <div class="stats-section__row">
-              <span class="stats-section__label">${t('onlineValue')}</span>
-              <span class="stats-section__value">${onlineCountVal}</span>
-            </div>
-            <div class="stats-section__row">
-              <span class="stats-section__label">${t('totalProjects')}</span>
-              <span class="stats-section__value">—</span>
-            </div>
-            <div class="stats-section__row">
-              <span class="stats-section__label">${t('totalDownloads')}</span>
-              <span class="stats-section__value">—</span>
-            </div>
-          </div>
-        `;
-        // Вставляем ПОСЛЕ футера — футер остаётся на месте
+        const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '0';
+        statsSection.innerHTML = buildStatsHTML(onlineCountVal);
         const footerEl = document.querySelector('.site-footer');
         if (footerEl && footerEl.parentNode) {
           footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
@@ -3285,7 +3553,6 @@
       statsSection.style.display = 'flex';
       statsSection.style.visibility = 'hidden';
 
-      // НЕ скрываем футер, только делаем reflow
       void statsSection.offsetHeight;
 
       onlineIndicator.style.zIndex = '99999';
@@ -3293,7 +3560,6 @@
       onlineIndicator.style.border = 'none';
       onlineIndicator.style.padding = '0';
 
-      // Целимся во внутренний контейнер статистики
       const statsInner = statsSection.querySelector('.stats-section__inner');
       morphIntoSection(
         onlineIndicator,
@@ -3303,6 +3569,7 @@
         () => {
           onlineIndicator.style.display = 'none';
           statsSection.classList.add('visible');
+          fillStatsFromFirebase(statsSection);
           const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
@@ -3343,7 +3610,6 @@
     }
   })();
 
-  // ===== PWA: регистрация service worker =====
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
@@ -3515,6 +3781,11 @@
     return result.snapshot.val() || 0;
   };
 
+  window.fbGetAllProjectDownloads = async function() {
+    const snap = await get(ref(db, 'projects'));
+    return snap.exists() ? snap.val() : {};
+  };
+
   fbGetUser = window.fbGetUser;
   fbCreateUser = window.fbCreateUser;
   fbUpdateUser = window.fbUpdateUser;
@@ -3522,6 +3793,7 @@
   fbGetProjectStats = window.fbGetProjectStats;
   fbToggleReaction = window.fbToggleReaction;
   fbIncrementDownload = window.fbIncrementDownload;
+  fbGetAllProjectDownloads = window.fbGetAllProjectDownloads;
 
   window.__resolveFirebaseReady();
 </script>
