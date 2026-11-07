@@ -786,7 +786,7 @@
     color: #888;
   }
 
-  /* ===== Профиль в настройках: ава слева, текст справа, вся группа по центру ===== */
+  /* ===== Профиль в настройках ===== */
   .profile-settings-header {
     display: flex;
     flex-direction: row;
@@ -992,13 +992,11 @@
   body.light #animSettingsLabel {
     color: #333;
   }
-
-  /* Светлая тема для самого переключателя анимаций */
   body.light #animToggle {
-    background: #d8d8d8 !important; /* Светло-серый фон дорожки */
+    background: #d8d8d8 !important;
   }
   body.light #animThumb {
-    background: #ffffff !important; /* Белый ползунок */
+    background: #ffffff !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
 
@@ -1100,7 +1098,7 @@
     display: none !important;
   }
 
-  /* ===== Секция, появляющаяся после морфинга «Лаунчер» ===== */
+  /* ===== Секции после морфинга ===== */
   .order-section {
     width: 100%;
     background: #1a1a1a;
@@ -1125,7 +1123,52 @@
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
 
-  /* ===== Морфинг «Лаунчер»: без scale, честные left/top/width/height ===== */
+  /* ===== Двойник «Лаунчер»-блока внутри секции ===== */
+  .order-block {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #1a1a1a;
+    border: 1px solid #5a5a5a;
+    border-radius: 16px;
+    box-sizing: border-box;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    color: #e0e0e0;
+    opacity: 0;
+    transition: background 0.4s ease, border-color 0.4s ease, opacity 0.5s ease;
+  }
+  .order-block.visible { opacity: 1; }
+  .order-block__text {
+    writing-mode: horizontal-tb;
+    transform: rotate(0deg);
+    color: #e0e0e0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .order-block__stripe {
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    background: #8a8a8a;
+    opacity: 0.6;
+  }
+  body.light .order-block {
+    background: #eaeaea;
+    border-color: #d8d8d8;
+    color: #333;
+  }
+  body.light .order-block__text { color: #333; }
+  body.light .order-block__stripe { background: #888; }
+
+  /* ===== Морфинг «Лаунчер» ===== */
   .order-btn--morph {
     transition:
       left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1163,7 +1206,6 @@
     height: 40px;
     transition: width 0.95s ease, height 0.95s ease, opacity 0.4s ease;
   }
-
   .order-btn--morph.order-btn--settled .order-btn__inner {
     flex-direction: column;
     justify-content: flex-start;
@@ -1184,7 +1226,7 @@
     opacity: 0.6;
   }
 
-  /* ===== Морфинг «Онлайн: N»: тот же подход ===== */
+  /* ===== Морфинг «Онлайн: N» ===== */
   .site-footer__online--morph {
     transition:
       left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
@@ -3076,23 +3118,19 @@
   })();
 
   /* ===== Универсальный морфинг элемента в секцию БЕЗ scale =====
-     el        — элемент-источник
-     section   — целевая секция (уже в DOM, невидима)
-     morphCls  — класс-модификатор на время морфинга
-     settledCls— класс финального состояния
-     onDone    — колбэк после завершения
+     ВАЖНО: секция уже должна быть вставлена в DOM и быть видимой
+     (display: block, opacity: 0, visibility: hidden), а все блоки,
+     которые «схлопываются», уже должны быть скрыты. Только после
+     этого измеряется getBoundingClientRect.
   */
   function morphIntoSection(el, section, morphCls, settledCls, onDone) {
-    section.style.transition = 'opacity 0.6s ease';
-    section.style.transform = 'none';
-    section.style.opacity = '0';
-    section.style.display = 'block';
-    section.style.visibility = 'hidden';
+    // Принудительный reflow — координаты секции теперь финальные
+    void section.offsetHeight;
 
     const startRect = el.getBoundingClientRect();
     const targetRect = section.getBoundingClientRect();
 
-    // 1. Фиксируем элемент ровно на его месте
+    // Фиксируем элемент ровно на его месте
     el.style.position = 'fixed';
     el.style.left = startRect.left + 'px';
     el.style.top = startRect.top + 'px';
@@ -3100,15 +3138,14 @@
     el.style.height = startRect.height + 'px';
     el.style.right = 'auto';
     el.style.bottom = 'auto';
+    el.style.margin = '0';
     el.style.zIndex = '99999';
+    el.style.pointerEvents = 'none';
     void el.offsetWidth;
 
     el.classList.add(morphCls);
     const isLight = document.body.classList.contains('light');
 
-    // 2. Запускаем анимацию реальных left/top/width/height.
-    //    Расширение строго от центра: каждый кадр пересчитываем left/width
-    //    так, чтобы центр оставался на месте.
     const startCx = startRect.left + startRect.width / 2;
     const startCy = startRect.top + startRect.height / 2;
     const targetCx = targetRect.left + targetRect.width / 2;
@@ -3118,13 +3155,26 @@
     const t0 = performance.now();
     const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
+    // Фон/бордер/радиус — отдельным CSS-transition
+    el.style.transition = 'background 0.7s ease, border-color 0.7s ease, border-radius 0.95s ease';
+    requestAnimationFrame(() => {
+      el.style.borderRadius = '16px';
+      el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
+      el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
+    });
+
+    // Поворот текста (для «Лаунчер»)
+    const textEl = el.querySelector('.order-btn__text');
+    if (textEl) {
+      textEl.style.transition = 'transform 0.95s cubic-bezier(0.22, 1, 0.36, 1)';
+      requestAnimationFrame(() => { textEl.style.transform = 'rotate(0deg)'; });
+    }
+
     function step(now) {
       const p = Math.min((now - t0) / duration, 1);
       const k = ease(p);
-      // ширина/высота — линейно по k
       const w = startRect.width + (targetRect.width - startRect.width) * k;
       const h = startRect.height + (targetRect.height - startRect.height) * k;
-      // центр плавно смещается от стартового к целевому
       const cx = startCx + (targetCx - startCx) * k;
       const cy = startCy + (targetCy - startCy) * k;
       el.style.width = w + 'px';
@@ -3133,21 +3183,6 @@
       el.style.top = (cy - h / 2) + 'px';
       if (p < 1) requestAnimationFrame(step);
       else finish();
-    }
-
-    // Меняем фон/бордер/радиус отдельным CSS-transition на самом элементе
-    el.style.transition = 'background 0.7s ease, border-color 0.7s ease, border-radius 0.95s ease';
-    requestAnimationFrame(() => {
-      el.style.borderRadius = '16px';
-      el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
-      el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
-    });
-
-    // Поворот текста (если есть .order-btn__text) — вертикаль -> горизонталь
-    const textEl = el.querySelector('.order-btn__text');
-    if (textEl) {
-      textEl.style.transition = 'transform 0.95s cubic-bezier(0.22, 1, 0.36, 1)';
-      requestAnimationFrame(() => { textEl.style.transform = 'rotate(0deg)'; });
     }
 
     function finish() {
@@ -3159,14 +3194,10 @@
       el.style.height = targetRect.height + 'px';
       el.classList.add(settledCls);
 
-      // Секция становится видимой, кнопка остаётся внутри как контент
       section.style.visibility = 'visible';
       requestAnimationFrame(() => { section.style.opacity = '1'; });
 
-      // Запускаем onDone, если он есть (например, чтобы наполнить секцию)
-      if (onDone) {
-        setTimeout(onDone, 120);
-      }
+      if (onDone) setTimeout(onDone, 120);
     }
 
     requestAnimationFrame(step);
@@ -3186,7 +3217,7 @@
       const dossier = document.getElementById('dossier');
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      // Создаём секцию-приёмник
+      // Создаём секцию-приёмник СРАЗУ и вставляем в DOM
       let orderSection = document.getElementById('orderSection');
       if (!orderSection) {
         orderSection = document.createElement('section');
@@ -3200,6 +3231,11 @@
           document.body.appendChild(orderSection);
         }
       }
+      // Делаем секцию видимой для измерения (но прозрачной)
+      orderSection.style.transition = 'opacity 0.6s ease';
+      orderSection.style.opacity = '0';
+      orderSection.style.display = 'block';
+      orderSection.style.visibility = 'hidden';
 
       // Прячем остальные блоки
       targets.forEach(el => el.classList.add('fade-out'));
@@ -3209,30 +3245,28 @@
           el.classList.add('hidden-by-order');
         });
 
-        // Запускаем морфинг
+        // ВАЖНО: после скрытия блоков делаем reflow, чтобы секция получила финальные координаты
+        void orderSection.offsetHeight;
+
         morphIntoSection(
           orderBtn,
           orderSection,
           'order-btn--morph',
           'order-btn--settled',
           () => {
-            // После превращения: кнопка остаётся внутри секции,
-            // но уже как обычный блок (не fixed). Переносим её в секцию.
-            orderBtn.style.position = 'static';
-            orderBtn.style.left = '';
-            orderBtn.style.top = '';
-            orderBtn.style.width = '100%';
-            orderBtn.style.height = 'auto';
-            orderBtn.style.zIndex = '';
-            orderBtn.style.transform = '';
-            orderBtn.style.overflow = 'visible';
-            orderBtn.style.cursor = 'default';
-            // Перемещаем кнопку внутрь секции
+            // После анимации скрываем летящую кнопку и показываем двойник в секции
+            orderBtn.style.display = 'none';
             const inner = orderSection.querySelector('.order-section__inner');
-            if (inner && orderBtn.parentNode !== inner) {
-              inner.appendChild(orderBtn);
+            if (inner && !inner.querySelector('.order-block')) {
+              const twin = document.createElement('div');
+              twin.className = 'order-block';
+              twin.innerHTML = `
+                <span class="order-block__text">${t('order')}</span>
+                <span class="order-block__stripe"></span>
+              `;
+              inner.appendChild(twin);
+              requestAnimationFrame(() => twin.classList.add('visible'));
             }
-            // Показываем секцию
             orderSection.classList.add('visible');
             const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
             window.scrollTo({ top: y, behavior: 'smooth' });
@@ -3249,7 +3283,6 @@
       if (onlineIndicator.dataset.done === '1') return;
       onlineIndicator.dataset.done = '1';
 
-      // Создаём секцию статистики
       let statsSection = document.getElementById('statsSection');
       if (!statsSection) {
         statsSection = document.createElement('section');
@@ -3273,15 +3306,24 @@
             </div>
           </div>
         `;
+        // Вставляем ДО футера — чтобы координаты совпадали с тем, что видит пользователь
         const footerEl = document.querySelector('.site-footer');
         if (footerEl && footerEl.parentNode) {
-          footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
+          footerEl.parentNode.insertBefore(statsSection, footerEl);
         } else {
           document.body.appendChild(statsSection);
         }
       }
+      statsSection.style.transition = 'opacity 0.6s ease';
+      statsSection.style.opacity = '0';
+      statsSection.style.display = 'block';
+      statsSection.style.visibility = 'hidden';
 
-      // Прячем сам индикатор через морфинг
+      // Прячем футер (он «схлопывается»), чтобы секция встала на его место
+      footer.classList.add('hidden-by-order');
+      // Reflow — теперь координаты финальные
+      void statsSection.offsetHeight;
+
       onlineIndicator.style.zIndex = '99999';
       onlineIndicator.style.background = 'transparent';
       onlineIndicator.style.border = 'none';
