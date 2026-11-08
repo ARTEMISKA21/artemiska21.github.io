@@ -1,4 +1,4 @@
- <meta charset="UTF-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARTEMIS</title>
 <link rel="icon" type="image/png" sizes="32x32" href="ARTEMIS.png">
@@ -655,6 +655,7 @@
     .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle,
     .menu, .menu a, .menu__register, .menu__login, .menu__user,
     .profile-menu__item, .project-card__reaction, .site-footer__online,
+    .morph-close,
     *:not(input):not(textarea):not(select):not([contenteditable="true"]) {
       cursor: none !important;
     }
@@ -1126,6 +1127,7 @@
     min-height: 260px;
     opacity: 0;
     transition: background 0.4s ease, opacity 0.6s ease;
+    position: relative;
   }
   .order-section.visible { opacity: 1; }
   .order-section__inner {
@@ -1143,33 +1145,44 @@
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
 
-  .order-block {
+  /* Блок «Лаунчер ARTEMIS» */
+  .launcher-block {
     width: 100%;
     max-width: 1100px;
+    min-height: 220px;
     margin: 0 auto;
-    min-height: 160px;
-    background: #1a1a1a;
-    border: none;
+    background: #151515;
+    border: 1px solid #2a2a2a;
     border-radius: 16px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    padding: 40px 24px;
     color: #e0e0e0;
-    opacity: 0;
-    transition: background 0.4s ease, opacity 0.5s ease;
   }
-  .order-block.visible { opacity: 1; }
-  .order-block__text {
-    color: #e0e0e0;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 3px;
+  body.light .launcher-block {
+    background: #f0f0f0;
+    border-color: #d8d8d8;
+    color: #222;
+  }
+  .launcher-block__title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 6px;
     text-transform: uppercase;
-    white-space: nowrap;
+    color: #4ade80;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    margin: 0;
+    user-select: none;
   }
-  body.light .order-block { background: #eaeaea; color: #333; }
-  body.light .order-block__text { color: #333; }
+  body.light .launcher-block__title { color: #16a34a; }
+  @media (max-width: 600px) {
+    .launcher-block { min-height: 160px; padding: 30px 16px; }
+    .launcher-block__title { font-size: 18px; letter-spacing: 4px; }
+  }
 
   /* ===== Морфинг «Лаунчер» ===== */
   .order-btn--morph {
@@ -1247,10 +1260,10 @@
     justify-content: flex-start !important;
   }
   .site-footer__online--settled {
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: flex-start !important;
     font-size: 14px !important;
-    gap: 12px;
+    gap: 8px;
   }
 
   /* ===== Секция статистики ===== */
@@ -1264,6 +1277,7 @@
     min-height: 260px;
     opacity: 0;
     transition: background 0.4s ease, opacity 0.6s ease;
+    position: relative;
   }
   .stats-section.visible {
     opacity: 1;
@@ -1425,7 +1439,7 @@
     .stats-section__bottom { grid-template-columns: 1fr; }
   }
 
-  /* Слот для морфинга: занимает место строки «Онлайн» */
+  /* Слот, КУДА ПРИЛЕТАЕТ индикатор. Содержит текст «Онлайн:» и цифру. */
   .stats-online-slot {
     display: inline-flex;
     align-items: center;
@@ -1435,6 +1449,57 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
+  /* Текст «Онлайн:» — цель морфинга */
+  .stats-online-slot__label {
+    display: inline-block;
+    color: #e8e8e8;
+  }
+  .stats-online-slot__count {
+    display: inline-block;
+    color: #e8e8e8;
+  }
+
+  /* ===== Крестик закрытия (для статистики и лаунчера) ===== */
+  .morph-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 1px solid #4a4a4a;
+    color: #d8d8d8;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    padding: 0;
+    font-family: inherit;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    transform-origin: center;
+  }
+  .morph-close:hover {
+    transform: rotate(360deg);
+    background: #3a3a3a;
+    border-color: #7a7a7a;
+    color: #fff;
+  }
+  body.light .morph-close {
+    background: #f0f0f0;
+    border-color: #c0c0c0;
+    color: #333;
+  }
+  body.light .morph-close:hover {
+    background: #e0e0e0;
+    border-color: #999;
+    color: #000;
+  }
+  body.no-animations .morph-close:hover { transform: none; }
 
   /* ===== Капча ===== */
   .captcha-row {
@@ -1642,7 +1707,7 @@
 
     <div class="site-footer__online" id="onlineIndicator" title="Статистика">
       <span class="site-footer__online-dot"></span>
-      <span data-i18n="online">Онлайн:</span>
+      <span data-i18n="online" class="site-footer__online-label">Онлайн:</span>
       <span class="site-footer__online-count" id="onlineCount">—</span>
     </div>
 
@@ -1862,9 +1927,6 @@
 <script>
   /* ===================================================================
      АВТОВЕРСИЯ ДЛЯ СБРОСА КУКИ
-     BUILD_ID формируется автоматически из содержимого страницы.
-     При любом изменении кода страницы меняется и BUILD_ID, а значит
-     куки сбрасываются сами — руками править ничего не нужно.
      =================================================================== */
   function computeBuildId() {
     const meta = document.querySelector('meta[name="build-id"]');
@@ -1950,7 +2012,7 @@
     }
     animateCursor();
 
-    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .order-btn, .site-footer__online, .site-preview__letter';
+    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .morph-close, .order-btn, .site-footer__online, .site-preview__letter';
     const textTargets = 'input, textarea, select, [contenteditable="true"]';
 
     document.addEventListener('mouseover', (e) => {
@@ -3426,10 +3488,16 @@
     });
   })();
 
-  /* morphIntoSection поддерживает keepSize:
-     если keepSize === true, летящий элемент сохраняет свои размеры,
-     а не растягивается до размеров цели — нужно для «Онлайн: N». */
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize) {
+  /* ================================================================
+     МОРФИНГ
+     - по умолчанию: элемент летит в центр цели и принимает её размеры
+     - keepSize = true: элемент летит, сохраняя свои размеры,
+       центрируется на цели
+     - alignLeft = true (вместе с keepSize): левый край летящего
+       совпадает с левым краем цели по X и центр по Y — так «Онлайн»
+       встаёт ровно на ТЕКСТ «Онлайн:», а не на цифру
+     ================================================================ */
+  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft) {
     void targetEl.offsetHeight;
     const startRect = el.getBoundingClientRect();
     const targetRect = targetEl.getBoundingClientRect();
@@ -3451,8 +3519,12 @@
 
     const startCx = startRect.left + startRect.width / 2;
     const startCy = startRect.top + startRect.height / 2;
-    const targetCx = targetRect.left + targetRect.width / 2;
-    const targetCy = targetRect.top + targetRect.height / 2;
+    const targetCx = alignLeft
+      ? (targetRect.left + startRect.width / 2)
+      : (targetRect.left + targetRect.width / 2);
+    const targetCy = alignLeft
+      ? (targetRect.top + startRect.height / 2)
+      : (targetRect.top + targetRect.height / 2);
 
     const duration = 950;
     const t0 = performance.now();
@@ -3497,8 +3569,13 @@
     function finish() {
       el.style.transition = 'none';
       if (keepSize) {
-        el.style.left = (targetCx - startRect.width / 2) + 'px';
-        el.style.top = (targetCy - startRect.height / 2) + 'px';
+        if (alignLeft) {
+          el.style.left = targetRect.left + 'px';
+          el.style.top = (targetCy - startRect.height / 2) + 'px';
+        } else {
+          el.style.left = (targetCx - startRect.width / 2) + 'px';
+          el.style.top = (targetCy - startRect.height / 2) + 'px';
+        }
         el.style.width = startRect.width + 'px';
         el.style.height = startRect.height + 'px';
       } else {
@@ -3514,6 +3591,9 @@
     requestAnimationFrame(step);
   }
 
+  /* ================================================================
+     КНОПКА «ЛАУНЧЕР»
+     ================================================================ */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -3535,9 +3615,10 @@
       orderSection.id = 'orderSection';
       orderSection.className = 'order-section';
       orderSection.innerHTML = `
+        <button class="morph-close" type="button" data-close="order" aria-label="Закрыть">✕</button>
         <div class="order-section__inner">
-          <div class="order-block">
-            <span class="order-block__text">${t('order')}</span>
+          <div class="launcher-block">
+            <h2 class="launcher-block__title">${t('order').toUpperCase()} ARTEMIS</h2>
           </div>
         </div>
       `;
@@ -3548,38 +3629,102 @@
         document.body.appendChild(orderSection);
       }
 
+      // Сначала скрываем старые блоки
+      targets.forEach(el => el.classList.add('hidden-by-order'));
+
+      // Показываем секцию, чтобы получить финальный layout
       orderSection.style.display = 'flex';
       orderSection.style.opacity = '0';
+      orderSection.style.visibility = 'hidden';
 
-      targets.forEach(el => el.classList.add('fade-out'));
+      const launcherBlock = orderSection.querySelector('.launcher-block');
 
-      setTimeout(() => {
-        targets.forEach(el => {
-          el.classList.remove('fade-out');
-          el.classList.add('hidden-by-order');
+      // Скроллим ДО измерения координат цели
+      const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
+      window.scrollTo({ top: topY, behavior: 'auto' });
+
+      // Двойной rAF — ждём, пока скролл применится
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          orderSection.style.visibility = 'visible';
+
+          // Теперь измеряем финальные координаты блока «Лаунчер ARTEMIS»
+          morphIntoSection(
+            orderBtn,
+            launcherBlock,
+            'order-btn--morph',
+            'order-btn--settled',
+            () => {
+              orderBtn.style.display = 'none';
+              orderSection.style.opacity = '1';
+              orderSection.classList.add('visible');
+              const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            },
+            true,
+            false,
+            false
+          );
         });
+      });
 
-        void orderSection.offsetHeight;
-
-        morphIntoSection(
-          orderBtn,
-          orderSection,
-          'order-btn--morph',
-          'order-btn--settled',
-          () => {
-            orderBtn.style.display = 'none';
-            orderSection.style.opacity = '1';
-            orderSection.classList.add('visible');
-            const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-          },
-          true
-        );
-      }, 750);
+      // Крестик закрытия
+      const closeBtn = orderSection.querySelector('[data-close="order"]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          closeOrderSection(orderSection, targets);
+        });
+      }
     });
   }
 
-  /* ===== Статистика ===== */
+  function closeOrderSection(orderSection, hiddenTargets) {
+    // 1. Прячем секцию
+    orderSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    orderSection.style.opacity = '0';
+    orderSection.style.transform = 'translateY(20px)';
+
+    // 2. Возвращаем кнопку «Лаунчер» на исходное место
+    if (orderBtn) {
+      orderBtn.style.display = '';
+      orderBtn.style.position = '';
+      orderBtn.style.left = '';
+      orderBtn.style.top = '';
+      orderBtn.style.width = '';
+      orderBtn.style.height = '';
+      orderBtn.style.right = '';
+      orderBtn.style.bottom = '';
+      orderBtn.style.margin = '';
+      orderBtn.style.zIndex = '';
+      orderBtn.style.pointerEvents = '';
+      orderBtn.style.transition = '';
+      orderBtn.style.borderRadius = '';
+      orderBtn.style.background = '';
+      orderBtn.style.borderColor = '';
+      orderBtn.classList.remove('order-btn--morph', 'order-btn--settled');
+      const textEl = orderBtn.querySelector('.order-btn__text');
+      if (textEl) {
+        textEl.style.transition = '';
+        textEl.style.transform = '';
+      }
+    }
+
+    setTimeout(() => {
+      if (orderSection.parentNode) orderSection.parentNode.removeChild(orderSection);
+      // 3. Возвращаем старые блоки
+      (hiddenTargets || []).forEach(el => el.classList.remove('hidden-by-order'));
+      const pt = document.querySelector('.projects-title');
+      if (pt) {
+        pt.classList.remove('fade-out');
+        pt.classList.remove('hidden-by-order');
+      }
+    }, 420);
+  }
+
+  /* ================================================================
+     СТАТИСТИКА
+     ================================================================ */
   function countAllProjects() {
     let n = 0;
     for (const key in projects) {
@@ -3593,6 +3738,7 @@
     const bars = monthsShort.map(m => `<div class="stats-chart__bar" data-m="${m}" data-v="0" style="height:4px"></div>`).join('');
     const labels = monthsShort.map(m => `<span>${m}</span>`).join('');
     return `
+      <button class="morph-close" type="button" data-close="stats" aria-label="Закрыть">✕</button>
       <div class="stats-section__inner">
         <h2 class="stats-section__title">${t('stats')}</h2>
         <div class="stats-section__rows">
@@ -3606,7 +3752,10 @@
           </div>
           <div class="stats-section__row">
             <span class="stats-section__label">${t('onlineValue')}</span>
-            <span class="stats-section__value stats-online-slot" id="statsOnlineSlot">${onlineCountVal}</span>
+            <span class="stats-section__value stats-online-slot" id="statsOnlineSlot">
+              <span class="stats-online-slot__label" data-i18n="online">${t('online')}</span>
+              <span class="stats-online-slot__count">${onlineCountVal}</span>
+            </span>
           </div>
         </div>
 
@@ -3700,7 +3849,6 @@
   const onlineIndicator = document.getElementById('onlineIndicator');
   if (onlineIndicator) {
     onlineIndicator.addEventListener('click', () => {
-      // Если секция уже есть — просто скроллим к ней, без повторного морфа
       const existing = document.getElementById('statsSection');
       if (existing) {
         const y = existing.getBoundingClientRect().top + window.scrollY - 20;
@@ -3722,59 +3870,111 @@
         document.body.appendChild(statsSection);
       }
 
-      // 1. Показываем секцию невидимо, layout финальный
+      // Показываем невидимо, чтобы получить финальный layout
       statsSection.style.display = 'flex';
       statsSection.style.opacity = '0';
       statsSection.style.visibility = 'hidden';
 
       const targetSlot = statsSection.querySelector('#statsOnlineSlot');
-      // 2. Заполняем слот невидимо — получаем финальную ширину
       if (targetSlot) {
-        targetSlot.textContent = onlineCountVal;
         targetSlot.style.visibility = 'hidden';
       }
 
-      void statsSection.offsetHeight; // reflow
+      void statsSection.offsetHeight;
 
-      // 3. СКРОЛЛИМ к блоку ДО измерения координат слота
+      // Скролл до измерения координат
       const blockTop = statsSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: blockTop, behavior: 'auto' });
 
-      // 4. Делаем секцию видимой (но прозрачной, чтобы морф был виден)
       statsSection.style.visibility = 'visible';
       statsSection.style.opacity = '1';
       statsSection.classList.add('visible');
 
-      // 5. Двойной rAF — гарантируем, что скролл и layout применились
+      // Крестик
+      const statsCloseBtn = statsSection.querySelector('[data-close="stats"]');
+      if (statsCloseBtn) {
+        statsCloseBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          closeStatsSection(statsSection);
+        });
+      }
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!targetSlot) {
             fillStatsFromFirebase(statsSection);
             return;
           }
+          if (targetSlot) targetSlot.style.visibility = '';
 
-          // Очищаем слот — значение «привезёт» индикатор
-          targetSlot.textContent = '';
-          targetSlot.style.visibility = '';
+          // ЦЕЛЬ МОРФА — ТЕКСТ «Онлайн:» ВНУТРИ СЛОТА
+          const targetLabel = targetSlot.querySelector('.stats-online-slot__label');
+          const morphTarget = targetLabel || targetSlot;
+
+          // Скрываем текст «Онлайн:» на время полёта
+          if (targetLabel) {
+            targetLabel.style.visibility = 'hidden';
+          } else {
+            targetSlot.style.visibility = 'hidden';
+          }
 
           morphIntoSection(
             onlineIndicator,
-            targetSlot,
+            morphTarget,
             'site-footer__online--morph',
             'site-footer__online--settled',
             () => {
               onlineIndicator.style.display = 'none';
-              if (targetSlot) targetSlot.textContent = onlineCountVal;
+              // После морфа — возвращаем текст и цифру на место
+              if (targetLabel) targetLabel.style.visibility = '';
+              targetSlot.style.visibility = '';
+
+              // Создаём новый индикатор ВНУТРИ слота — но только текст и цифру
+              // (чтобы слот был полностью корректным визуально)
+              targetSlot.innerHTML = `<span class="stats-online-slot__label">${t('online')}</span><span class="stats-online-slot__count">${onlineCountVal}</span>`;
+
               fillStatsFromFirebase(statsSection);
               const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
               window.scrollTo({ top: y, behavior: 'smooth' });
             },
             true,
-            true
+            true,
+            true   // alignLeft = true — садимся ровно на ТЕКСТ
           );
         });
       });
     });
+  }
+
+  function closeStatsSection(statsSection) {
+    // 1. Возвращаем индикатор «Онлайн» на его место в футере
+    if (onlineIndicator) {
+      onlineIndicator.style.display = '';
+      onlineIndicator.style.position = '';
+      onlineIndicator.style.left = '';
+      onlineIndicator.style.top = '';
+      onlineIndicator.style.width = '';
+      onlineIndicator.style.height = '';
+      onlineIndicator.style.right = '';
+      onlineIndicator.style.bottom = '';
+      onlineIndicator.style.margin = '';
+      onlineIndicator.style.zIndex = '';
+      onlineIndicator.style.pointerEvents = '';
+      onlineIndicator.style.transition = '';
+      onlineIndicator.style.borderRadius = '';
+      onlineIndicator.style.background = '';
+      onlineIndicator.style.borderColor = '';
+      onlineIndicator.style.padding = '';
+      onlineIndicator.classList.remove('site-footer__online--morph', 'site-footer__online--settled');
+    }
+
+    // 2. Убираем секцию
+    statsSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    statsSection.style.opacity = '0';
+    statsSection.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      if (statsSection.parentNode) statsSection.parentNode.removeChild(statsSection);
+    }, 420);
   }
 
   (async () => {
@@ -4007,3 +4207,4 @@
 
   window.__resolveFirebaseReady();
 </script>
+ 
