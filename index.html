@@ -2058,6 +2058,7 @@
       nameTaken: 'Такое имя уже занято',
       errSave: 'Ошибка сохранения',
       errConn: 'Ошибка соединения',
+      userNotFound: 'Пользователь не найден',
       enterName: 'Введите имя',
       fillAll: 'Заполните все поля',
       check: 'Проверка...',
@@ -2130,6 +2131,7 @@
       nameTaken: 'This name is taken',
       errSave: 'Save error',
       errConn: 'Connection error',
+      userNotFound: 'User not found',
       enterName: 'Enter name',
       fillAll: 'Fill all fields',
       check: 'Checking...',
@@ -2665,7 +2667,7 @@
       const user = await fbGetUser(name);
       if (!user) {
         loginError.style.color = '#ff6b6b';
-        loginError.textContent = t('errConn');
+        loginError.textContent = t('userNotFound');
         loginSubmit.disabled = false;
         return;
       }
@@ -3379,7 +3381,7 @@
     });
   })();
 
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone) {
+  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain) {
     void targetEl.offsetHeight;
     const startRect = el.getBoundingClientRect();
     const targetRect = targetEl.getBoundingClientRect();
@@ -3409,11 +3411,13 @@
     const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     el.style.transition = 'background 0.7s ease, border-color 0.7s ease, border-radius 0.95s ease';
-    requestAnimationFrame(() => {
-      el.style.borderRadius = '16px';
-      el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
-      el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
-    });
+    if (!plain) {
+      requestAnimationFrame(() => {
+        el.style.borderRadius = '16px';
+        el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
+        el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
+      });
+    }
 
     const textEl = el.querySelector('.order-btn__text');
     if (textEl) {
@@ -3481,33 +3485,36 @@
           document.body.appendChild(orderSection);
         }
       }
-      orderSection.style.transition = 'opacity 0.6s ease';
-      orderSection.style.opacity = '0';
+
+      // Показываем секцию до скрытия целей, чтобы layout был стабильным
       orderSection.style.display = 'flex';
-      orderSection.style.visibility = 'hidden';
+      orderSection.style.opacity = '0';
 
       targets.forEach(el => el.classList.add('fade-out'));
+
       setTimeout(() => {
         targets.forEach(el => {
           el.classList.remove('fade-out');
           el.classList.add('hidden-by-order');
         });
 
+        // ВАЖНО: reflow после скрытия — координаты финальные
         void orderSection.offsetHeight;
 
-        const orderBlock = orderSection.querySelector('.order-block');
+        // Морфим в саму секцию, а не в .order-block
         morphIntoSection(
           orderBtn,
-          orderBlock || orderSection,
+          orderSection,
           'order-btn--morph',
           'order-btn--settled',
           () => {
             orderBtn.style.display = 'none';
+            orderSection.style.opacity = '1';
             orderSection.classList.add('visible');
-            if (orderBlock) orderBlock.classList.add('visible');
             const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
             window.scrollTo({ top: y, behavior: 'smooth' });
-          }
+          },
+          true // plain — не превращать в серую плашку
         );
       }, 750);
     });
@@ -3644,9 +3651,6 @@
         statsSection = document.createElement('section');
         statsSection.id = 'statsSection';
         statsSection.className = 'stats-section';
-        statsSection.style.display = 'flex';       // показываем, чтобы измерить
-        statsSection.style.opacity = '0';
-        statsSection.style.visibility = 'hidden';
         statsSection.innerHTML = buildStatsHTML(onlineCountVal);
         const footerEl = document.querySelector('.site-footer');
         if (footerEl && footerEl.parentNode) {
@@ -3654,40 +3658,22 @@
         } else {
           document.body.appendChild(statsSection);
         }
-      } else {
-        statsSection.style.display = 'flex';
-        statsSection.style.opacity = '0';
-        statsSection.style.visibility = 'hidden';
       }
 
-      // Принудительный reflow — координаты уже финальные
-      void statsSection.offsetHeight;
+      // Скрываем исходный индикатор в футере (fade)
+      onlineIndicator.style.transition = 'opacity 0.3s ease';
+      onlineIndicator.style.opacity = '0';
+      setTimeout(() => { onlineIndicator.style.display = 'none'; }, 300);
 
-      // Слот, в который летит индикатор (только маленький прямоугольник, не весь .inner)
-      const slot = statsSection.querySelector('#statsOnlineSlot');
-
-      onlineIndicator.style.zIndex = '99999';
-      onlineIndicator.style.background = 'transparent';
-      onlineIndicator.style.border = 'none';
-      onlineIndicator.style.padding = '0';
-
-      morphIntoSection(
-        onlineIndicator,
-        slot || statsSection,
-        'site-footer__online--morph',
-        'site-footer__online--settled',
-        () => {
-          // Скрываем летящий индикатор, но сама секция уже готова и видима
-          onlineIndicator.style.display = 'none';
-          statsSection.style.visibility = 'visible';
-          statsSection.style.opacity = '1';
-          statsSection.classList.add('visible');
-          // Заполняем данные сразу (синхронно)
-          fillStatsFromFirebase(statsSection);
-          const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      );
+      // Показываем секцию и сразу заполняем
+      requestAnimationFrame(() => {
+        statsSection.style.display = 'flex';
+        void statsSection.offsetHeight;
+        statsSection.classList.add('visible');
+        fillStatsFromFirebase(statsSection);
+        const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      });
     });
   }
 
