@@ -1862,12 +1862,9 @@
 <script>
   /* ===================================================================
      АВТОВЕРСИЯ ДЛЯ СБРОСА КУКИ
-     BUILD_ID формируется автоматически:
-       1) из meta[name="build-id"] (если задан вручную),
-       2) из ?v= в URL (если пришёл с сервера/CI),
-       3) иначе — из хэша содержимого <head> + <body> (дата/размер).
-     При любом изменении кода страницы меняется и BUILD_ID,
-     а значит куки сбрасываются сами — руками править ничего не нужно.
+     BUILD_ID формируется автоматически из содержимого страницы.
+     При любом изменении кода страницы меняется и BUILD_ID, а значит
+     куки сбрасываются сами — руками править ничего не нужно.
      =================================================================== */
   function computeBuildId() {
     const meta = document.querySelector('meta[name="build-id"]');
@@ -3520,8 +3517,12 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      if (getCookie('artemis_order_done') === BUILD_ID) return;
-      setCookie('artemis_order_done', BUILD_ID, 365);
+      const existing = document.getElementById('orderSection');
+      if (existing) {
+        const y = existing.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        return;
+      }
 
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
@@ -3530,24 +3531,21 @@
       const dossier = document.getElementById('dossier');
       const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
 
-      let orderSection = document.getElementById('orderSection');
-      if (!orderSection) {
-        orderSection = document.createElement('section');
-        orderSection.id = 'orderSection';
-        orderSection.className = 'order-section';
-        orderSection.innerHTML = `
-          <div class="order-section__inner">
-            <div class="order-block">
-              <span class="order-block__text">${t('order')}</span>
-            </div>
+      const orderSection = document.createElement('section');
+      orderSection.id = 'orderSection';
+      orderSection.className = 'order-section';
+      orderSection.innerHTML = `
+        <div class="order-section__inner">
+          <div class="order-block">
+            <span class="order-block__text">${t('order')}</span>
           </div>
-        `;
-        const footerEl = document.querySelector('.site-footer');
-        if (footerEl && footerEl.parentNode) {
-          footerEl.parentNode.insertBefore(orderSection, footerEl);
-        } else {
-          document.body.appendChild(orderSection);
-        }
+        </div>
+      `;
+      const footerEl = document.querySelector('.site-footer');
+      if (footerEl && footerEl.parentNode) {
+        footerEl.parentNode.insertBefore(orderSection, footerEl);
+      } else {
+        document.body.appendChild(orderSection);
       }
 
       orderSection.style.display = 'flex';
@@ -3702,55 +3700,60 @@
   const onlineIndicator = document.getElementById('onlineIndicator');
   if (onlineIndicator) {
     onlineIndicator.addEventListener('click', () => {
-      if (getCookie('artemis_stats_done') === BUILD_ID) return;
-      setCookie('artemis_stats_done', BUILD_ID, 365);
+      // Если секция уже есть — просто скроллим к ней, без повторного морфа
+      const existing = document.getElementById('statsSection');
+      if (existing) {
+        const y = existing.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        return;
+      }
 
       const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '0';
 
-      let statsSection = document.getElementById('statsSection');
-      if (!statsSection) {
-        statsSection = document.createElement('section');
-        statsSection.id = 'statsSection';
-        statsSection.className = 'stats-section';
-        statsSection.innerHTML = buildStatsHTML(onlineCountVal);
-        const footerEl = document.querySelector('.site-footer');
-        if (footerEl && footerEl.parentNode) {
-          footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
-        } else {
-          document.body.appendChild(statsSection);
-        }
+      const statsSection = document.createElement('section');
+      statsSection.id = 'statsSection';
+      statsSection.className = 'stats-section';
+      statsSection.innerHTML = buildStatsHTML(onlineCountVal);
+
+      const footerEl = document.querySelector('.site-footer');
+      if (footerEl && footerEl.parentNode) {
+        footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
+      } else {
+        document.body.appendChild(statsSection);
       }
 
-      // 1. Показываем секцию, но прозрачной — layout уже финальный
+      // 1. Показываем секцию невидимо, layout финальный
       statsSection.style.display = 'flex';
       statsSection.style.opacity = '0';
       statsSection.style.visibility = 'hidden';
-      void statsSection.offsetHeight;
 
       const targetSlot = statsSection.querySelector('#statsOnlineSlot');
-
-      // 2. Заполняем слот значением НЕВИДИМО, чтобы он получил финальную ширину
+      // 2. Заполняем слот невидимо — получаем финальную ширину
       if (targetSlot) {
         targetSlot.textContent = onlineCountVal;
         targetSlot.style.visibility = 'hidden';
       }
 
-      // 3. Делаем секцию видимой
+      void statsSection.offsetHeight; // reflow
+
+      // 3. СКРОЛЛИМ к блоку ДО измерения координат слота
+      const blockTop = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+      window.scrollTo({ top: blockTop, behavior: 'auto' });
+
+      // 4. Делаем секцию видимой (но прозрачной, чтобы морф был виден)
       statsSection.style.visibility = 'visible';
       statsSection.style.opacity = '1';
       statsSection.classList.add('visible');
-      void statsSection.offsetHeight;
 
-      // 4. Двойной rAF — гарантируем финальные координаты цели
+      // 5. Двойной rAF — гарантируем, что скролл и layout применились
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!targetSlot) {
-            statsSection.style.opacity = '1';
             fillStatsFromFirebase(statsSection);
             return;
           }
 
-          // Очищаем слот и снимаем невидимость — значение «привезёт» индикатор
+          // Очищаем слот — значение «привезёт» индикатор
           targetSlot.textContent = '';
           targetSlot.style.visibility = '';
 
