@@ -1250,7 +1250,6 @@
     align-items: flex-start !important;
     justify-content: flex-start !important;
     font-size: 14px !important;
-    padding: 20px !important;
     gap: 12px;
   }
 
@@ -1878,7 +1877,6 @@
     const v = url.searchParams.get('v');
     if (v) return v;
 
-    // Хэш от содержимого страницы (быстрый, стабильный в рамках одной сборки)
     let s = '';
     const head = document.head ? document.head.innerHTML : '';
     const body = document.body ? document.body.innerHTML : '';
@@ -1923,7 +1921,6 @@
     setCookie(COOKIE_VERSION_KEY, BUILD_ID, 365);
   }
 
-  // Сбрасываем куки ДО всего остального
   resetOutdatedCookies();
 
   (function initCustomCursor() {
@@ -3432,7 +3429,7 @@
     });
   })();
 
-  /* morphIntoSection теперь поддерживает keepSize:
+  /* morphIntoSection поддерживает keepSize:
      если keepSize === true, летящий элемент сохраняет свои размеры,
      а не растягивается до размеров цели — нужно для «Онлайн: N». */
   function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize) {
@@ -3724,39 +3721,55 @@
         }
       }
 
-      // Показываем секцию, но значение в целевой строке пока пустое —
-      // его «привезёт» летящий индикатор.
+      // 1. Показываем секцию, но прозрачной — layout уже финальный
       statsSection.style.display = 'flex';
       statsSection.style.opacity = '0';
       statsSection.style.visibility = 'hidden';
       void statsSection.offsetHeight;
 
-      const targetRow = statsSection.querySelector('.stats-section__row:last-child');
       const targetSlot = statsSection.querySelector('#statsOnlineSlot');
-      if (targetSlot) targetSlot.textContent = '';
 
+      // 2. Заполняем слот значением НЕВИДИМО, чтобы он получил финальную ширину
+      if (targetSlot) {
+        targetSlot.textContent = onlineCountVal;
+        targetSlot.style.visibility = 'hidden';
+      }
+
+      // 3. Делаем секцию видимой
       statsSection.style.visibility = 'visible';
       statsSection.style.opacity = '1';
       statsSection.classList.add('visible');
+      void statsSection.offsetHeight;
 
+      // 4. Двойной rAF — гарантируем финальные координаты цели
       requestAnimationFrame(() => {
-        // Летит сам индикатор (свои размеры — keepSize),
-        // цель — последняя строка «Онлайн: N» в блоке статистики.
-        morphIntoSection(
-          onlineIndicator,
-          targetRow || statsSection,
-          'site-footer__online--morph',
-          'site-footer__online--settled',
-          () => {
-            onlineIndicator.style.display = 'none';
-            if (targetSlot) targetSlot.textContent = onlineCountVal;
+        requestAnimationFrame(() => {
+          if (!targetSlot) {
+            statsSection.style.opacity = '1';
             fillStatsFromFirebase(statsSection);
-            const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-          },
-          true,
-          true
-        );
+            return;
+          }
+
+          // Очищаем слот и снимаем невидимость — значение «привезёт» индикатор
+          targetSlot.textContent = '';
+          targetSlot.style.visibility = '';
+
+          morphIntoSection(
+            onlineIndicator,
+            targetSlot,
+            'site-footer__online--morph',
+            'site-footer__online--settled',
+            () => {
+              onlineIndicator.style.display = 'none';
+              if (targetSlot) targetSlot.textContent = onlineCountVal;
+              fillStatsFromFirebase(statsSection);
+              const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            },
+            true,
+            true
+          );
+        });
       });
     });
   }
