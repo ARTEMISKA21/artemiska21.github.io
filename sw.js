@@ -1,4 +1,4 @@
-const CACHE_NAME = 'artemis-v2';
+1const CACHE_NAME = 'artemis-v2';
 const ASSETS = [
   './ARTEMIS.png',
   './manifest.json'
