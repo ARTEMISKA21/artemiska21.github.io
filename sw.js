@@ -23,6 +23,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
+  // Навигация / HTML — всегда из сети, чтобы страница не «залипала»
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(req).catch(() => caches.match('./'))
