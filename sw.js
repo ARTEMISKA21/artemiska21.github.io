@@ -1,7 +1,5 @@
-const CACHE_NAME = 'artemis-v1';
+const CACHE_NAME = 'artemis-v2';
 const ASSETS = [
-  './',
-  './index.html',
   './ARTEMIS.png',
   './manifest.json'
 ];
@@ -23,7 +21,16 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const req = event.request;
+
+  if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
+    event.respondWith(
+      fetch(req).catch(() => caches.match('./'))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(req).then((cached) => cached || fetch(req))
   );
 });
