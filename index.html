@@ -1431,7 +1431,6 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-width: 60px;
     min-height: 18px;
     color: #e8e8e8;
     font-weight: 600;
@@ -1862,6 +1861,71 @@
 </div>
 
 <script>
+  /* ===================================================================
+     АВТОВЕРСИЯ ДЛЯ СБРОСА КУКИ
+     BUILD_ID формируется автоматически:
+       1) из meta[name="build-id"] (если задан вручную),
+       2) из ?v= в URL (если пришёл с сервера/CI),
+       3) иначе — из хэша содержимого <head> + <body> (дата/размер).
+     При любом изменении кода страницы меняется и BUILD_ID,
+     а значит куки сбрасываются сами — руками править ничего не нужно.
+     =================================================================== */
+  function computeBuildId() {
+    const meta = document.querySelector('meta[name="build-id"]');
+    if (meta && meta.content) return meta.content;
+
+    const url = new URL(window.location.href);
+    const v = url.searchParams.get('v');
+    if (v) return v;
+
+    // Хэш от содержимого страницы (быстрый, стабильный в рамках одной сборки)
+    let s = '';
+    const head = document.head ? document.head.innerHTML : '';
+    const body = document.body ? document.body.innerHTML : '';
+    s = head.length + ':' + body.length + ':' + head.slice(0, 200) + body.slice(0, 200);
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) {
+      h = ((h << 5) + h) ^ s.charCodeAt(i);
+    }
+    return 'auto-' + (h >>> 0).toString(36);
+  }
+
+  const COOKIE_VERSION_KEY = 'artemis_ver';
+  const BUILD_ID = computeBuildId();
+
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/';
+  }
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  function deleteCookie(name) {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+  }
+
+  function resetOutdatedCookies() {
+    const saved = getCookie(COOKIE_VERSION_KEY);
+    if (saved === BUILD_ID) return;
+
+    [
+      'artemis_user',
+      'artemis_gender',
+      'artemis_lang',
+      'artemis_animations',
+      'artemis_theme',
+      'artemis_stats_done',
+      'artemis_order_done'
+    ].forEach(deleteCookie);
+
+    setCookie(COOKIE_VERSION_KEY, BUILD_ID, 365);
+  }
+
+  // Сбрасываем куки ДО всего остального
+  resetOutdatedCookies();
+
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -1972,19 +2036,6 @@
       smoothScrollTo(targetY, 900);
     });
   });
-
-  function setCookie(name, value, days) {
-    const d = new Date();
-    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/';
-  }
-  function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-    return match ? decodeURIComponent(match[1]) : null;
-  }
-  function deleteCookie(name) {
-    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-  }
 
   let fbGetUser = null;
   let fbCreateUser = null;
@@ -3381,7 +3432,10 @@
     });
   })();
 
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain) {
+  /* morphIntoSection теперь поддерживает keepSize:
+     если keepSize === true, летящий элемент сохраняет свои размеры,
+     а не растягивается до размеров цели — нужно для «Онлайн: N». */
+  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize) {
     void targetEl.offsetHeight;
     const startRect = el.getBoundingClientRect();
     const targetRect = targetEl.getBoundingClientRect();
@@ -3428,10 +3482,16 @@
     function step(now) {
       const p = Math.min((now - t0) / duration, 1);
       const k = ease(p);
-      const w = startRect.width + (targetRect.width - startRect.width) * k;
-      const h = startRect.height + (targetRect.height - startRect.height) * k;
-      const cx = startCx + (targetCx - startCx) * k;
-      const cy = startCy + (targetCy - startCy) * k;
+      let w, h, cx, cy;
+      if (keepSize) {
+        w = startRect.width;
+        h = startRect.height;
+      } else {
+        w = startRect.width + (targetRect.width - startRect.width) * k;
+        h = startRect.height + (targetRect.height - startRect.height) * k;
+      }
+      cx = startCx + (targetCx - startCx) * k;
+      cy = startCy + (targetCy - startCy) * k;
       el.style.width = w + 'px';
       el.style.height = h + 'px';
       el.style.left = (cx - w / 2) + 'px';
@@ -3442,10 +3502,17 @@
 
     function finish() {
       el.style.transition = 'none';
-      el.style.left = targetRect.left + 'px';
-      el.style.top = targetRect.top + 'px';
-      el.style.width = targetRect.width + 'px';
-      el.style.height = targetRect.height + 'px';
+      if (keepSize) {
+        el.style.left = (targetCx - startRect.width / 2) + 'px';
+        el.style.top = (targetCy - startRect.height / 2) + 'px';
+        el.style.width = startRect.width + 'px';
+        el.style.height = startRect.height + 'px';
+      } else {
+        el.style.left = targetRect.left + 'px';
+        el.style.top = targetRect.top + 'px';
+        el.style.width = targetRect.width + 'px';
+        el.style.height = targetRect.height + 'px';
+      }
       el.classList.add(settledCls);
       if (onDone) setTimeout(onDone, 120);
     }
@@ -3456,8 +3523,8 @@
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
-      if (orderBtn.dataset.done === '1') return;
-      orderBtn.dataset.done = '1';
+      if (getCookie('artemis_order_done') === BUILD_ID) return;
+      setCookie('artemis_order_done', BUILD_ID, 365);
 
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
@@ -3486,7 +3553,6 @@
         }
       }
 
-      // Показываем секцию до скрытия целей, чтобы layout был стабильным
       orderSection.style.display = 'flex';
       orderSection.style.opacity = '0';
 
@@ -3498,10 +3564,8 @@
           el.classList.add('hidden-by-order');
         });
 
-        // ВАЖНО: reflow после скрытия — координаты финальные
         void orderSection.offsetHeight;
 
-        // Морфим в саму секцию, а не в .order-block
         morphIntoSection(
           orderBtn,
           orderSection,
@@ -3514,7 +3578,7 @@
             const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
             window.scrollTo({ top: y, behavior: 'smooth' });
           },
-          true // plain — не превращать в серую плашку
+          true
         );
       }, 750);
     });
@@ -3641,8 +3705,8 @@
   const onlineIndicator = document.getElementById('onlineIndicator');
   if (onlineIndicator) {
     onlineIndicator.addEventListener('click', () => {
-      if (onlineIndicator.dataset.done === '1') return;
-      onlineIndicator.dataset.done = '1';
+      if (getCookie('artemis_stats_done') === BUILD_ID) return;
+      setCookie('artemis_stats_done', BUILD_ID, 365);
 
       const onlineCountVal = (document.getElementById('onlineCount') || {}).textContent || '0';
 
@@ -3660,19 +3724,39 @@
         }
       }
 
-      // Скрываем исходный индикатор в футере (fade)
-      onlineIndicator.style.transition = 'opacity 0.3s ease';
-      onlineIndicator.style.opacity = '0';
-      setTimeout(() => { onlineIndicator.style.display = 'none'; }, 300);
+      // Показываем секцию, но значение в целевой строке пока пустое —
+      // его «привезёт» летящий индикатор.
+      statsSection.style.display = 'flex';
+      statsSection.style.opacity = '0';
+      statsSection.style.visibility = 'hidden';
+      void statsSection.offsetHeight;
 
-      // Показываем секцию и сразу заполняем
+      const targetRow = statsSection.querySelector('.stats-section__row:last-child');
+      const targetSlot = statsSection.querySelector('#statsOnlineSlot');
+      if (targetSlot) targetSlot.textContent = '';
+
+      statsSection.style.visibility = 'visible';
+      statsSection.style.opacity = '1';
+      statsSection.classList.add('visible');
+
       requestAnimationFrame(() => {
-        statsSection.style.display = 'flex';
-        void statsSection.offsetHeight;
-        statsSection.classList.add('visible');
-        fillStatsFromFirebase(statsSection);
-        const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
-        window.scrollTo({ top: y, behavior: 'smooth' });
+        // Летит сам индикатор (свои размеры — keepSize),
+        // цель — последняя строка «Онлайн: N» в блоке статистики.
+        morphIntoSection(
+          onlineIndicator,
+          targetRow || statsSection,
+          'site-footer__online--morph',
+          'site-footer__online--settled',
+          () => {
+            onlineIndicator.style.display = 'none';
+            if (targetSlot) targetSlot.textContent = onlineCountVal;
+            fillStatsFromFirebase(statsSection);
+            const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          },
+          true,
+          true
+        );
       });
     });
   }
@@ -3710,11 +3794,21 @@
     }
   })();
 
+  // SW: регистрация + автообновление
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then((reg) => console.log('SW registered:', reg.scope))
-        .catch((err) => console.warn('SW error:', err));
+    window.addEventListener('load', async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('sw.js');
+        reg.update().catch(() => {});
+        let refreshed = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshed) return;
+          refreshed = true;
+          window.location.reload();
+        });
+      } catch (err) {
+        console.warn('SW error:', err);
+      }
     });
   }
 </script>
