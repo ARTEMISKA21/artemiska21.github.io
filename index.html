@@ -1115,7 +1115,6 @@
     display: none !important;
   }
 
-  /* ===== Секция после морфинга «Лаунчер» ===== */
   .order-section {
     width: 100%;
     background: #1a1a1a;
@@ -1145,7 +1144,6 @@
     .order-section { padding: 30px 20px; min-height: 200px; }
   }
 
-  /* Блок «Лаунчер ARTEMIS» */
   .launcher-block {
     width: 100%;
     max-width: 1100px;
@@ -1184,7 +1182,6 @@
     .launcher-block__title { font-size: 18px; letter-spacing: 4px; }
   }
 
-  /* ===== Морфинг «Лаунчер» ===== */
   .order-btn--morph {
     transition:
       left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1242,7 +1239,6 @@
     opacity: 0.6;
   }
 
-  /* ===== Морфинг «Онлайн: N» ===== */
   .site-footer__online--morph {
     transition:
       left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1266,7 +1262,6 @@
     gap: 8px;
   }
 
-  /* ===== Секция статистики ===== */
   .stats-section {
     width: 100%;
     background: #1a1a1a;
@@ -1921,9 +1916,6 @@
 </div>
 
 <script>
-  /* ===================================================================
-     АВТОВЕРСИЯ ДЛЯ СБРОСА КУКИ
-     =================================================================== */
   function computeBuildId() {
     const meta = document.querySelector('meta[name="build-id"]');
     if (meta && meta.content) return meta.content;
@@ -3484,11 +3476,8 @@
     });
   })();
 
-  /* ================================================================
-     МОРФИНГ
-     ================================================================ */
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect) {
-    const startRect = el.getBoundingClientRect();
+  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect, forcedStartRect) {
+    const startRect = forcedStartRect || el.getBoundingClientRect();
     const targetRect = forcedTargetRect || targetEl.getBoundingClientRect();
 
     el.style.position = 'fixed';
@@ -3580,9 +3569,6 @@
     requestAnimationFrame(step);
   }
 
-  /* ================================================================
-     КНОПКА «ЛАУНЧЕР»
-     ================================================================ */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -3592,6 +3578,9 @@
         window.scrollTo({ top: y, behavior: 'smooth' });
         return;
       }
+
+      // 1) Снимаем СТАРТОВЫЙ прямоугольник кнопки ДО каких-либо изменений DOM и скролла
+      const startRect = orderBtn.getBoundingClientRect();
 
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
@@ -3620,29 +3609,29 @@
 
       targets.forEach(el => el.classList.add('hidden-by-order'));
 
+      // 2) Показываем секцию для измерения
       orderSection.style.display = 'flex';
       orderSection.style.opacity = '0';
       orderSection.style.visibility = 'hidden';
 
       const launcherBlock = orderSection.querySelector('.launcher-block');
 
-      // Принудительно применяем layout после вставки и скрытия старых блоков
+      // 3) Принудительный layout после вставки и скрытия старых блоков
       void orderSection.offsetHeight;
       void launcherBlock.offsetHeight;
 
-      // Скролл к секции — сразу, без плавности
+      // 4) Скролл к секции (мгновенно)
       const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: topY, behavior: 'auto' });
 
-      // Ждём ДВА кадра, чтобы скролл и layout гарантированно применились,
-      // затем измеряем финальные координаты и передаём их в морфинг явно
+      // 5) После скролла и двух кадров — измеряем ЦЕЛЕВОЙ прямоугольник
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           orderSection.style.visibility = 'visible';
 
-          // Финальные координаты блока «Лаунчер ARTEMIS» уже после скролла
           const targetRect = launcherBlock.getBoundingClientRect();
 
+          // 6) Морфим, передавая ОБА прямоугольника явно
           morphIntoSection(
             orderBtn,
             launcherBlock,
@@ -3658,7 +3647,8 @@
             true,
             false,
             false,
-            targetRect
+            targetRect,
+            startRect
           );
         });
       });
@@ -3713,9 +3703,6 @@
     }, 420);
   }
 
-  /* ================================================================
-     СТАТИСТИКА
-     ================================================================ */
   function countAllProjects() {
     let n = 0;
     for (const key in projects) {
