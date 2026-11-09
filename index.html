@@ -1439,7 +1439,6 @@
     .stats-section__bottom { grid-template-columns: 1fr; }
   }
 
-  /* Слот, КУДА ПРИЛЕТАЕТ цифра. */
   .stats-online-slot {
     display: inline-flex;
     align-items: center;
@@ -1458,7 +1457,6 @@
     color: #e8e8e8;
   }
 
-  /* ===== Крестик закрытия (для статистики и лаунчера) ===== */
   .morph-close {
     position: absolute;
     top: 14px;
@@ -1500,7 +1498,6 @@
   }
   body.no-animations .morph-close:hover { transform: none; }
 
-  /* ===== Капча ===== */
   .captcha-row {
     display: flex;
     align-items: center;
@@ -3490,10 +3487,9 @@
   /* ================================================================
      МОРФИНГ
      ================================================================ */
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft) {
-    void targetEl.offsetHeight;
+  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect) {
     const startRect = el.getBoundingClientRect();
-    const targetRect = targetEl.getBoundingClientRect();
+    const targetRect = forcedTargetRect || targetEl.getBoundingClientRect();
 
     el.style.position = 'fixed';
     el.style.left = startRect.left + 'px';
@@ -3630,12 +3626,22 @@
 
       const launcherBlock = orderSection.querySelector('.launcher-block');
 
+      // Принудительно применяем layout после вставки и скрытия старых блоков
+      void orderSection.offsetHeight;
+      void launcherBlock.offsetHeight;
+
+      // Скролл к секции — сразу, без плавности
       const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: topY, behavior: 'auto' });
 
+      // Ждём ДВА кадра, чтобы скролл и layout гарантированно применились,
+      // затем измеряем финальные координаты и передаём их в морфинг явно
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           orderSection.style.visibility = 'visible';
+
+          // Финальные координаты блока «Лаунчер ARTEMIS» уже после скролла
+          const targetRect = launcherBlock.getBoundingClientRect();
 
           morphIntoSection(
             orderBtn,
@@ -3651,7 +3657,8 @@
             },
             true,
             false,
-            false
+            false,
+            targetRect
           );
         });
       });
