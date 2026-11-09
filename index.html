@@ -1558,6 +1558,63 @@
     background: #e6e6e6;
     border-color: #b8b8b8;
   }
+
+  /* --- Стили для нового аудиоплеера --- */
+  .player-expanded {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: #1a1a1a;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 40px;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .player-expanded.open {
+    transform: translateY(0);
+  }
+  .player-expanded__btn {
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .player-expanded__btn:hover { transform: scale(1.1); }
+  
+  .player-expanded__progress {
+    flex: 1;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .player-expanded__progress-fill {
+    height: 100%;
+    background: #4ade80;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+  .player-expanded__time {
+    font-size: 14px;
+    color: #9a9a9a;
+    font-variant-numeric: tabular-nums;
+    min-width: 45px;
+    text-align: right;
+  }
 </style>
 
 <div class="custom-cursor" id="customCursor"></div>
@@ -1686,6 +1743,16 @@
   </div>
 </div>
 
+<!-- Новый аудиоплеер -->
+<div class="player-expanded" id="playerExpanded">
+  <button class="player-expanded__btn" id="playerPlayBtn">▶</button>
+  <div class="player-expanded__progress" id="playerProgress">
+    <div class="player-expanded__progress-fill" id="playerProgressFill"></div>
+  </div>
+  <div class="player-expanded__time" id="playerTime">0:00</div>
+</div>
+<audio id="audioPlayer" src="AkaiYAnnyj_Psihiatr.aac" preload="auto"></audio>
+
 <footer class="site-footer">
   <div class="site-footer__left">
     <div class="site-footer__ps" data-i18n="ps">P.S.:</div>
@@ -1702,10 +1769,10 @@
       <span class="site-footer__online-count" id="onlineCount">—</span>
     </div>
 
-    <a class="site-footer__player" href="https://vk.ru/audio671219224_456242573_63e834263d2c3a33b0" target="_blank" rel="noopener">
-      <span class="site-footer__play">➤</span>
+    <a class="site-footer__player" href="#" id="siteFooterPlayer">
+      <span class="site-footer__play" id="siteFooterPlayIcon">➤</span>
       <span class="site-footer__wave">•၊၊||၊|။||||။၊|။•</span>
-      <span class="site-footer__time">2:08</span>
+      <span class="site-footer__time" id="siteFooterTime">2:58</span>
     </a>
     <div class="site-footer__date" id="currentDate"></div>
   </div>
@@ -1970,6 +2037,133 @@
 
   resetOutdatedCookies();
 
+  // --- ЛОГИКА АУДИОПЛЕЕРА ---
+  let audioCtx = null;
+  const audio = document.getElementById('audioPlayer');
+  const footerPlayBtn = document.getElementById('siteFooterPlayer');
+  const footerPlayIcon = document.getElementById('siteFooterPlayIcon');
+  const footerWave = document.querySelector('.site-footer__wave');
+  const footerTime = document.getElementById('siteFooterTime');
+  
+  const playerExpanded = document.getElementById('playerExpanded');
+  const playerPlayBtn = document.getElementById('playerPlayBtn');
+  const playerProgress = document.getElementById('playerProgress');
+  const playerProgressFill = document.getElementById('playerProgressFill');
+  const playerTime = document.getElementById('playerTime');
+
+  let isPlaying = false;
+  let playerOpen = false;
+  let animFrame;
+
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function updateProgress() {
+    if (!isPlaying) return;
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      playerProgressFill.style.width = pct + '%';
+      playerTime.textContent = formatTime(audio.currentTime);
+    }
+    animFrame = requestAnimationFrame(updateProgress);
+  }
+
+  footerPlayBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    // Анимация выезда элементов
+    if (!playerOpen) {
+      playerOpen = true;
+      playerExpanded.classList.add('open');
+      
+      // Запуск аудио
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      audio.play().then(() => {
+        isPlaying = true;
+        footerPlayIcon.textContent = '⏸';
+        playerPlayBtn.textContent = '⏸';
+        updateProgress();
+      }).catch(err => {
+        console.error('Ошибка воспроизведения:', err);
+      });
+    } else {
+      // Если уже открыт - играем/пауза
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        footerPlayIcon.textContent = '➤';
+        playerPlayBtn.textContent = '▶';
+        cancelAnimationFrame(animFrame);
+      } else {
+        audio.play();
+        isPlaying = true;
+        footerPlayIcon.textContent = '⏸';
+        playerPlayBtn.textContent = '⏸';
+        updateProgress();
+      }
+    }
+  });
+
+  playerPlayBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      audio.pause();
+      isPlaying = false;
+      footerPlayIcon.textContent = '➤';
+      playerPlayBtn.textContent = '▶';
+      cancelAnimationFrame(animFrame);
+    } else {
+      audio.play();
+      isPlaying = true;
+      footerPlayIcon.textContent = '⏸';
+      playerPlayBtn.textContent = '⏸';
+      updateProgress();
+    }
+  });
+
+  playerProgress.addEventListener('click', (e) => {
+    const rect = playerProgress.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    if (audio.duration) {
+      audio.currentTime = pct * audio.duration;
+    }
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isPlaying) return;
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      playerProgressFill.style.width = pct + '%';
+      playerTime.textContent = formatTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    isPlaying = false;
+    footerPlayIcon.textContent = '➤';
+    playerPlayBtn.textContent = '▶';
+    playerProgressFill.style.width = '0%';
+    playerTime.textContent = '0:00';
+    cancelAnimationFrame(animFrame);
+  });
+
+  // Закрытие плеера по клику вне его
+  document.addEventListener('click', (e) => {
+    if (playerOpen && !playerExpanded.contains(e.target) && !footerPlayBtn.contains(e.target)) {
+      playerOpen = false;
+      playerExpanded.classList.remove('open');
+      if (isPlaying) {
+        // Не останавливаем музыку, просто скрываем плеер
+      }
+    }
+  });
+  // --- КОНЕЦ ЛОГИКИ АУДИОПЛЕЕРА ---
+
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -2089,6 +2283,8 @@
   let fbToggleReaction = null;
   let fbIncrementDownload = null;
   let fbGetAllProjectDownloads = null;
+  let fbGetVisits = null;
+  let fbAddVisit = null;
 
   window.__firebaseReady = new Promise((resolve) => {
     window.__resolveFirebaseReady = resolve;
@@ -3546,8 +3742,6 @@
     }
 
     function finish() {
-      // ФИЗИЧЕСКИ ПЕРЕСЕЛЯЕМ КНОПКУ ВНУТРЬ БЛОКА
-      // Теперь она не зависит от скролла и layout — всегда точно на блоке
       el.style.transition = 'none';
       el.style.position = 'absolute';
       el.style.left = '0';
@@ -3558,18 +3752,15 @@
       el.style.zIndex = 'auto';
       el.style.pointerEvents = 'none';
 
-      // Убеждаемся, что у targetEl есть position: relative для абсолютного позиционирования
       const targetPos = window.getComputedStyle(targetEl).position;
       if (targetPos === 'static') {
         targetEl.style.position = 'relative';
       }
 
-      // Физически переносим кнопку внутрь целевого блока
       targetEl.appendChild(el);
 
       el.classList.add(settledCls);
 
-      // Мгновенно скрываем кнопку после переноса
       setTimeout(() => {
         el.style.opacity = '0';
       }, 50);
@@ -3646,7 +3837,7 @@
               orderSection.classList.add('visible');
             },
             true,
-            false, // keepSize = false
+            false,
             false,
             null,
             startRect
@@ -3670,7 +3861,6 @@
     orderSection.style.transform = 'translateY(20px)';
 
     if (orderBtn) {
-      // Возвращаем кнопку обратно в body, если она внутри секции
       if (orderBtn.parentNode && orderBtn.parentNode !== document.body) {
         document.body.appendChild(orderBtn);
       }
@@ -3777,48 +3967,41 @@
     if (!section) return;
     try {
       await window.__firebaseReady;
-      if (!fbGetAllProjectDownloads) return;
-      const data = await fbGetAllProjectDownloads();
+      if (!fbGetVisits) return;
+      const data = await fbGetVisits(); // Получаем данные по визитам (структура: { visitors: { android: 10, iphone: 5, windows: 20 }, timeline: { "2024-01": 10, "2024-02": 15 ... } })
 
       let total = 0;
-      const perProject = {};
-      for (const k in data) {
-        const v = data[k] || {};
-        const d = Number(v.downloads) || 0;
-        perProject[k] = d;
-        total += d;
+      const perMonth = {};
+      let android = 0, iphone = 0, windows = 0;
+
+      // Заполняем месяцы
+      for (const k in data.timeline) {
+        perMonth[k] = data.timeline[k];
+        total += perMonth[k];
       }
-      const totalEl = section.querySelector('#statsDownloads');
+
+      // Заполняем платформы
+      android = data.visitors.android || 0;
+      iphone = data.visitors.iphone || 0;
+      windows = data.visitors.windows || 0;
+
+      const totalEl = section.querySelector('#statsTotal');
       if (totalEl) totalEl.textContent = String(total);
 
-      let android = 0, windows = 0;
-      for (const cat in projects) {
-        const list = projects[cat];
-        if (!Array.isArray(list)) continue;
-        for (const p of list) {
-          const key = String(p.name).trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '_');
-          const d = perProject[key] || 0;
-          if (cat === 'android') android += d;
-          else windows += d;
-        }
-      }
       const aEl = section.querySelector('#statsPlatAndroid');
       const iEl = section.querySelector('#statsPlatIphone');
       const wEl = section.querySelector('#statsPlatWindows');
-      const tEl = section.querySelector('#statsTotal');
+      
       if (aEl) aEl.textContent = String(android);
-      if (iEl) iEl.textContent = '0';
+      if (iEl) iEl.textContent = String(iphone);
       if (wEl) wEl.textContent = String(windows);
-      if (tEl) tEl.textContent = String(android + windows);
 
       const bars = section.querySelectorAll('#statsBars .stats-chart__bar');
       if (bars.length) {
-        const n = bars.length;
-        const per = Math.floor(total / n);
-        let rem = total - per * n;
-        const maxVal = Math.max(per + 1, 1);
+        const maxVal = Math.max(...Object.values(perMonth), 1);
         bars.forEach((bar, i) => {
-          const v = per + (i < rem ? 1 : 0);
+          const monthKey = new Date(new Date().getFullYear(), i, 1).toISOString().slice(0, 7); // YYYY-MM
+          const v = perMonth[monthKey] || 0;
           const h = Math.max(4, Math.round((v / maxVal) * 110));
           bar.style.height = h + 'px';
           bar.setAttribute('data-v', String(v));
@@ -3869,9 +4052,10 @@
       statsSection.className = 'stats-section';
       statsSection.innerHTML = buildStatsHTML(onlineCountVal);
 
+      // Вставляем секцию статистики ПЕРЕД футером
       const footerEl = document.querySelector('.site-footer');
       if (footerEl && footerEl.parentNode) {
-        footerEl.parentNode.insertBefore(statsSection, footerEl.nextSibling);
+        footerEl.parentNode.insertBefore(statsSection, footerEl);
       } else {
         document.body.appendChild(statsSection);
       }
@@ -4233,6 +4417,38 @@
     }
   })();
 
+  // --- ЛОГИКА УЧЁТА ПОСЕТИТЕЛЕЙ (ВИЗИТОВ) ---
+  (async () => {
+    try {
+      const today = new Date();
+      const yearMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
+      
+      // Определяем платформу
+      const ua = navigator.userAgent || '';
+      let platform = 'windows';
+      if (/android/i.test(ua)) platform = 'android';
+      else if (/iPad|iPhone|iPod/.test(ua)) platform = 'iphone';
+
+      // Записываем визит (транзакция для атомарности)
+      const visitsRef = ref(db, 'visits');
+      await runTransaction(visitsRef, (currentData) => {
+        if (!currentData) currentData = { timeline: {}, visitors: { android: 0, iphone: 0, windows: 0 } };
+        
+        // Обновляем таймлайн
+        if (!currentData.timeline) currentData.timeline = {};
+        currentData.timeline[yearMonth] = (currentData.timeline[yearMonth] || 0) + 1;
+
+        // Обновляем платформы
+        if (!currentData.visitors) currentData.visitors = { android: 0, iphone: 0, windows: 0 };
+        currentData.visitors[platform] = (currentData.visitors[platform] || 0) + 1;
+
+        return currentData;
+      });
+    } catch (e) {
+      console.warn('Visit tracking failed:', e);
+    }
+  })();
+
   function normName(name) {
     return String(name || '').trim().toLowerCase();
   }
@@ -4351,6 +4567,12 @@
     return snap.exists() ? snap.val() : {};
   };
 
+  // --- ДОБАВЛЕНО ДЛЯ ВИЗИТОВ ---
+  window.fbGetVisits = async function() {
+    const snap = await get(ref(db, 'visits'));
+    return snap.exists() ? snap.val() : { timeline: {}, visitors: { android: 0, iphone: 0, windows: 0 } };
+  };
+
   fbGetUser = window.fbGetUser;
   fbCreateUser = window.fbCreateUser;
   fbUpdateUser = window.fbUpdateUser;
@@ -4359,6 +4581,7 @@
   fbToggleReaction = window.fbToggleReaction;
   fbIncrementDownload = window.fbIncrementDownload;
   fbGetAllProjectDownloads = window.fbGetAllProjectDownloads;
+  fbGetVisits = window.fbGetVisits;
 
   window.__resolveFirebaseReady();
 </script>
