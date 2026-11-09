@@ -3478,7 +3478,6 @@
 
   function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect, forcedStartRect) {
     const startRect = forcedStartRect || el.getBoundingClientRect();
-    const targetRect = forcedTargetRect || targetEl.getBoundingClientRect();
 
     el.style.position = 'fixed';
     el.style.left = startRect.left + 'px';
@@ -3497,12 +3496,6 @@
 
     const startCx = startRect.left + startRect.width / 2;
     const startCy = startRect.top + startRect.height / 2;
-    const targetCx = alignLeft
-      ? (targetRect.left + startRect.width / 2)
-      : (targetRect.left + targetRect.width / 2);
-    const targetCy = alignLeft
-      ? (targetRect.top + startRect.height / 2)
-      : (targetRect.top + targetRect.height / 2);
 
     const duration = 950;
     const t0 = performance.now();
@@ -3524,6 +3517,15 @@
     }
 
     function step(now) {
+      // Пересчитываем цель на каждом кадре — так полёт всегда идёт в актуальный блок
+      const liveRect = targetEl.getBoundingClientRect();
+      const liveTargetCx = alignLeft
+        ? (liveRect.left + startRect.width / 2)
+        : (liveRect.left + liveRect.width / 2);
+      const liveTargetCy = alignLeft
+        ? (liveRect.top + startRect.height / 2)
+        : (liveRect.top + liveRect.height / 2);
+
       const p = Math.min((now - t0) / duration, 1);
       const k = ease(p);
       let w, h, cx, cy;
@@ -3531,11 +3533,11 @@
         w = startRect.width;
         h = startRect.height;
       } else {
-        w = startRect.width + (targetRect.width - startRect.width) * k;
-        h = startRect.height + (targetRect.height - startRect.height) * k;
+        w = startRect.width + (liveRect.width - startRect.width) * k;
+        h = startRect.height + (liveRect.height - startRect.height) * k;
       }
-      cx = startCx + (targetCx - startCx) * k;
-      cy = startCy + (targetCy - startCy) * k;
+      cx = startCx + (liveTargetCx - startCx) * k;
+      cy = startCy + (liveTargetCy - startCy) * k;
       el.style.width = w + 'px';
       el.style.height = h + 'px';
       el.style.left = (cx - w / 2) + 'px';
@@ -3545,22 +3547,24 @@
     }
 
     function finish() {
+      const finalRect = targetEl.getBoundingClientRect();
+
       el.style.transition = 'none';
       if (keepSize) {
         if (alignLeft) {
-          el.style.left = targetRect.left + 'px';
-          el.style.top = (targetCy - startRect.height / 2) + 'px';
+          el.style.left = finalRect.left + 'px';
+          el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
         } else {
-          el.style.left = (targetCx - startRect.width / 2) + 'px';
-          el.style.top = (targetCy - startRect.height / 2) + 'px';
+          el.style.left = (finalRect.left + finalRect.width / 2 - startRect.width / 2) + 'px';
+          el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
         }
         el.style.width = startRect.width + 'px';
         el.style.height = startRect.height + 'px';
       } else {
-        el.style.left = targetRect.left + 'px';
-        el.style.top = targetRect.top + 'px';
-        el.style.width = targetRect.width + 'px';
-        el.style.height = targetRect.height + 'px';
+        el.style.left = finalRect.left + 'px';
+        el.style.top = finalRect.top + 'px';
+        el.style.width = finalRect.width + 'px';
+        el.style.height = finalRect.height + 'px';
       }
       el.classList.add(settledCls);
       if (onDone) setTimeout(onDone, 120);
@@ -3579,7 +3583,6 @@
         return;
       }
 
-      // 1) Снимаем СТАРТОВЫЙ прямоугольник кнопки ДО каких-либо изменений DOM и скролла
       const startRect = orderBtn.getBoundingClientRect();
 
       const projectsTitle = document.querySelector('.projects-title');
@@ -3609,29 +3612,22 @@
 
       targets.forEach(el => el.classList.add('hidden-by-order'));
 
-      // 2) Показываем секцию для измерения
       orderSection.style.display = 'flex';
       orderSection.style.opacity = '0';
       orderSection.style.visibility = 'hidden';
 
       const launcherBlock = orderSection.querySelector('.launcher-block');
 
-      // 3) Принудительный layout после вставки и скрытия старых блоков
       void orderSection.offsetHeight;
       void launcherBlock.offsetHeight;
 
-      // 4) Скролл к секции (мгновенно)
       const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: topY, behavior: 'auto' });
 
-      // 5) После скролла и двух кадров — измеряем ЦЕЛЕВОЙ прямоугольник
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           orderSection.style.visibility = 'visible';
 
-          const targetRect = launcherBlock.getBoundingClientRect();
-
-          // 6) Морфим, передавая ОБА прямоугольника явно
           morphIntoSection(
             orderBtn,
             launcherBlock,
@@ -3647,7 +3643,7 @@
             true,
             false,
             false,
-            targetRect,
+            null,
             startRect
           );
         });
