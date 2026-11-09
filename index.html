@@ -3490,12 +3490,6 @@
 
   /* ================================================================
      МОРФИНГ
-     - по умолчанию: элемент летит в центр цели и принимает её размеры
-     - keepSize = true: элемент летит, сохраняя свои размеры,
-       центрируется на цели
-     - alignLeft = true (вместе с keepSize): левый край летящего
-       совпадает с левым краем цели по X и центр по Y — так «Онлайн»
-       встаёт ровно на ТЕКСТ «Онлайн:», а не на цифру
      ================================================================ */
   function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft) {
     void targetEl.offsetHeight;
@@ -3629,26 +3623,21 @@
         document.body.appendChild(orderSection);
       }
 
-      // Сначала скрываем старые блоки
       targets.forEach(el => el.classList.add('hidden-by-order'));
 
-      // Показываем секцию, чтобы получить финальный layout
       orderSection.style.display = 'flex';
       orderSection.style.opacity = '0';
       orderSection.style.visibility = 'hidden';
 
       const launcherBlock = orderSection.querySelector('.launcher-block');
 
-      // Скроллим ДО измерения координат цели
       const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: topY, behavior: 'auto' });
 
-      // Двойной rAF — ждём, пока скролл применится
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           orderSection.style.visibility = 'visible';
 
-          // Теперь измеряем финальные координаты блока «Лаунчер ARTEMIS»
           morphIntoSection(
             orderBtn,
             launcherBlock,
@@ -3668,7 +3657,6 @@
         });
       });
 
-      // Крестик закрытия
       const closeBtn = orderSection.querySelector('[data-close="order"]');
       if (closeBtn) {
         closeBtn.addEventListener('click', (ev) => {
@@ -3680,12 +3668,10 @@
   }
 
   function closeOrderSection(orderSection, hiddenTargets) {
-    // 1. Прячем секцию
     orderSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     orderSection.style.opacity = '0';
     orderSection.style.transform = 'translateY(20px)';
 
-    // 2. Возвращаем кнопку «Лаунчер» на исходное место
     if (orderBtn) {
       orderBtn.style.display = '';
       orderBtn.style.position = '';
@@ -3712,7 +3698,6 @@
 
     setTimeout(() => {
       if (orderSection.parentNode) orderSection.parentNode.removeChild(orderSection);
-      // 3. Возвращаем старые блоки
       (hiddenTargets || []).forEach(el => el.classList.remove('hidden-by-order'));
       const pt = document.querySelector('.projects-title');
       if (pt) {
@@ -3846,7 +3831,33 @@
     }
   }
 
+  /* ------------------------------------------------------------------
+     Утилита: плавная анимация клона от текущей позиции к targetRect
+     ------------------------------------------------------------------ */
+  function animateCloneToTarget(clone, targetRect, duration, onDone) {
+    const startRect = clone.getBoundingClientRect();
+    const startCx = startRect.left + startRect.width / 2;
+    const startCy = startRect.top + startRect.height / 2;
+    const targetCx = targetRect.left + targetRect.width / 2;
+    const targetCy = targetRect.top + targetRect.height / 2;
+    const t0 = performance.now();
+    const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    function step(now) {
+      const p = Math.min((now - t0) / duration, 1);
+      const k = ease(p);
+      const cx = startCx + (targetCx - startCx) * k;
+      const cy = startCy + (targetCy - startCy) * k;
+      clone.style.left = (cx - startRect.width / 2) + 'px';
+      clone.style.top  = (cy - startRect.height / 2) + 'px';
+      if (p < 1) requestAnimationFrame(step);
+      else if (onDone) onDone();
+    }
+    requestAnimationFrame(step);
+  }
+
   const onlineIndicator = document.getElementById('onlineIndicator');
+
   if (onlineIndicator) {
     onlineIndicator.addEventListener('click', () => {
       const existing = document.getElementById('statsSection');
@@ -3870,19 +3881,15 @@
         document.body.appendChild(statsSection);
       }
 
-      // Показываем невидимо, чтобы получить финальный layout
       statsSection.style.display = 'flex';
       statsSection.style.opacity = '0';
       statsSection.style.visibility = 'hidden';
 
       const targetSlot = statsSection.querySelector('#statsOnlineSlot');
-      if (targetSlot) {
-        targetSlot.style.visibility = 'hidden';
-      }
+      if (targetSlot) targetSlot.style.visibility = 'hidden';
 
       void statsSection.offsetHeight;
 
-      // Скролл до измерения координат
       const blockTop = statsSection.getBoundingClientRect().top + window.scrollY - 20;
       window.scrollTo({ top: blockTop, behavior: 'auto' });
 
@@ -3890,7 +3897,6 @@
       statsSection.style.opacity = '1';
       statsSection.classList.add('visible');
 
-      // Крестик
       const statsCloseBtn = statsSection.querySelector('[data-close="stats"]');
       if (statsCloseBtn) {
         statsCloseBtn.addEventListener('click', (ev) => {
@@ -3905,70 +3911,236 @@
             fillStatsFromFirebase(statsSection);
             return;
           }
-          if (targetSlot) targetSlot.style.visibility = '';
+          targetSlot.style.visibility = '';
 
-          // ЦЕЛЬ МОРФА — ТЕКСТ «Онлайн:» ВНУТРИ СЛОТА
           const targetLabel = targetSlot.querySelector('.stats-online-slot__label');
-          const morphTarget = targetLabel || targetSlot;
+          const targetCount = targetSlot.querySelector('.stats-online-slot__count');
+          const morphTargetLabel = targetLabel || targetSlot;
 
-          // Скрываем текст «Онлайн:» на время полёта
-          if (targetLabel) {
-            targetLabel.style.visibility = 'hidden';
-          } else {
-            targetSlot.style.visibility = 'hidden';
+          if (targetLabel) targetLabel.style.visibility = 'hidden';
+          if (targetCount) targetCount.style.visibility = 'hidden';
+
+          const footerLabel = onlineIndicator.querySelector('.site-footer__online-label');
+          const footerCount = onlineIndicator.querySelector('.site-footer__online-count');
+          const footerDot   = onlineIndicator.querySelector('.site-footer__online-dot');
+
+          if (footerCount) footerCount.style.visibility = 'hidden';
+
+          const isLight = document.body.classList.contains('light');
+
+          // 1) ТЕКСТ «Онлайн:» (с точкой) летит к тексту «Онлайн:»
+          const labelClone = document.createElement('div');
+          labelClone.style.cssText = `
+            position: fixed;
+            z-index: 100000;
+            pointer-events: none;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font: inherit;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: ${isLight ? '#555' : '#c8c8c8'};
+            white-space: nowrap;
+          `;
+          if (footerDot) labelClone.appendChild(footerDot.cloneNode(true));
+          const labelText = document.createElement('span');
+          labelText.textContent = (footerLabel && footerLabel.textContent) || t('online');
+          labelClone.appendChild(labelText);
+
+          const fr = onlineIndicator.getBoundingClientRect();
+          labelClone.style.left = fr.left + 'px';
+          labelClone.style.top  = fr.top + 'px';
+          document.body.appendChild(labelClone);
+
+          // 2) ЦИФРА летит к цифре
+          let countClone = null;
+          let countTargetRect = null;
+          if (footerCount && targetCount) {
+            const countText = document.createElement('div');
+            countText.textContent = footerCount.textContent;
+            countText.style.cssText = `
+              position: fixed;
+              z-index: 100001;
+              pointer-events: none;
+              margin: 0;
+              font: inherit;
+              font-weight: 600;
+              font-variant-numeric: tabular-nums;
+              color: ${isLight ? '#111' : '#e8e8e8'};
+              white-space: nowrap;
+            `;
+            const cr = footerCount.getBoundingClientRect();
+            countText.style.left = cr.left + 'px';
+            countText.style.top  = cr.top + 'px';
+            document.body.appendChild(countText);
+            countClone = countText;
+            countTargetRect = targetCount.getBoundingClientRect();
           }
 
-          morphIntoSection(
-            onlineIndicator,
-            morphTarget,
-            'site-footer__online--morph',
-            'site-footer__online--settled',
-            () => {
-              onlineIndicator.style.display = 'none';
-              // После морфа — возвращаем текст и цифру на место
-              if (targetLabel) targetLabel.style.visibility = '';
-              targetSlot.style.visibility = '';
+          onlineIndicator.style.visibility = 'hidden';
 
-              // Создаём новый индикатор ВНУТРИ слота — но только текст и цифру
-              // (чтобы слот был полностью корректным визуально)
-              targetSlot.innerHTML = `<span class="stats-online-slot__label">${t('online')}</span><span class="stats-online-slot__count">${onlineCountVal}</span>`;
+          const labelTargetRect = morphTargetLabel.getBoundingClientRect();
 
-              fillStatsFromFirebase(statsSection);
-              const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
-              window.scrollTo({ top: y, behavior: 'smooth' });
-            },
-            true,
-            true,
-            true   // alignLeft = true — садимся ровно на ТЕКСТ
-          );
+          const DURATION = 950;
+          let doneCount = 0;
+          const totalAnims = countClone ? 2 : 1;
+          function onOneDone() {
+            doneCount++;
+            if (doneCount < totalAnims) return;
+
+            if (labelClone.parentNode) labelClone.parentNode.removeChild(labelClone);
+            if (countClone && countClone.parentNode) countClone.parentNode.removeChild(countClone);
+
+            if (footerCount) footerCount.style.visibility = '';
+
+            onlineIndicator.style.display = 'none';
+            onlineIndicator.style.visibility = '';
+
+            if (targetLabel) targetLabel.style.visibility = '';
+            if (targetCount) targetCount.style.visibility = '';
+
+            targetSlot.innerHTML = `<span class="stats-online-slot__label">${t('online')}</span><span class="stats-online-slot__count">${onlineCountVal}</span>`;
+
+            fillStatsFromFirebase(statsSection);
+            const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+
+          animateCloneToTarget(labelClone, labelTargetRect, DURATION, () => {
+            labelClone.style.transition = 'opacity 0.2s ease';
+            labelClone.style.opacity = '0';
+            onOneDone();
+          });
+
+          if (countClone && countTargetRect) {
+            animateCloneToTarget(countClone, countTargetRect, DURATION, () => {
+              countClone.style.transition = 'opacity 0.2s ease';
+              countClone.style.opacity = '0';
+              onOneDone();
+            });
+          }
         });
       });
     });
   }
 
   function closeStatsSection(statsSection) {
-    // 1. Возвращаем индикатор «Онлайн» на его место в футере
+    if (!statsSection) return;
+
+    const targetSlot = statsSection.querySelector('#statsOnlineSlot');
+    const targetLabel = targetSlot ? targetSlot.querySelector('.stats-online-slot__label') : null;
+    const targetCount = targetSlot ? targetSlot.querySelector('.stats-online-slot__count') : null;
+
     if (onlineIndicator) {
       onlineIndicator.style.display = '';
-      onlineIndicator.style.position = '';
-      onlineIndicator.style.left = '';
-      onlineIndicator.style.top = '';
-      onlineIndicator.style.width = '';
-      onlineIndicator.style.height = '';
-      onlineIndicator.style.right = '';
-      onlineIndicator.style.bottom = '';
-      onlineIndicator.style.margin = '';
-      onlineIndicator.style.zIndex = '';
-      onlineIndicator.style.pointerEvents = '';
-      onlineIndicator.style.transition = '';
-      onlineIndicator.style.borderRadius = '';
-      onlineIndicator.style.background = '';
-      onlineIndicator.style.borderColor = '';
-      onlineIndicator.style.padding = '';
-      onlineIndicator.classList.remove('site-footer__online--morph', 'site-footer__online--settled');
+      onlineIndicator.style.visibility = '';
+      const footerCount = onlineIndicator.querySelector('.site-footer__online-count');
+      if (footerCount) footerCount.style.visibility = '';
+
+      const footerLabel = onlineIndicator.querySelector('.site-footer__online-label');
+      const footerCountEl = onlineIndicator.querySelector('.site-footer__online-count');
+      const footerDot = onlineIndicator.querySelector('.site-footer__online-dot');
+
+      if (targetLabel || targetSlot) {
+        const isLight = document.body.classList.contains('light');
+        const labelClone = document.createElement('div');
+        labelClone.style.cssText = `
+          position: fixed;
+          z-index: 100000;
+          pointer-events: none;
+          margin: 0;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font: inherit;
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
+          color: ${isLight ? '#555' : '#c8c8c8'};
+          white-space: nowrap;
+        `;
+        if (footerDot) labelClone.appendChild(footerDot.cloneNode(true));
+        const labelText = document.createElement('span');
+        labelText.textContent = (footerLabel && footerLabel.textContent) || t('online');
+        labelClone.appendChild(labelText);
+
+        const srcRect = (targetLabel || targetSlot).getBoundingClientRect();
+        labelClone.style.left = srcRect.left + 'px';
+        labelClone.style.top  = srcRect.top + 'px';
+        document.body.appendChild(labelClone);
+
+        if (targetLabel) targetLabel.style.visibility = 'hidden';
+        if (targetCount) targetCount.style.visibility = 'hidden';
+        if (targetSlot) targetSlot.style.visibility = 'hidden';
+
+        let countClone = null;
+        let countTargetRect = null;
+        if (targetCount && footerCountEl) {
+          const countText = document.createElement('div');
+          countText.textContent = targetCount.textContent;
+          countText.style.cssText = `
+            position: fixed;
+            z-index: 100001;
+            pointer-events: none;
+            margin: 0;
+            font: inherit;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: ${isLight ? '#111' : '#e8e8e8'};
+            white-space: nowrap;
+          `;
+          const cr = targetCount.getBoundingClientRect();
+          countText.style.left = cr.left + 'px';
+          countText.style.top  = cr.top + 'px';
+          document.body.appendChild(countText);
+          countClone = countText;
+          countTargetRect = footerCountEl.getBoundingClientRect();
+        }
+
+        onlineIndicator.style.visibility = 'hidden';
+
+        const labelTargetRect = footerLabel ? footerLabel.getBoundingClientRect() : onlineIndicator.getBoundingClientRect();
+
+        const DURATION = 950;
+        let doneCount = 0;
+        const totalAnims = countClone ? 2 : 1;
+        function onOneDone() {
+          doneCount++;
+          if (doneCount < totalAnims) return;
+
+          if (labelClone.parentNode) labelClone.parentNode.removeChild(labelClone);
+          if (countClone && countClone.parentNode) countClone.parentNode.removeChild(countClone);
+
+          onlineIndicator.style.visibility = '';
+          const fc = onlineIndicator.querySelector('.site-footer__online-count');
+          if (fc) fc.style.visibility = '';
+
+          statsSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          statsSection.style.opacity = '0';
+          statsSection.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            if (statsSection.parentNode) statsSection.parentNode.removeChild(statsSection);
+          }, 420);
+        }
+
+        animateCloneToTarget(labelClone, labelTargetRect, DURATION, () => {
+          labelClone.style.transition = 'opacity 0.2s ease';
+          labelClone.style.opacity = '0';
+          onOneDone();
+        });
+
+        if (countClone && countTargetRect) {
+          animateCloneToTarget(countClone, countTargetRect, DURATION, () => {
+            countClone.style.transition = 'opacity 0.2s ease';
+            countClone.style.opacity = '0';
+            onOneDone();
+          });
+        }
+        return;
+      }
     }
 
-    // 2. Убираем секцию
     statsSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     statsSection.style.opacity = '0';
     statsSection.style.transform = 'translateY(20px)';
@@ -4010,7 +4182,6 @@
     }
   })();
 
-  // SW: регистрация + автообновление
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
       try {
@@ -4207,4 +4378,3 @@
 
   window.__resolveFirebaseReady();
 </script>
- 
