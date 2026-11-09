@@ -3517,7 +3517,6 @@
     }
 
     function step(now) {
-      // Пересчитываем цель на каждом кадре — так полёт всегда идёт в актуальный блок
       const liveRect = targetEl.getBoundingClientRect();
       const liveTargetCx = alignLeft
         ? (liveRect.left + startRect.width / 2)
@@ -3547,27 +3546,41 @@
     }
 
     function finish() {
-      const finalRect = targetEl.getBoundingClientRect();
+      const applyRect = () => {
+        const finalRect = targetEl.getBoundingClientRect();
+        if (keepSize) {
+          if (alignLeft) {
+            el.style.left = finalRect.left + 'px';
+            el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
+          } else {
+            el.style.left = (finalRect.left + finalRect.width / 2 - startRect.width / 2) + 'px';
+            el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
+          }
+          el.style.width = startRect.width + 'px';
+          el.style.height = startRect.height + 'px';
+        } else {
+          el.style.left = finalRect.left + 'px';
+          el.style.top = finalRect.top + 'px';
+          el.style.width = finalRect.width + 'px';
+          el.style.height = finalRect.height + 'px';
+        }
+      };
 
       el.style.transition = 'none';
-      if (keepSize) {
-        if (alignLeft) {
-          el.style.left = finalRect.left + 'px';
-          el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
-        } else {
-          el.style.left = (finalRect.left + finalRect.width / 2 - startRect.width / 2) + 'px';
-          el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
-        }
-        el.style.width = startRect.width + 'px';
-        el.style.height = startRect.height + 'px';
-      } else {
-        el.style.left = finalRect.left + 'px';
-        el.style.top = finalRect.top + 'px';
-        el.style.width = finalRect.width + 'px';
-        el.style.height = finalRect.height + 'px';
-      }
-      el.classList.add(settledCls);
-      if (onDone) setTimeout(onDone, 120);
+      applyRect();
+      
+      setTimeout(() => {
+        el.style.opacity = '0';
+      }, 50);
+
+      requestAnimationFrame(() => {
+        applyRect();
+        requestAnimationFrame(() => {
+          applyRect();
+          el.classList.add(settledCls);
+          if (onDone) setTimeout(onDone, 120);
+        });
+      });
     }
 
     requestAnimationFrame(step);
@@ -3637,11 +3650,9 @@
               orderBtn.style.display = 'none';
               orderSection.style.opacity = '1';
               orderSection.classList.add('visible');
-              const y = orderSection.getBoundingClientRect().top + window.scrollY - 20;
-              window.scrollTo({ top: y, behavior: 'smooth' });
             },
             true,
-            false,
+            false, // keepSize = false, чтобы кнопка растянулась по размеру блока
             false,
             null,
             startRect
@@ -3680,6 +3691,7 @@
       orderBtn.style.borderRadius = '';
       orderBtn.style.background = '';
       orderBtn.style.borderColor = '';
+      orderBtn.style.opacity = ''; // Возвращаем видимость при закрытии
       orderBtn.classList.remove('order-btn--morph', 'order-btn--settled');
       const textEl = orderBtn.querySelector('.order-btn__text');
       if (textEl) {
