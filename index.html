@@ -8,7 +8,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a1a1a">
 <style>
-  /* ... (все ваши стили без изменений, кроме стилей плеера) ... */
   html, body {
     margin: 0;
     padding: 0;
@@ -566,8 +565,7 @@
   .social-wrap.open .social-item { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
   .social-wrap.open .social-item:nth-child(1) { transition-delay: 0.05s; }
   .social-wrap.open .social-item:nth-child(2) { transition-delay: 0.12s; }
-  .social-item__icon { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; filter: invert(1); pointer-events: none; user-select: none; -webkit-user-drag: none; transition: filter 0.4s ease; }
-  body.light .social-item__icon { filter: invert(0); }
+  .social-item__icon { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; filter: brightness(0) invert(1); pointer-events: none; user-select: none; -webkit-user-drag: none; transition: filter 0.4s ease; }
   .social-item__label { display: flex; flex-direction: column; line-height: 1.2; }
   .social-item__name { font-weight: 600; font-size: 13px; color: #e8e8e8; transition: color 0.4s ease; }
   .social-item__user { color: #9a9a9a; font-size: 11px; transition: color 0.4s ease; }
@@ -1560,22 +1558,24 @@
     border-color: #b8b8b8;
   }
 
-  /* --- Новый аудиоплеер --- */
+  /* --- Стили для нового аудиоплеера --- */
   .player-expanded {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 90px;
+    height: 70px;
     background: rgba(26, 26, 26, 0.98);
     backdrop-filter: blur(12px);
     z-index: 999999;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    gap: 0;
-    padding: 10px 40px 15px;
+    gap: 15px;
+    padding: 0 30px;
     box-shadow: 0 4px 30px rgba(0,0,0,0.6);
     transform: translateY(-100%);
     transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
     flex-wrap: nowrap;
   }
   .player-expanded.open {
@@ -1589,14 +1589,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 20px;
     flex-shrink: 0;
   }
   .player-expanded__btn {
-    font-size: 28px;
+    font-size: 26px;
     background: none;
     border: none;
-    color: #e0e0e0;
+    color: inherit;
     cursor: pointer;
     padding: 0;
     display: flex;
@@ -1605,15 +1604,15 @@
     transition: transform 0.2s;
     z-index: 2;
   }
-  body.light .player-expanded__btn { color: #333; }
   .player-expanded__btn:hover { transform: scale(1.1); }
 
   .player-expanded__main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     max-width: 800px;
+    min-width: 0;
   }
   .player-expanded__header {
     display: flex;
@@ -1635,7 +1634,7 @@
     background: none;
     border: none;
     color: #9a9a9a;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     padding: 0 4px;
     line-height: 1;
@@ -1653,9 +1652,9 @@
   }
   .player-expanded__progress {
     flex: 1;
-    height: 5px;
+    height: 4px;
     background: #333;
-    border-radius: 3px;
+    border-radius: 2px;
     position: relative;
     cursor: pointer;
     overflow: hidden;
@@ -1670,13 +1669,13 @@
     height: 100%;
     background: #4ade80;
     width: 0%;
-    border-radius: 3px;
+    border-radius: 2px;
     transition: width 0.1s linear;
     position: absolute;
     left: 0; top: 0;
   }
   .player-expanded__time {
-    font-size: 13px;
+    font-size: 12px;
     color: #9a9a9a;
     font-variant-numeric: tabular-nums;
     min-width: 40px;
@@ -1689,6 +1688,35 @@
   .player-expanded.open .player-expanded__time {
     opacity: 1;
     transform: translateX(0);
+  }
+
+  .player-expanded__volume,
+  .player-expanded__text-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #9a9a9a;
+    cursor: pointer;
+    padding: 0 5px;
+    font-size: 16px;
+    transition: color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .player-expanded__volume:hover,
+  .player-expanded__text-btn:hover {
+    color: #e0e0e0;
+    transform: scale(1.1);
+  }
+  body.light .player-expanded__volume:hover,
+  body.light .player-expanded__text-btn:hover {
+    color: #111;
+  }
+  .player-expanded__text-btn {
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
   }
 </style>
 
@@ -1835,6 +1863,8 @@
       <div class="player-expanded__time" id="playerTime">0:00</div>
     </div>
   </div>
+  <button class="player-expanded__text-btn" id="playerTtBtn" title="Тт">Тт</button>
+  <button class="player-expanded__volume" id="playerVolBtn" title="Громкость">🔊</button>
 </div>
 <audio id="audioPlayer" src="AkaiYAnnyj_Psihiatr.aac" preload="auto"></audio>
 
@@ -1870,13 +1900,6 @@
       <span class="social-item__label">
         <span class="social-item__name">Telegram</span>
         <span class="social-item__user">@ARTEMIS112</span>
-      </span>
-    </a>
-    <a href="https://github.com/ARTEMISKA21" target="_blank" rel="noopener" class="social-item">
-      <img class="social-item__icon" src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="Github" draggable="false" oncontextmenu="return false;">
-      <span class="social-item__label">
-        <span class="social-item__name">Github</span>
-        <span class="social-item__user">ARTEMISKA21</span>
       </span>
     </a>
   </div>
@@ -2123,7 +2146,6 @@
   resetOutdatedCookies();
 
   // --- ЛОГИКА АУДИОПЛЕЕРА ---
-  let audioCtx = null;
   const audio = document.getElementById('audioPlayer');
   const footerPlayBtn = document.getElementById('siteFooterPlayer');
   const footerPlayIcon = document.getElementById('siteFooterPlayIcon');
@@ -2136,6 +2158,9 @@
   const playerProgressFill = document.getElementById('playerProgressFill');
   const playerTime = document.getElementById('playerTime');
   const playerClose = document.getElementById('playerClose');
+  
+  const playerVolBtn = document.getElementById('playerVolBtn');
+  const playerTtBtn = document.getElementById('playerTtBtn');
 
   let isPlaying = false;
   let playerOpen = false;
@@ -2162,102 +2187,66 @@
     if (playerOpen) return;
     playerOpen = true;
     
-    // 1. Получаем координаты элементов в футере
     const playRect = footerPlayIcon.getBoundingClientRect();
     const waveRect = footerWave.getBoundingClientRect();
     const timeRect = footerTime.getBoundingClientRect();
     
-    // 2. Создаём клоны для полёта
     const playClone = footerPlayIcon.cloneNode(true);
     const waveClone = footerWave.cloneNode(true);
     const timeClone = footerTime.cloneNode(true);
     
-    // 3. Прячем оригиналы
     footerPlayIcon.style.opacity = '0';
     footerWave.style.opacity = '0';
     footerTime.style.opacity = '0';
     
-    // 4. Настраиваем клоны для полёта
-    playClone.style.position = 'fixed';
-    playClone.style.left = playRect.left + 'px';
-    playClone.style.top = playRect.top + 'px';
-    playClone.style.zIndex = '1000000';
-    playClone.style.pointerEvents = 'none';
-    playClone.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-    
-    waveClone.style.position = 'fixed';
-    waveClone.style.left = waveRect.left + 'px';
-    waveClone.style.top = waveRect.top + 'px';
-    waveClone.style.zIndex = '1000000';
-    waveClone.style.pointerEvents = 'none';
-    waveClone.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-    
-    timeClone.style.position = 'fixed';
-    timeClone.style.left = timeRect.left + 'px';
-    timeClone.style.top = timeRect.top + 'px';
-    timeClone.style.zIndex = '1000000';
-    timeClone.style.pointerEvents = 'none';
-    timeClone.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+    playClone.style.cssText = `position: fixed; left: ${playRect.left}px; top: ${playRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: inherit;`;
+    waveClone.style.cssText = `position: fixed; left: ${waveRect.left}px; top: ${waveRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: inherit;`;
+    timeClone.style.cssText = `position: fixed; left: ${timeRect.left}px; top: ${timeRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: inherit;`;
     
     document.body.appendChild(playClone);
     document.body.appendChild(waveClone);
     document.body.appendChild(timeClone);
     
-    // 5. Показываем расширенный плеер (скрытый, чтобы измерить)
     playerExpanded.style.display = 'flex';
     playerExpanded.style.transform = 'translateY(-100%)';
     void playerExpanded.offsetHeight;
     
-    // 6. Получаем целевые координаты элементов в расширенном плеере
     const targetPlayRect = playerPlayBtn.getBoundingClientRect();
     const targetProgressRect = playerProgress.getBoundingClientRect();
     const targetTimeRect = playerTime.getBoundingClientRect();
     
-    // 7. Анимируем полёт (запускаем после реквеста анимации)
     requestAnimationFrame(() => {
-      // Летим кнопкой
       playClone.style.left = targetPlayRect.left + 'px';
       playClone.style.top = targetPlayRect.top + 'px';
-      playClone.style.transform = 'scale(1.2)'; // Немного увеличиваем
+      playClone.style.transform = 'scale(1.2)';
       
-      // Летим волной (она превратится в точки и потом в полоску)
       waveClone.style.left = targetProgressRect.left + 'px';
       waveClone.style.top = targetProgressRect.top + 'px';
-      waveClone.style.opacity = '0'; // Исчезает, на ее место встанет полоска
+      waveClone.style.opacity = '0';
       
-      // Летим временем
       timeClone.style.left = targetTimeRect.left + 'px';
       timeClone.style.top = targetTimeRect.top + 'px';
     });
     
-    // 8. Через 600мс (после полёта) показываем плеер и убираем клоны
     setTimeout(() => {
       playerExpanded.style.transform = 'translateY(0)';
       playerExpanded.classList.add('open');
       
-      // Удаляем клоны
       if (playClone.parentNode) playClone.parentNode.removeChild(playClone);
       if (waveClone.parentNode) waveClone.parentNode.removeChild(waveClone);
       if (timeClone.parentNode) timeClone.parentNode.removeChild(timeClone);
       
-      // Запускаем аудио
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
       audio.play().then(() => {
         isPlaying = true;
         playerPlayBtn.textContent = '⏸';
         updateProgress();
-      }).catch(err => {
-        console.error('Ошибка воспроизведения:', err);
-      });
+      }).catch(err => console.error('Ошибка воспроизведения:', err));
     }, 600);
   }
 
   function closePlayer() {
     if (!playerOpen) return;
     
-    // Останавливаем анимацию и скрываем плеер
     playerExpanded.style.transform = 'translateY(-100%)';
     playerExpanded.classList.remove('open');
     
@@ -2265,12 +2254,10 @@
       playerExpanded.style.display = 'none';
       playerOpen = false;
       
-      // Возвращаем оригиналы в футер
       footerPlayIcon.style.opacity = '1';
       footerWave.style.opacity = '1';
       footerTime.style.opacity = '1';
       
-      // Останавливаем музыку
       audio.pause();
       isPlaying = false;
       playerPlayBtn.textContent = '▶';
@@ -2280,10 +2267,8 @@
 
   footerPlayBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    if (!playerOpen) {
-      openPlayer();
-    } else {
-      // Если уже открыт, просто ставим на паузу/играем
+    if (!playerOpen) openPlayer();
+    else {
       if (isPlaying) {
         audio.pause();
         isPlaying = false;
@@ -2315,9 +2300,7 @@
   playerProgress.addEventListener('click', (e) => {
     const rect = playerProgress.getBoundingClientRect();
     const pct = (e.clientX - rect.left) / rect.width;
-    if (audio.duration) {
-      audio.currentTime = pct * audio.duration;
-    }
+    if (audio.duration) audio.currentTime = pct * audio.duration;
   });
 
   audio.addEventListener('timeupdate', () => {
@@ -2338,10 +2321,11 @@
   });
 
   playerClose.addEventListener('click', closePlayer);
+  
+  playerVolBtn.addEventListener('click', () => console.log('Volume clicked'));
+  playerTtBtn.addEventListener('click', () => console.log('Tt clicked'));
   // --- КОНЕЦ ЛОГИКИ АУДИОПЛЕЕРА ---
 
-  // ... (Весь остальной JS-код) ...
-  
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -4177,8 +4161,10 @@
       const bars = section.querySelectorAll('#statsBars .stats-chart__bar');
       if (bars.length) {
         const maxVal = Math.max(...Object.values(perMonth), 1);
+        const currentYear = new Date().getFullYear();
         bars.forEach((bar, i) => {
-          const monthKey = new Date(new Date().getFullYear(), i, 1).toISOString().slice(0, 7); // YYYY-MM
+          const mm = String(i + 1).padStart(2, '0');
+          const monthKey = currentYear + '-' + mm;
           const v = perMonth[monthKey] || 0;
           const h = Math.max(4, Math.round((v / maxVal) * 110));
           bar.style.height = h + 'px';
@@ -4599,7 +4585,9 @@
   (async () => {
     try {
       const today = new Date();
-      const yearMonth = today.toISOString().slice(0, 7); // "YYYY-MM"
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const yearMonth = y + '-' + m; // "YYYY-MM" в ЛОКАЛЬНОМ времени
       
       // Определяем платформу
       const ua = navigator.userAgent || '';
