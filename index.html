@@ -1439,7 +1439,7 @@
     .stats-section__bottom { grid-template-columns: 1fr; }
   }
 
-  /* Слот, КУДА ПРИЛЕТАЕТ индикатор. Содержит текст «Онлайн:» и цифру. */
+  /* Слот, КУДА ПРИЛЕТАЕТ цифра. */
   .stats-online-slot {
     display: inline-flex;
     align-items: center;
@@ -1449,7 +1449,6 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
-  /* Текст «Онлайн:» — цель морфинга */
   .stats-online-slot__label {
     display: inline-block;
     color: #e8e8e8;
@@ -3736,9 +3735,8 @@
             <span class="stats-section__value" id="statsDownloads">0</span>
           </div>
           <div class="stats-section__row">
-            <span class="stats-section__label">${t('onlineValue')}</span>
+            <span class="stats-section__label stats-online-slot__label" data-i18n="online">${t('online')}</span>
             <span class="stats-section__value stats-online-slot" id="statsOnlineSlot">
-              <span class="stats-online-slot__label" data-i18n="online">${t('online')}</span>
               <span class="stats-online-slot__count">${onlineCountVal}</span>
             </span>
           </div>
@@ -3831,9 +3829,6 @@
     }
   }
 
-  /* ------------------------------------------------------------------
-     Утилита: плавная анимация клона от текущей позиции к targetRect
-     ------------------------------------------------------------------ */
   function animateCloneToTarget(clone, targetRect, duration, onDone) {
     const startRect = clone.getBoundingClientRect();
     const startCx = startRect.left + startRect.width / 2;
@@ -3913,22 +3908,19 @@
           }
           targetSlot.style.visibility = '';
 
-          const targetLabel = targetSlot.querySelector('.stats-online-slot__label');
+          const targetLabel = statsSection.querySelector('.stats-section__label.stats-online-slot__label');
           const targetCount = targetSlot.querySelector('.stats-online-slot__count');
-          const morphTargetLabel = targetLabel || targetSlot;
 
           if (targetLabel) targetLabel.style.visibility = 'hidden';
           if (targetCount) targetCount.style.visibility = 'hidden';
 
           const footerLabel = onlineIndicator.querySelector('.site-footer__online-label');
           const footerCount = onlineIndicator.querySelector('.site-footer__online-count');
-          const footerDot   = onlineIndicator.querySelector('.site-footer__online-dot');
 
           if (footerCount) footerCount.style.visibility = 'hidden';
 
           const isLight = document.body.classList.contains('light');
 
-          // 1) ТЕКСТ «Онлайн:» (с точкой) летит к тексту «Онлайн:»
           const labelClone = document.createElement('div');
           labelClone.style.cssText = `
             position: fixed;
@@ -3937,14 +3929,12 @@
             margin: 0;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
             font: inherit;
             font-weight: 600;
             font-variant-numeric: tabular-nums;
             color: ${isLight ? '#555' : '#c8c8c8'};
             white-space: nowrap;
           `;
-          if (footerDot) labelClone.appendChild(footerDot.cloneNode(true));
           const labelText = document.createElement('span');
           labelText.textContent = (footerLabel && footerLabel.textContent) || t('online');
           labelClone.appendChild(labelText);
@@ -3954,7 +3944,6 @@
           labelClone.style.top  = fr.top + 'px';
           document.body.appendChild(labelClone);
 
-          // 2) ЦИФРА летит к цифре
           let countClone = null;
           let countTargetRect = null;
           if (footerCount && targetCount) {
@@ -3981,7 +3970,7 @@
 
           onlineIndicator.style.visibility = 'hidden';
 
-          const labelTargetRect = morphTargetLabel.getBoundingClientRect();
+          const labelTargetRect = targetLabel.getBoundingClientRect();
 
           const DURATION = 950;
           let doneCount = 0;
@@ -4000,8 +3989,6 @@
 
             if (targetLabel) targetLabel.style.visibility = '';
             if (targetCount) targetCount.style.visibility = '';
-
-            targetSlot.innerHTML = `<span class="stats-online-slot__label">${t('online')}</span><span class="stats-online-slot__count">${onlineCountVal}</span>`;
 
             fillStatsFromFirebase(statsSection);
             const y = statsSection.getBoundingClientRect().top + window.scrollY - 20;
@@ -4030,7 +4017,7 @@
     if (!statsSection) return;
 
     const targetSlot = statsSection.querySelector('#statsOnlineSlot');
-    const targetLabel = targetSlot ? targetSlot.querySelector('.stats-online-slot__label') : null;
+    const targetLabel = statsSection.querySelector('.stats-section__label.stats-online-slot__label');
     const targetCount = targetSlot ? targetSlot.querySelector('.stats-online-slot__count') : null;
 
     if (onlineIndicator) {
@@ -4041,7 +4028,6 @@
 
       const footerLabel = onlineIndicator.querySelector('.site-footer__online-label');
       const footerCountEl = onlineIndicator.querySelector('.site-footer__online-count');
-      const footerDot = onlineIndicator.querySelector('.site-footer__online-dot');
 
       if (targetLabel || targetSlot) {
         const isLight = document.body.classList.contains('light');
@@ -4053,14 +4039,12 @@
           margin: 0;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
           font: inherit;
           font-weight: 600;
           font-variant-numeric: tabular-nums;
           color: ${isLight ? '#555' : '#c8c8c8'};
           white-space: nowrap;
         `;
-        if (footerDot) labelClone.appendChild(footerDot.cloneNode(true));
         const labelText = document.createElement('span');
         labelText.textContent = (footerLabel && footerLabel.textContent) || t('online');
         labelClone.appendChild(labelText);
