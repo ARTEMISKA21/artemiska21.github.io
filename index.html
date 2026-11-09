@@ -3546,41 +3546,35 @@
     }
 
     function finish() {
-      const applyRect = () => {
-        const finalRect = targetEl.getBoundingClientRect();
-        if (keepSize) {
-          if (alignLeft) {
-            el.style.left = finalRect.left + 'px';
-            el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
-          } else {
-            el.style.left = (finalRect.left + finalRect.width / 2 - startRect.width / 2) + 'px';
-            el.style.top = (finalRect.top + finalRect.height / 2 - startRect.height / 2) + 'px';
-          }
-          el.style.width = startRect.width + 'px';
-          el.style.height = startRect.height + 'px';
-        } else {
-          el.style.left = finalRect.left + 'px';
-          el.style.top = finalRect.top + 'px';
-          el.style.width = finalRect.width + 'px';
-          el.style.height = finalRect.height + 'px';
-        }
-      };
-
+      // ФИЗИЧЕСКИ ПЕРЕСЕЛЯЕМ КНОПКУ ВНУТРЬ БЛОКА
+      // Теперь она не зависит от скролла и layout — всегда точно на блоке
       el.style.transition = 'none';
-      applyRect();
-      
+      el.style.position = 'absolute';
+      el.style.left = '0';
+      el.style.top = '0';
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.margin = '0';
+      el.style.zIndex = 'auto';
+      el.style.pointerEvents = 'none';
+
+      // Убеждаемся, что у targetEl есть position: relative для абсолютного позиционирования
+      const targetPos = window.getComputedStyle(targetEl).position;
+      if (targetPos === 'static') {
+        targetEl.style.position = 'relative';
+      }
+
+      // Физически переносим кнопку внутрь целевого блока
+      targetEl.appendChild(el);
+
+      el.classList.add(settledCls);
+
+      // Мгновенно скрываем кнопку после переноса
       setTimeout(() => {
         el.style.opacity = '0';
       }, 50);
 
-      requestAnimationFrame(() => {
-        applyRect();
-        requestAnimationFrame(() => {
-          applyRect();
-          el.classList.add(settledCls);
-          if (onDone) setTimeout(onDone, 120);
-        });
-      });
+      if (onDone) setTimeout(onDone, 120);
     }
 
     requestAnimationFrame(step);
@@ -3652,7 +3646,7 @@
               orderSection.classList.add('visible');
             },
             true,
-            false, // keepSize = false, чтобы кнопка растянулась по размеру блока
+            false, // keepSize = false
             false,
             null,
             startRect
@@ -3676,7 +3670,12 @@
     orderSection.style.transform = 'translateY(20px)';
 
     if (orderBtn) {
+      // Возвращаем кнопку обратно в body, если она внутри секции
+      if (orderBtn.parentNode && orderBtn.parentNode !== document.body) {
+        document.body.appendChild(orderBtn);
+      }
       orderBtn.style.display = '';
+      orderBtn.style.opacity = '';
       orderBtn.style.position = '';
       orderBtn.style.left = '';
       orderBtn.style.top = '';
@@ -3691,7 +3690,6 @@
       orderBtn.style.borderRadius = '';
       orderBtn.style.background = '';
       orderBtn.style.borderColor = '';
-      orderBtn.style.opacity = ''; // Возвращаем видимость при закрытии
       orderBtn.classList.remove('order-btn--morph', 'order-btn--settled');
       const textEl = orderBtn.querySelector('.order-btn__text');
       if (textEl) {
