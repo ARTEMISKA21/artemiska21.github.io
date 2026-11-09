@@ -565,7 +565,7 @@
   .social-wrap.open .social-item { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
   .social-wrap.open .social-item:nth-child(1) { transition-delay: 0.05s; }
   .social-wrap.open .social-item:nth-child(2) { transition-delay: 0.12s; }
-  .social-item__icon { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; filter: brightness(0) invert(1); pointer-events: none; user-select: none; -webkit-user-drag: none; transition: filter 0.4s ease; }
+  .social-item__icon { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; pointer-events: none; user-select: none; -webkit-user-drag: none; transition: filter 0.4s ease; }
   .social-item__label { display: flex; flex-direction: column; line-height: 1.2; }
   .social-item__name { font-weight: 600; font-size: 13px; color: #e8e8e8; transition: color 0.4s ease; }
   .social-item__user { color: #9a9a9a; font-size: 11px; transition: color 0.4s ease; }
@@ -1846,14 +1846,15 @@
   </div>
 </div>
 
-<!-- Новый аудиоплеер -->
 <div class="player-expanded" id="playerExpanded">
   <div class="player-expanded__play-wrap">
-    <button class="player-expanded__btn" id="playerPlayBtn">▶</button>
+    <button class="player-expanded__btn" id="playerPlayBtn">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5,3 19,12 5,21" /></svg>
+    </button>
   </div>
   <div class="player-expanded__main">
     <div class="player-expanded__header">
-      <div class="player-expanded__title">AkaiYAnnyj - Психиатр</div>
+      <div class="player-expanded__title">AkaiЯнный - Психиатр</div>
       <button class="player-close" id="playerClose">✕</button>
     </div>
     <div class="player-expanded__progress-wrap">
@@ -1864,7 +1865,13 @@
     </div>
   </div>
   <button class="player-expanded__text-btn" id="playerTtBtn" title="Тт">Тт</button>
-  <button class="player-expanded__volume" id="playerVolBtn" title="Громкость">🔊</button>
+  <button class="player-expanded__volume" id="playerVolBtn" title="Громкость">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+  </button>
 </div>
 <audio id="audioPlayer" src="AkaiYAnnyj_Psihiatr.aac" preload="auto"></audio>
 
@@ -2162,6 +2169,9 @@
   const playerVolBtn = document.getElementById('playerVolBtn');
   const playerTtBtn = document.getElementById('playerTtBtn');
 
+  const playIconSVG = `<svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5,3 19,12 5,21" /></svg>`;
+  const pauseIconSVG = `<svg viewBox="0 0 24 24" width="24" height="24" fill="white"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>`;
+
   let isPlaying = false;
   let playerOpen = false;
   let animFrame;
@@ -2238,7 +2248,7 @@
       
       audio.play().then(() => {
         isPlaying = true;
-        playerPlayBtn.textContent = '⏸';
+        playerPlayBtn.innerHTML = pauseIconSVG;
         updateProgress();
       }).catch(err => console.error('Ошибка воспроизведения:', err));
     }, 600);
@@ -2260,7 +2270,7 @@
       
       audio.pause();
       isPlaying = false;
-      playerPlayBtn.textContent = '▶';
+      playerPlayBtn.innerHTML = playIconSVG;
       cancelAnimationFrame(animFrame);
     }, 400);
   }
@@ -2272,12 +2282,12 @@
       if (isPlaying) {
         audio.pause();
         isPlaying = false;
-        playerPlayBtn.textContent = '▶';
+        playerPlayBtn.innerHTML = playIconSVG;
         cancelAnimationFrame(animFrame);
       } else {
         audio.play();
         isPlaying = true;
-        playerPlayBtn.textContent = '⏸';
+        playerPlayBtn.innerHTML = pauseIconSVG;
         updateProgress();
       }
     }
@@ -2287,12 +2297,12 @@
     if (isPlaying) {
       audio.pause();
       isPlaying = false;
-      playerPlayBtn.textContent = '▶';
+      playerPlayBtn.innerHTML = playIconSVG;
       cancelAnimationFrame(animFrame);
     } else {
       audio.play();
       isPlaying = true;
-      playerPlayBtn.textContent = '⏸';
+      playerPlayBtn.innerHTML = pauseIconSVG;
       updateProgress();
     }
   });
@@ -2314,7 +2324,7 @@
 
   audio.addEventListener('ended', () => {
     isPlaying = false;
-    playerPlayBtn.textContent = '▶';
+    playerPlayBtn.innerHTML = playIconSVG;
     playerProgressFill.style.width = '0%';
     playerTime.textContent = '0:00';
     cancelAnimationFrame(animFrame);
@@ -4130,19 +4140,17 @@
     try {
       await window.__firebaseReady;
       if (!fbGetVisits) return;
-      const data = await fbGetVisits(); // Получаем данные по визитам (структура: { visitors: { android: 10, iphone: 5, windows: 20 }, timeline: { "2024-01": 10, "2024-02": 15 ... } })
+      const data = await fbGetVisits();
 
       let total = 0;
       const perMonth = {};
       let android = 0, iphone = 0, windows = 0;
 
-      // Заполняем месяцы
       for (const k in data.timeline) {
         perMonth[k] = data.timeline[k];
         total += perMonth[k];
       }
 
-      // Заполняем платформы
       android = data.visitors.android || 0;
       iphone = data.visitors.iphone || 0;
       windows = data.visitors.windows || 0;
@@ -4216,7 +4224,6 @@
       statsSection.className = 'stats-section';
       statsSection.innerHTML = buildStatsHTML(onlineCountVal);
 
-      // Вставляем секцию статистики ПЕРЕД футером
       const footerEl = document.querySelector('.site-footer');
       if (footerEl && footerEl.parentNode) {
         footerEl.parentNode.insertBefore(statsSection, footerEl);
@@ -4581,30 +4588,25 @@
     }
   })();
 
-  // --- ЛОГИКА УЧЁТА ПОСЕТИТЕЛЕЙ (ВИЗИТОВ) ---
   (async () => {
     try {
       const today = new Date();
       const y = today.getFullYear();
       const m = String(today.getMonth() + 1).padStart(2, '0');
-      const yearMonth = y + '-' + m; // "YYYY-MM" в ЛОКАЛЬНОМ времени
+      const yearMonth = y + '-' + m;
       
-      // Определяем платформу
       const ua = navigator.userAgent || '';
       let platform = 'windows';
       if (/android/i.test(ua)) platform = 'android';
       else if (/iPad|iPhone|iPod/.test(ua)) platform = 'iphone';
 
-      // Записываем визит (транзакция для атомарности)
       const visitsRef = ref(db, 'visits');
       await runTransaction(visitsRef, (currentData) => {
         if (!currentData) currentData = { timeline: {}, visitors: { android: 0, iphone: 0, windows: 0 } };
         
-        // Обновляем таймлайн
         if (!currentData.timeline) currentData.timeline = {};
         currentData.timeline[yearMonth] = (currentData.timeline[yearMonth] || 0) + 1;
 
-        // Обновляем платформы
         if (!currentData.visitors) currentData.visitors = { android: 0, iphone: 0, windows: 0 };
         currentData.visitors[platform] = (currentData.visitors[platform] || 0) + 1;
 
@@ -4733,7 +4735,6 @@
     return snap.exists() ? snap.val() : {};
   };
 
-  // --- ДОБАВЛЕНО ДЛЯ ВИЗИТОВ ---
   window.fbGetVisits = async function() {
     const snap = await get(ref(db, 'visits'));
     return snap.exists() ? snap.val() : { timeline: {}, visitors: { android: 0, iphone: 0, windows: 0 } };
