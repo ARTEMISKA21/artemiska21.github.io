@@ -1558,7 +1558,6 @@
     border-color: #b8b8b8;
   }
 
-  /* --- Стили для нового аудиоплеера --- */
   .player-expanded {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -2195,65 +2194,75 @@
   function openPlayer() {
     if (playerOpen) return;
     playerOpen = true;
-    
+
     const playRect = footerPlayIcon.getBoundingClientRect();
     const waveRect = footerWave.getBoundingClientRect();
     const timeRect = footerTime.getBoundingClientRect();
-    
+
     const playClone = footerPlayIcon.cloneNode(true);
     const waveClone = footerWave.cloneNode(true);
     const timeClone = footerTime.cloneNode(true);
-    
+
     footerPlayIcon.style.opacity = '0';
     footerWave.style.opacity = '0';
     footerTime.style.opacity = '0';
-    
+
     const isLight = document.body.classList.contains('light');
     const cloneColor = isLight ? '#555' : '#e8e8e8';
-    
-    playClone.style.cssText = `position: fixed; left: ${playRect.left}px; top: ${playRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: ${cloneColor}; font-size: 15px; line-height: 1;`;
-    waveClone.style.cssText = `position: fixed; left: ${waveRect.left}px; top: ${waveRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: ${cloneColor}; font-size: 18px; letter-spacing: 1px; line-height: 1;`;
-    timeClone.style.cssText = `position: fixed; left: ${timeRect.left}px; top: ${timeRect.top}px; z-index: 1000000; pointer-events: none; transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); color: ${cloneColor}; font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1;`;
-    
+
+    playClone.style.cssText = `position: fixed; left: ${playRect.left}px; top: ${playRect.top}px; z-index: 1000000; pointer-events: none; color: ${cloneColor}; font-size: 15px; line-height: 1;`;
+    waveClone.style.cssText = `position: fixed; left: ${waveRect.left}px; top: ${waveRect.top}px; z-index: 1000000; pointer-events: none; color: ${cloneColor}; font-size: 18px; letter-spacing: 1px; line-height: 1;`;
+    timeClone.style.cssText = `position: fixed; left: ${timeRect.left}px; top: ${timeRect.top}px; z-index: 1000000; pointer-events: none; color: ${cloneColor}; font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1;`;
+
     document.body.appendChild(playClone);
     document.body.appendChild(waveClone);
     document.body.appendChild(timeClone);
-    
+
     playerExpanded.style.display = 'flex';
     playerExpanded.style.transform = 'translateY(-100%)';
     void playerExpanded.offsetHeight;
-    
-    const targetPlayRect = playerPlayBtn.getBoundingClientRect();
-    const targetProgressRect = playerProgress.getBoundingClientRect();
-    const targetTimeRect = playerTime.getBoundingClientRect();
-    
+
+    playerExpanded.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
     requestAnimationFrame(() => {
-      playClone.style.left = targetPlayRect.left + 'px';
-      playClone.style.top = targetPlayRect.top + 'px';
-      playClone.style.transform = 'scale(1.2)';
-      
-      waveClone.style.left = targetProgressRect.left + 'px';
-      waveClone.style.top = targetProgressRect.top + 'px';
-      waveClone.style.opacity = '0';
-      
-      timeClone.style.left = targetTimeRect.left + 'px';
-      timeClone.style.top = targetTimeRect.top + 'px';
-    });
-    
-    setTimeout(() => {
       playerExpanded.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
       playerExpanded.classList.add('open');
-      
+
+      const targetPlayRect = playerPlayBtn.getBoundingClientRect();
+      const targetProgressRect = playerProgress.getBoundingClientRect();
+      const targetTimeRect = playerTime.getBoundingClientRect();
+
+      playClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1)';
+      waveClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease 0.6s';
+      timeClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1)';
+
+      requestAnimationFrame(() => {
+        playClone.style.left = targetPlayRect.left + 'px';
+        playClone.style.top = targetPlayRect.top + 'px';
+        playClone.style.transform = 'scale(1.2)';
+
+        waveClone.style.left = targetProgressRect.left + 'px';
+        waveClone.style.top = targetProgressRect.top + 'px';
+        waveClone.style.opacity = '0';
+
+        timeClone.style.left = targetTimeRect.left + 'px';
+        timeClone.style.top = targetTimeRect.top + 'px';
+      });
+    }, 500);
+
+    setTimeout(() => {
       if (playClone.parentNode) playClone.parentNode.removeChild(playClone);
       if (waveClone.parentNode) waveClone.parentNode.removeChild(waveClone);
       if (timeClone.parentNode) timeClone.parentNode.removeChild(timeClone);
-      
+
       audio.play().then(() => {
         isPlaying = true;
         playerPlayBtn.innerHTML = pauseIconSVG;
         updateProgress();
       }).catch(err => console.error('Ошибка воспроизведения:', err));
-    }, 600);
+    }, 1600);
   }
 
   function closePlayer() {
