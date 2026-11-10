@@ -113,6 +113,7 @@
     user-select: none;
     -webkit-user-drag: none;
     -webkit-touch-callout: none;
+    transition: opacity 0.4s ease;
   }
   .site-preview::after {
     content: "";
@@ -1032,7 +1033,7 @@
     border-radius: 10px 0 0 10px;
     cursor: pointer;
     box-shadow: -4px 0 16px rgba(0,0,0,0.4);
-    transition: background 0.25s ease, border-color 0.25s ease, width 0.35s cubic-bezier(0.22,1,0.36,1);
+    transition: background 0.25s ease, border-color 0.25s ease, width 0.35s cubic-bezier(0.22,1,0.36,1), right 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease;
     overflow: hidden;
     height: 130px;
     width: 44px;
@@ -1070,6 +1071,11 @@
     border-radius: 2px;
     background: #8a8a8a;
     flex-shrink: 0;
+  }
+  /* без анимаций: кнопка просто уезжает вправо */
+  body.no-animations .order-btn.order-btn--hide {
+    right: -120px !important;
+    opacity: 0 !important;
   }
   body.light .order-btn {
     background: #d8d8d8;
@@ -1179,63 +1185,6 @@
   @media (max-width: 600px) {
     .launcher-block { min-height: 160px; padding: 30px 16px; }
     .launcher-block__title { font-size: 18px; letter-spacing: 4px; }
-  }
-
-  .order-btn--morph {
-    transition:
-      left 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-      top 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-      width 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-      height 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-      border-radius 0.95s ease,
-      background 0.7s ease,
-      border-color 0.7s ease !important;
-    cursor: default !important;
-    will-change: left, top, width, height;
-  }
-  .order-btn--morph:hover { width: auto !important; }
-
-  .order-btn--morph .order-btn__inner {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 12px;
-    transition: padding 0.95s ease, gap 0.95s ease;
-  }
-  .order-btn--morph .order-btn__text {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-                letter-spacing 0.95s ease,
-                font-size 0.95s ease;
-    letter-spacing: 2px;
-    font-size: 14px;
-    opacity: 1;
-  }
-  .order-btn--morph .order-btn__stripe {
-    width: 4px;
-    height: 40px;
-    transition: width 0.95s ease, height 0.95s ease, opacity 0.4s ease;
-  }
-  .order-btn--morph.order-btn--settled .order-btn__inner {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 14px;
-    padding: 24px 20px;
-  }
-  .order-btn--morph.order-btn--settled .order-btn__text {
-    writing-mode: horizontal-tb;
-    transform: rotate(0deg);
-    letter-spacing: 3px;
-    font-size: 15px;
-    opacity: 1;
-  }
-  .order-btn--morph.order-btn--settled .order-btn__stripe {
-    width: 60px;
-    height: 3px;
-    opacity: 0.6;
   }
 
   .site-footer__online--morph {
@@ -1605,6 +1554,12 @@
   }
   .player-expanded__btn:hover { transform: scale(1.1); }
 
+  /* светлая тема: плей/пауза серее */
+  body.light .player-expanded__btn svg polygon,
+  body.light .player-expanded__btn svg rect {
+    fill: #7a7a7a !important;
+  }
+
   .player-expanded__main {
     flex: 1;
     display: flex;
@@ -1703,6 +1658,9 @@
     transition: color 0.2s, transform 0.2s;
     flex-shrink: 0;
   }
+  .player-expanded__volume {
+    position: relative;
+  }
   .player-expanded__volume:hover,
   .player-expanded__text-btn:hover {
     color: #e0e0e0;
@@ -1717,12 +1675,158 @@
     font-weight: 600;
     font-family: inherit;
   }
+
+  /* всплывающий ползунок громкости */
+  .player-expanded__volume-pop {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: -8px;
+    width: 140px;
+    height: 34px;
+    border-radius: 17px;
+    background: #2a2a2a;
+    border: 1px solid #4a4a4a;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+    z-index: 1000001;
+  }
+  .player-expanded__volume-pop.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .player-expanded__volume-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: #555;
+    outline: none;
+    cursor: pointer;
+  }
+  .player-expanded__volume-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e8e8e8;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    cursor: pointer;
+  }
+  .player-expanded__volume-range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: #e8e8e8;
+    cursor: pointer;
+  }
+  body.light .player-expanded__volume-pop {
+    background: #f0f0f0;
+    border-color: #d0d0d0;
+  }
+  body.light .player-expanded__volume-range { background: #c8c8c8; }
+  body.light .player-expanded__volume-range::-webkit-slider-thumb { background: #444; }
+  body.light .player-expanded__volume-range::-moz-range-thumb { background: #444; }
+
+  /* окно "Тт" — перемещаемое поверх сайта */
+  .tt-window {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(460px, calc(100vw - 40px));
+    max-height: min(70vh, 600px);
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    z-index: 1000002;
+    display: flex;
+    flex-direction: column;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+  }
+  body.light .tt-window {
+    background: #ffffff;
+    border-color: #d8d8d8;
+    color: #333;
+  }
+  .tt-window__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #333;
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  body.light .tt-window__header { border-bottom-color: #e0e0e0; }
+  .tt-window__header:active { cursor: grabbing; }
+  .tt-window__title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #e8e8e8;
+  }
+  body.light .tt-window__title { color: #222; }
+  .tt-window__close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 1px solid #4a4a4a;
+    color: #d8d8d8;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
+  }
+  .tt-window__close:hover {
+    transform: rotate(360deg);
+    background: #3a3a3a;
+    color: #fff;
+  }
+  body.light .tt-window__close {
+    background: #f0f0f0;
+    border-color: #c0c0c0;
+    color: #333;
+  }
+  body.light .tt-window__close:hover {
+    background: #e0e0e0;
+    color: #000;
+  }
+  .tt-window__body {
+    padding: 16px 18px 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #d8d8d8;
+  }
+  body.light .tt-window__body { color: #333; }
 </style>
 
 <div class="custom-cursor" id="customCursor"></div>
 
 <div class="site-preview" id="preview">
-  <img class="site-preview__img" src="ARTEMIS.png" alt="ARTEMIS" draggable="false" oncontextmenu="return false;">
+  <img class="site-preview__img" id="previewImg" src="ARTEMIS.png" alt="ARTEMIS" draggable="false" oncontextmenu="return false;">
 
   <div class="site-preview__title" id="previewTitle" data-type="ARTEMIS"></div>
 
@@ -1805,7 +1909,7 @@
         <div class="about-sign__media-inner">
           <div class="about-sign__media-face about-sign__media-face--back"></div>
           <div class="about-sign__media-face about-sign__media-face--front">
-            <img src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;">
+            <img id="tagMediaImg" src="ARTEMIS.png" alt="Знак ARTEMIS" draggable="false" oncontextmenu="return false;">
           </div>
         </div>
       </div>
@@ -1853,7 +1957,7 @@
   </div>
   <div class="player-expanded__main">
     <div class="player-expanded__header">
-      <div class="player-expanded__title">AkaiЯнный - Психиатр</div>
+      <div class="player-expanded__title" id="playerTitle" data-i18n="trackTitle">AkaiЯнный - Психиатр</div>
       <button class="player-close" id="playerClose">✕</button>
     </div>
     <div class="player-expanded__progress-wrap">
@@ -1865,11 +1969,10 @@
   </div>
   <button class="player-expanded__text-btn" id="playerTtBtn" title="Тт">Тт</button>
   <button class="player-expanded__volume" id="playerVolBtn" title="Громкость">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-    </svg>
+    <span id="playerVolIcon"></span>
+    <div class="player-expanded__volume-pop" id="playerVolPop">
+      <input type="range" class="player-expanded__volume-range" id="playerVolRange" min="0" max="100" value="100">
+    </div>
   </button>
 </div>
 <audio id="audioPlayer" src="AkaiYAnnyj_Psihiatr.aac" preload="auto"></audio>
@@ -2151,20 +2254,43 @@
 
   resetOutdatedCookies();
 
+  /* ================= КАРТИНКИ ПО ТЕМЕ ================= */
+  const DARK_IMG = 'ARTEMIS.png';
+  const LIGHT_IMG = 'ARTEMIS_1.png';
+
+  function updateThemedImages() {
+    const isLight = document.body.classList.contains('light');
+    const src = isLight ? LIGHT_IMG : DARK_IMG;
+
+    const previewImg = document.getElementById('previewImg');
+    if (previewImg && previewImg.getAttribute('src') !== src) {
+      previewImg.setAttribute('src', src);
+    }
+    const tagMediaImg = document.getElementById('tagMediaImg');
+    if (tagMediaImg && tagMediaImg.getAttribute('src') !== src) {
+      tagMediaImg.setAttribute('src', src);
+    }
+  }
+
+  /* ================= АУДИО / ПЛЕЕР ================= */
   const audio = document.getElementById('audioPlayer');
   const footerPlayBtn = document.getElementById('siteFooterPlayer');
   const footerPlayIcon = document.getElementById('siteFooterPlayIcon');
   const footerWave = document.getElementById('siteFooterWave');
   const footerTime = document.getElementById('siteFooterTime');
-  
+
   const playerExpanded = document.getElementById('playerExpanded');
   const playerPlayBtn = document.getElementById('playerPlayBtn');
   const playerProgress = document.getElementById('playerProgress');
   const playerProgressFill = document.getElementById('playerProgressFill');
   const playerTime = document.getElementById('playerTime');
   const playerClose = document.getElementById('playerClose');
-  
+  const playerTitle = document.getElementById('playerTitle');
+
   const playerVolBtn = document.getElementById('playerVolBtn');
+  const playerVolPop = document.getElementById('playerVolPop');
+  const playerVolRange = document.getElementById('playerVolRange');
+  const playerVolIcon = document.getElementById('playerVolIcon');
   const playerTtBtn = document.getElementById('playerTtBtn');
 
   const playIconSVG = `<svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5,3 19,12 5,21" /></svg>`;
@@ -2189,6 +2315,47 @@
       playerTime.textContent = formatTime(audio.currentTime);
     }
     animFrame = requestAnimationFrame(updateProgress);
+  }
+
+  const VOL_ICONS = {
+    high: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`,
+    mid: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+    low: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>`,
+    mute: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`
+  };
+
+  function updateVolIcon(v) {
+    let key = 'high';
+    if (v <= 0) key = 'mute';
+    else if (v < 30) key = 'low';
+    else if (v < 70) key = 'mid';
+    else key = 'high';
+    if (playerVolIcon) playerVolIcon.innerHTML = VOL_ICONS[key];
+  }
+
+  if (playerVolRange) {
+    updateVolIcon(100);
+    playerVolRange.addEventListener('input', () => {
+      const v = Number(playerVolRange.value);
+      audio.volume = v / 100;
+      updateVolIcon(v);
+      if (playerVolBtn) playerVolBtn.title = 'Громкость: ' + v + '%';
+    });
+  }
+
+  if (playerVolBtn) {
+    playerVolBtn.addEventListener('click', (e) => {
+      if (e.target === playerVolRange) return;
+      e.stopPropagation();
+      playerVolPop.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!playerVolBtn.contains(e.target)) {
+        playerVolPop.classList.remove('open');
+      }
+    });
+    // не закрывать при клике по ползунку
+    playerVolPop.addEventListener('click', (e) => e.stopPropagation());
   }
 
   function openPlayer() {
@@ -2234,14 +2401,16 @@
       const targetProgressRect = playerProgress.getBoundingClientRect();
       const targetTimeRect = playerTime.getBoundingClientRect();
 
-      playClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1)';
-      waveClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease 0.6s';
-      timeClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1)';
+      // Клоны исчезают чуть раньше финиша, чтобы не наложиться на символы плеера
+      playClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease 0.7s';
+      waveClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease 0.55s';
+      timeClone.style.transition = 'left 1s cubic-bezier(0.22, 1, 0.36, 1), top 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease 0.7s';
 
       requestAnimationFrame(() => {
         playClone.style.left = targetPlayRect.left + 'px';
         playClone.style.top = targetPlayRect.top + 'px';
         playClone.style.transform = 'scale(1.2)';
+        setTimeout(() => { playClone.style.opacity = '0'; }, 700);
 
         waveClone.style.left = targetProgressRect.left + 'px';
         waveClone.style.top = targetProgressRect.top + 'px';
@@ -2249,6 +2418,7 @@
 
         timeClone.style.left = targetTimeRect.left + 'px';
         timeClone.style.top = targetTimeRect.top + 'px';
+        setTimeout(() => { timeClone.style.opacity = '0'; }, 700);
       });
     }, 500);
 
@@ -2267,18 +2437,18 @@
 
   function closePlayer() {
     if (!playerOpen) return;
-    
+
     playerExpanded.style.transform = 'translateY(-100%)';
     playerExpanded.classList.remove('open');
-    
+
     setTimeout(() => {
       playerExpanded.style.display = 'none';
       playerOpen = false;
-      
+
       footerPlayIcon.style.opacity = '1';
       footerWave.style.opacity = '1';
       footerTime.style.opacity = '1';
-      
+
       audio.pause();
       isPlaying = false;
       playerPlayBtn.innerHTML = playIconSVG;
@@ -2342,10 +2512,292 @@
   });
 
   playerClose.addEventListener('click', closePlayer);
-  
-  playerVolBtn.addEventListener('click', () => console.log('Volume clicked'));
-  playerTtBtn.addEventListener('click', () => console.log('Tt clicked'));
 
+  /* ================= ОКНО "Тт" (перемещаемое) ================= */
+  const TT_TEXT_RU = `А, здравствуйте, мне, мне справка нужна, что я нормальный
+Ну, ну, на работу бригадиру справка, справку просит, да
+Что я нормальный
+
+Вот сидим мы с доктором вдвоём
+Чтоб признала, что не ***
+Справку знаю точно получу
+Без лавэхи я вам не шучу
+Перед всеми ею потрясу
+Бригадиру её отнесу
+Я сижу и смотрю на неё
+Чтоб сказала, что не ***
+
+«Вы на учёте не стоите?» Нет, я не стою
+«Лицо мне ваше так знакомо» Да мне по ***
+«Нет, всё-таки я где-то видела!» Не знаю где
+А сам немного поднапрягся, чуя, что к беде
+И она смотрит на меня, я на неё смотрю
+«Храпите ночью?» *** понять, наверное, храплю
+«Вы выпиваете, скажите?» Доктор, ну бывает
+«А вот наркотики?» Наркотики не потребляю
+Вопрос — ответ, ответ — вопрос, потом опять вопросы
+И в кабинете тет-а-тет на жёстком симбиозе
+Она меня за руку тянет и потянет ногу
+Потом в журнале что-то пишет, а в глазах тревога
+Она картинки в лицо тычет и рисует что-то
+Мне про политику задвинет и затронет Бога
+Минут пятнадцать сквозь глаза мои посмотрит молча
+«А может, всё-таки стоите?» Не стою я точно
+Оближет губы незаметно и протрёт очки
+Глаза в глаза мы смотрим молча, словно дурачки
+Её расширились зрачки, в зубах виднелись щели
+Мы два ковбоя в кабинете, будто на дуэли
+Потупит молча у окна: «Всё же повторю
+Признайтесь, точно не стоите?» Нет, ***, не стою
+Я б накидал ей говница с лихвой на вентилятор
+Но промолчал, ведь эта старая врач-психиатр
+
+Вот сидим мы с доктором вдвоём
+Чтоб признала, что не ***
+Справку знаю точно получу
+Без лавэхи я вам не шучу
+Перед всеми ею потрясу
+Бригадиру её отнесу
+Я сижу и смотрю на неё
+Чтоб сказала, что не ***
+
+«А вот скажите, как вы спите?» Сплю нормально я
+«Ну что ж, давайте раздеваетесь» Доктор, на ***?
+Нет, я не то чтобы стесняюсь, лёгкий дискомфорт
+Ко мне приходит, когда смотрят на большой живот
+Бегунок рукой прижала, смотрит, я смотрю
+«Вы на учёте не стоите?» Доктор, не стою
+«Тогда зачем себе вредите, оголяйте торс»
+Рыжий разделся, *** делать, жёсткий попадос
+И она гладит мою спину, трогает соски
+Такое чувство, что со старой мы давно близки
+Я поднимаю руки вверх и вниз потом опять
+Почти прижалась, словно хочет рыжего обнять
+«Так повернитесь!» Повернулся, трогает меня
+Татухи лапает на теле нежно и любя
+«Ну что же вы сейчас троите?» Боже упаси
+«Какой дебил на ваше тело это наносил?»
+Стою раздетый в кабинете молча, как дурак
+Открыты двери, рядом люди, словно экспонат
+Она в компьютере пытается найти курсор
+Стою, позирую, старушка, сука, Пикассо
+Двойные линзы на глазах, озябшая рука
+За что ж вы, боги? Где виновен — не пойму никак
+Старушка явно что-то хочет, но я не хочу
+***, но чувствую, что справку тут не получу
+
+Вот сидим мы с доктором вдвоём
+Чтоб признала, что не ***
+Справку знаю точно получу
+Без лавэхи я вам не шучу
+Перед всеми ею потрясу
+Бригадиру её отнесу
+Я сижу и смотрю на неё
+Чтоб сказала, что не ***`;
+
+  const TT_TEXT_EN = `Ah, hello, I, I need a certificate that I'm normal
+Well, well, for work the foreman asks for a certificate, yes
+That I'm normal
+
+So the doctor and I sit together
+So she admits I'm not a ***
+I know for sure I'll get the certificate
+Without cash I'm not kidding you
+I'll shake it in front of everyone
+I'll bring it to the foreman
+I sit and look at her
+So she says I'm not a ***
+
+"Are you registered?" No, I'm not
+"Your face is so familiar" Yeah, I don't give a ***
+"No, I've definitely seen you somewhere!" I don't know where
+And I tensed up a bit, sensing trouble
+And she looks at me, I look at her
+"Do you snore at night?" *** knows, probably I do
+"Do you drink, tell me?" Doctor, well, sometimes
+"And drugs?" I don't use drugs
+Question — answer, answer — question, then questions again
+And in the office one-on-one on a hard symbiosis
+She pulls my hand and pulls my leg
+Then writes something in a journal, and there's alarm in her eyes
+She shoves pictures in my face and draws something
+She'll bring up politics and touch on God
+For fifteen minutes she looks through my eyes in silence
+"Maybe you are registered after all?" I'm definitely not
+She licks her lips unnoticed and wipes her glasses
+Eye to eye we look in silence, like fools
+Her pupils widened, gaps showed in her teeth
+We're two cowboys in the office, like in a duel
+She'll look down silently at the window: "I'll ask again
+Admit it, you're definitely not registered?" No, ***, I'm not
+I'd throw *** at her fan with interest
+But I kept silent, after all this old psychiatrist
+
+So the doctor and I sit together
+So she admits I'm not a ***
+I know for sure I'll get the certificate
+Without cash I'm not kidding you
+I'll shake it in front of everyone
+I'll bring it to the foreman
+I sit and look at her
+So she says I'm not a ***
+
+"Tell me, how do you sleep?" I sleep fine
+"Well then, undress" Doctor, what the ***?
+No, it's not that I'm shy, mild discomfort
+Comes to me when they look at a big belly
+She pressed the zipper with her hand, looks, I look
+"Are you registered?" Doctor, I'm not
+"Then why harm yourself, bare your torso"
+The redhead undressed, *** to do, tough luck
+And she strokes my back, touches my nipples
+It feels like we've been close with the old lady for a long time
+I raise my arms up and down and then again
+Almost pressed against me, as if she wants to hug the redhead
+"Now turn around!" I turned, she touches me
+Paws my tattoos gently and lovingly
+"Well, why are you tripling now?" God forbid
+"What idiot put this on your body?"
+I stand undressed in the office in silence, like a fool
+Doors open, people nearby, like an exhibit
+She tries to find the cursor on the computer
+I stand, pose, old lady, bitch, Picasso
+Double lenses on her eyes, chilled hand
+Why, gods? Where am I guilty — I can't understand
+The old lady clearly wants something, but I don't want to
+***, but I feel I won't get the certificate here
+
+So the doctor and I sit together
+So she admits I'm not a ***
+I know for sure I'll get the certificate
+Without cash I'm not kidding you
+I'll shake it in front of everyone
+I'll bring it to the foreman
+I sit and look at her
+So she says I'm not a ***`;
+
+  let ttWindow = null;
+
+  function getTtText() {
+    return currentLang() === 'en' ? TT_TEXT_EN : TT_TEXT_RU;
+  }
+
+  function openTtWindow() {
+    if (ttWindow) {
+      ttWindow.style.display = '';
+      return;
+    }
+
+    ttWindow = document.createElement('div');
+    ttWindow.className = 'tt-window';
+
+    const header = document.createElement('div');
+    header.className = 'tt-window__header';
+
+    const title = document.createElement('div');
+    title.className = 'tt-window__title';
+    title.textContent = 'Тт';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'tt-window__close';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Закрыть');
+    closeBtn.textContent = '✕';
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    const body = document.createElement('div');
+    body.className = 'tt-window__body';
+    body.textContent = getTtText();
+
+    ttWindow.appendChild(header);
+    ttWindow.appendChild(body);
+    document.body.appendChild(ttWindow);
+
+    closeBtn.addEventListener('click', () => {
+      ttWindow.style.display = 'none';
+    });
+
+    // Перемещение за header
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let origLeft = 0, origTop = 0;
+
+    // Ставим окно по центру (transform уже центрирует, но при drag снимем)
+    header.addEventListener('mousedown', (e) => {
+      if (e.target === closeBtn) return;
+      dragging = true;
+      const rect = ttWindow.getBoundingClientRect();
+      // фиксируем позицию в координатах top/left
+      ttWindow.style.transform = 'none';
+      ttWindow.style.left = rect.left + 'px';
+      ttWindow.style.top = rect.top + 'px';
+      startX = e.clientX;
+      startY = e.clientY;
+      origLeft = rect.left;
+      origTop = rect.top;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      let nl = origLeft + (e.clientX - startX);
+      let nt = origTop + (e.clientY - startY);
+      const w = ttWindow.offsetWidth;
+      const h = ttWindow.offsetHeight;
+      const maxL = window.innerWidth - 20;
+      const maxT = window.innerHeight - 20;
+      nl = Math.max(-w + 80, Math.min(nl, maxL - 40));
+      nt = Math.max(0, Math.min(nt, maxT - 40));
+      ttWindow.style.left = nl + 'px';
+      ttWindow.style.top = nt + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+      dragging = false;
+    });
+
+    // touch
+    header.addEventListener('touchstart', (e) => {
+      if (e.target === closeBtn) return;
+      const t = e.touches[0];
+      dragging = true;
+      const rect = ttWindow.getBoundingClientRect();
+      ttWindow.style.transform = 'none';
+      ttWindow.style.left = rect.left + 'px';
+      ttWindow.style.top = rect.top + 'px';
+      startX = t.clientX;
+      startY = t.clientY;
+      origLeft = rect.left;
+      origTop = rect.top;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      const t = e.touches[0];
+      let nl = origLeft + (t.clientX - startX);
+      let nt = origTop + (t.clientY - startY);
+      const w = ttWindow.offsetWidth;
+      const h = ttWindow.offsetHeight;
+      const maxL = window.innerWidth - 20;
+      const maxT = window.innerHeight - 20;
+      nl = Math.max(-w + 80, Math.min(nl, maxL - 40));
+      nt = Math.max(0, Math.min(nt, maxT - 40));
+      ttWindow.style.left = nl + 'px';
+      ttWindow.style.top = nt + 'px';
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      dragging = false;
+    });
+  }
+
+  if (playerTtBtn) {
+    playerTtBtn.addEventListener('click', () => openTtWindow());
+  }
+
+  /* ================= КАСТОМНЫЙ КУРСОР ================= */
   (function initCustomCursor() {
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!isFinePointer) return;
@@ -2376,7 +2828,7 @@
     }
     animateCursor();
 
-    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .morph-close, .order-btn, .site-footer__online, .site-preview__letter';
+    const hoverTargets = 'a, button, .tile, .project-card, .burger, .social-button, .social-item, .theme-toggle, .back-to-top, [role="switch"], .avatar-upload__circle, .settings-close-btn, .morph-close, .order-btn, .site-footer__online, .site-preview__letter, .tt-window__close';
     const textTargets = 'input, textarea, select, [contenteditable="true"]';
 
     document.addEventListener('mouseover', (e) => {
@@ -2539,6 +2991,7 @@
       wrongPass: 'Неверный пароль',
       needLogin: 'Войдите, чтобы оценивать проекты',
       needLoginDownload: 'Зарегистрируйтесь или войдите, чтобы скачать',
+      trackTitle: 'AkaiЯнный - Психиатр',
       dossierP1: 'Я — кодер. Пишу код, вожусь с софтом и всем, что с этим связано.',
       dossierP2: 'В электронике тоже кой-чего смыслю и могу собрать что-нибудь из этой сферы. Не основное моё дело, но интерес и знания имею.',
       dossierP3: 'Тружусь на себя и ради себя.',
@@ -2612,6 +3065,7 @@
       wrongPass: 'Wrong password',
       needLogin: 'Log in to rate projects',
       needLoginDownload: 'Sign up or log in to download',
+      trackTitle: 'AkaiЯнный - Psychiatrist',
       dossierP1: 'I am a coder. I write code, tinker with software and everything related to it.',
       dossierP2: 'I also have some understanding of electronics and can assemble things from that field. It is not my main occupation, but I have the interest and knowledge.',
       dossierP3: 'I work for myself and for my own sake.',
@@ -2641,6 +3095,14 @@
       }
     });
 
+    // "Проекты:" — переводим всегда, в т.ч. если уже был typeText
+    const projectsTitleEl = document.querySelector('.projects-title');
+    if (projectsTitleEl) {
+      const txt = t('projectsTitle');
+      projectsTitleEl.setAttribute('data-type', txt);
+      projectsTitleEl.textContent = txt;
+    }
+
     const setData = (sel, key) => {
       const el = document.querySelector(sel);
       if (!el) return;
@@ -2648,12 +3110,22 @@
       el.setAttribute('data-type', txt);
       el.textContent = txt;
     };
-    setData('.projects-title', 'projectsTitle');
     setData('.about-sign__heading', 'tagTitle');
 
     const dossierHeading = document.querySelector('#dossier .about-sign__heading');
     if (dossierHeading) {
       dossierHeading.textContent = t('dossierTitle');
+    }
+
+    // Заголовок трека — автора не переводим, только слово «Психиатр»
+    if (playerTitle) {
+      playerTitle.textContent = t('trackTitle');
+    }
+
+    // Текст в окне "Тт" — если открыто, обновляем
+    if (ttWindow) {
+      const bodyEl = ttWindow.querySelector('.tt-window__body');
+      if (bodyEl) bodyEl.textContent = getTtText();
     }
 
     const openLogin = document.getElementById('openLogin');
@@ -2726,6 +3198,10 @@
       themeToggle.classList.remove('light');
       themeToggle.setAttribute('aria-checked', 'false');
     }
+
+    // смена картинок по теме
+    updateThemedImages();
+
     if (typeof applyAnimSetting === 'function' && typeof animOn !== 'undefined') {
       applyAnimSetting(animOn);
     }
@@ -3854,7 +4330,9 @@
     });
   })();
 
+  /* ================= ЛАУНЧЕР ================= */
   function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect, forcedStartRect) {
+    // ... (не используется в режиме без анимаций, оставлено на всякий случай)
     const startRect = forcedStartRect || el.getBoundingClientRect();
 
     el.style.position = 'fixed';
@@ -3963,14 +4441,17 @@
         return;
       }
 
-      const startRect = orderBtn.getBoundingClientRect();
+      const useAnim = animationsEnabled();
 
       const projectsTitle = document.querySelector('.projects-title');
       const tilesBlock = document.getElementById('tilesBlock');
       const projectsPanel = document.getElementById('projectsPanel');
       const aboutSign = document.getElementById('aboutSign');
       const dossier = document.getElementById('dossier');
-      const targets = [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier].filter(Boolean);
+      // НЕ скрываем остальные блоки — просто добавляем секцию
+      void [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier];
+
+      const startRect = orderBtn.getBoundingClientRect();
 
       const orderSection = document.createElement('section');
       orderSection.id = 'orderSection';
@@ -3990,54 +4471,63 @@
         document.body.appendChild(orderSection);
       }
 
-      targets.forEach(el => el.classList.add('hidden-by-order'));
-
       orderSection.style.display = 'flex';
-      orderSection.style.opacity = '0';
-      orderSection.style.visibility = 'hidden';
 
-      const launcherBlock = orderSection.querySelector('.launcher-block');
+      if (!useAnim) {
+        // Просто: кнопка уезжает вправо, блок сразу появляется
+        orderBtn.classList.add('order-btn--hide');
+        orderBtn.style.pointerEvents = 'none';
+        orderSection.style.opacity = '1';
+        orderSection.classList.add('visible');
+        setTimeout(() => {
+          orderBtn.style.display = 'none';
+        }, 500);
+      } else {
+        orderSection.style.opacity = '0';
+        orderSection.style.visibility = 'hidden';
 
-      void orderSection.offsetHeight;
-      void launcherBlock.offsetHeight;
+        const launcherBlock = orderSection.querySelector('.launcher-block');
+        void orderSection.offsetHeight;
+        void launcherBlock.offsetHeight;
 
-      const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
-      window.scrollTo({ top: topY, behavior: 'auto' });
+        const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: topY, behavior: 'auto' });
 
-      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          orderSection.style.visibility = 'visible';
+          requestAnimationFrame(() => {
+            orderSection.style.visibility = 'visible';
 
-          morphIntoSection(
-            orderBtn,
-            launcherBlock,
-            'order-btn--morph',
-            'order-btn--settled',
-            () => {
-              orderBtn.style.display = 'none';
-              orderSection.style.opacity = '1';
-              orderSection.classList.add('visible');
-            },
-            true,
-            false,
-            false,
-            null,
-            startRect
-          );
+            morphIntoSection(
+              orderBtn,
+              launcherBlock,
+              'order-btn--morph',
+              'order-btn--settled',
+              () => {
+                orderBtn.style.display = 'none';
+                orderSection.style.opacity = '1';
+                orderSection.classList.add('visible');
+              },
+              true,
+              false,
+              false,
+              null,
+              startRect
+            );
+          });
         });
-      });
+      }
 
       const closeBtn = orderSection.querySelector('[data-close="order"]');
       if (closeBtn) {
         closeBtn.addEventListener('click', (ev) => {
           ev.stopPropagation();
-          closeOrderSection(orderSection, targets);
+          closeOrderSection(orderSection);
         });
       }
     });
   }
 
-  function closeOrderSection(orderSection, hiddenTargets) {
+  function closeOrderSection(orderSection) {
     orderSection.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     orderSection.style.opacity = '0';
     orderSection.style.transform = 'translateY(20px)';
@@ -4062,7 +4552,7 @@
       orderBtn.style.borderRadius = '';
       orderBtn.style.background = '';
       orderBtn.style.borderColor = '';
-      orderBtn.classList.remove('order-btn--morph', 'order-btn--settled');
+      orderBtn.classList.remove('order-btn--morph', 'order-btn--settled', 'order-btn--hide');
       const textEl = orderBtn.querySelector('.order-btn__text');
       if (textEl) {
         textEl.style.transition = '';
@@ -4072,12 +4562,6 @@
 
     setTimeout(() => {
       if (orderSection.parentNode) orderSection.parentNode.removeChild(orderSection);
-      (hiddenTargets || []).forEach(el => el.classList.remove('hidden-by-order'));
-      const pt = document.querySelector('.projects-title');
-      if (pt) {
-        pt.classList.remove('fade-out');
-        pt.classList.remove('hidden-by-order');
-      }
     }, 420);
   }
 
@@ -4171,7 +4655,7 @@
       const aEl = section.querySelector('#statsPlatAndroid');
       const iEl = section.querySelector('#statsPlatIphone');
       const wEl = section.querySelector('#statsPlatWindows');
-      
+
       if (aEl) aEl.textContent = String(android);
       if (iEl) iEl.textContent = String(iphone);
       if (wEl) wEl.textContent = String(windows);
@@ -4499,6 +4983,8 @@
   }
 
   (async () => {
+    // при первом запуске применяем картинки по текущей теме
+    updateThemedImages();
     applyLanguage();
     updateInfoPanel();
 
