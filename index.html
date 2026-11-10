@@ -212,6 +212,26 @@
   .menu a:hover { background: rgba(255,255,255,0.1); color: #e0e0e0; }
   .menu a:visited, .menu a:active { color: #c8c8c8; }
 
+  .menu__dynamic {
+    color: #c8c8c8;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    text-align: center;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .menu__dynamic:hover { background: rgba(255,255,255,0.1); color: #e0e0e0; }
+  body.light .menu__dynamic { color: #444; }
+  body.light .menu__dynamic:hover { background: rgba(0,0,0,0.06); color: #111; }
+
   .menu__register {
     margin: 0 0 6px;
     padding: 10px 14px;
@@ -507,7 +527,7 @@
     .burger { width: 42px; height: 42px; top: 12px; right: 12px; }
     .menu { top: 12px; right: 62px; min-width: 200px; max-width: calc(100% - 78px); max-height: calc(100vh - 24px); }
     .menu a { font-size: 13px; padding: 9px 12px; }
-    .menu__register, .menu__user, .menu__login { font-size: 13px; padding: 9px 12px; }
+    .menu__register, .menu__user, .menu__login, .menu__dynamic { font-size: 13px; padding: 9px 12px; }
     .profile-menu__item { font-size: 13px; padding: 9px 12px; }
     .projects-title { font-size: 18px; letter-spacing: 1.5px; padding: 18px 12px 4px; }
     .tiles-block { padding: 16px 12px 20px; gap: 10px; min-height: 200px; }
@@ -1072,8 +1092,8 @@
     background: #8a8a8a;
     flex-shrink: 0;
   }
-  /* без анимаций: кнопка просто уезжает вправо */
-  body.no-animations .order-btn.order-btn--hide {
+  /* кнопка уезжает вправо и исчезает — единое правило для всех режимов */
+  .order-btn.order-btn--hide {
     right: -120px !important;
     opacity: 0 !important;
   }
@@ -1849,6 +1869,9 @@
     <a href="#tilesBlock" data-scroll data-i18n="projects">Проекты</a>
     <a href="#aboutSign" data-scroll data-i18n="digitalTag">Цифровой тег</a>
     <a href="#dossier" data-scroll data-i18n="dossier">Досье</a>
+
+    <button class="menu__dynamic" id="menuLauncherItem" type="button" data-i18n="order" style="display:none;">Лаунчер</button>
+    <button class="menu__dynamic" id="menuStatsItem" type="button" data-i18n="stats" style="display:none;">Статистика</button>
 
     <div class="theme-switch">
       <span class="theme-switch__label" data-i18n="theme">Тема</span>
@@ -2724,12 +2747,10 @@ So she says I'm not a ***`;
     let startX = 0, startY = 0;
     let origLeft = 0, origTop = 0;
 
-    // Ставим окно по центру (transform уже центрирует, но при drag снимем)
     header.addEventListener('mousedown', (e) => {
       if (e.target === closeBtn) return;
       dragging = true;
       const rect = ttWindow.getBoundingClientRect();
-      // фиксируем позицию в координатах top/left
       ttWindow.style.transform = 'none';
       ttWindow.style.left = rect.left + 'px';
       ttWindow.style.top = rect.top + 'px';
@@ -3095,7 +3116,6 @@ So she says I'm not a ***`;
       }
     });
 
-    // "Проекты:" — переводим всегда, в т.ч. если уже был typeText
     const projectsTitleEl = document.querySelector('.projects-title');
     if (projectsTitleEl) {
       const txt = t('projectsTitle');
@@ -3117,12 +3137,10 @@ So she says I'm not a ***`;
       dossierHeading.textContent = t('dossierTitle');
     }
 
-    // Заголовок трека — автора не переводим, только слово «Психиатр»
     if (playerTitle) {
       playerTitle.textContent = t('trackTitle');
     }
 
-    // Текст в окне "Тт" — если открыто, обновляем
     if (ttWindow) {
       const bodyEl = ttWindow.querySelector('.tt-window__body');
       if (bodyEl) bodyEl.textContent = getTtText();
@@ -3199,7 +3217,6 @@ So she says I'm not a ***`;
       themeToggle.setAttribute('aria-checked', 'false');
     }
 
-    // смена картинок по теме
     updateThemedImages();
 
     if (typeof applyAnimSetting === 'function' && typeof animOn !== 'undefined') {
@@ -4330,107 +4347,20 @@ So she says I'm not a ***`;
     });
   })();
 
-  /* ================= ЛАУНЧЕР ================= */
-  function morphIntoSection(el, targetEl, morphCls, settledCls, onDone, plain, keepSize, alignLeft, forcedTargetRect, forcedStartRect) {
-    // ... (не используется в режиме без анимаций, оставлено на всякий случай)
-    const startRect = forcedStartRect || el.getBoundingClientRect();
+  /* ================= ДИНАМИЧЕСКИЕ ПУНКТЫ МЕНЮ ================= */
+  const menuStatsItem = document.getElementById('menuStatsItem');
+  const menuLauncherItem = document.getElementById('menuLauncherItem');
 
-    el.style.position = 'fixed';
-    el.style.left = startRect.left + 'px';
-    el.style.top = startRect.top + 'px';
-    el.style.width = startRect.width + 'px';
-    el.style.height = startRect.height + 'px';
-    el.style.right = 'auto';
-    el.style.bottom = 'auto';
-    el.style.margin = '0';
-    el.style.zIndex = '99999';
-    el.style.pointerEvents = 'none';
-    void el.offsetWidth;
-
-    el.classList.add(morphCls);
-    const isLight = document.body.classList.contains('light');
-
-    const startCx = startRect.left + startRect.width / 2;
-    const startCy = startRect.top + startRect.height / 2;
-
-    const duration = 950;
-    const t0 = performance.now();
-    const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    el.style.transition = 'background 0.7s ease, border-color 0.7s ease, border-radius 0.95s ease';
-    if (!plain) {
-      requestAnimationFrame(() => {
-        el.style.borderRadius = '16px';
-        el.style.background = isLight ? '#eaeaea' : '#1a1a1a';
-        el.style.borderColor = isLight ? '#d8d8d8' : '#5a5a5a';
-      });
-    }
-
-    const textEl = el.querySelector('.order-btn__text');
-    if (textEl) {
-      textEl.style.transition = 'transform 0.95s cubic-bezier(0.22, 1, 0.36, 1)';
-      requestAnimationFrame(() => { textEl.style.transform = 'rotate(0deg)'; });
-    }
-
-    function step(now) {
-      const liveRect = targetEl.getBoundingClientRect();
-      const liveTargetCx = alignLeft
-        ? (liveRect.left + startRect.width / 2)
-        : (liveRect.left + liveRect.width / 2);
-      const liveTargetCy = alignLeft
-        ? (liveRect.top + startRect.height / 2)
-        : (liveRect.top + liveRect.height / 2);
-
-      const p = Math.min((now - t0) / duration, 1);
-      const k = ease(p);
-      let w, h, cx, cy;
-      if (keepSize) {
-        w = startRect.width;
-        h = startRect.height;
-      } else {
-        w = startRect.width + (liveRect.width - startRect.width) * k;
-        h = startRect.height + (liveRect.height - startRect.height) * k;
-      }
-      cx = startCx + (liveTargetCx - startCx) * k;
-      cy = startCy + (liveTargetCy - startCy) * k;
-      el.style.width = w + 'px';
-      el.style.height = h + 'px';
-      el.style.left = (cx - w / 2) + 'px';
-      el.style.top = (cy - h / 2) + 'px';
-      if (p < 1) requestAnimationFrame(step);
-      else finish();
-    }
-
-    function finish() {
-      el.style.transition = 'none';
-      el.style.position = 'absolute';
-      el.style.left = '0';
-      el.style.top = '0';
-      el.style.width = '100%';
-      el.style.height = '100%';
-      el.style.margin = '0';
-      el.style.zIndex = 'auto';
-      el.style.pointerEvents = 'none';
-
-      const targetPos = window.getComputedStyle(targetEl).position;
-      if (targetPos === 'static') {
-        targetEl.style.position = 'relative';
-      }
-
-      targetEl.appendChild(el);
-
-      el.classList.add(settledCls);
-
-      setTimeout(() => {
-        el.style.opacity = '0';
-      }, 50);
-
-      if (onDone) setTimeout(onDone, 120);
-    }
-
-    requestAnimationFrame(step);
+  function showMenuDynamic(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  }
+  function hideMenuDynamic(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
   }
 
+  /* ================= ЛАУНЧЕР ================= */
   const orderBtn = document.getElementById('orderBtn');
   if (orderBtn) {
     orderBtn.addEventListener('click', () => {
@@ -4440,16 +4370,6 @@ So she says I'm not a ***`;
         window.scrollTo({ top: y, behavior: 'smooth' });
         return;
       }
-
-      const useAnim = animationsEnabled();
-
-      const projectsTitle = document.querySelector('.projects-title');
-      const tilesBlock = document.getElementById('tilesBlock');
-      const projectsPanel = document.getElementById('projectsPanel');
-      const aboutSign = document.getElementById('aboutSign');
-      const dossier = document.getElementById('dossier');
-      // НЕ скрываем остальные блоки — просто добавляем секцию
-      void [projectsTitle, tilesBlock, projectsPanel, aboutSign, dossier];
 
       const startRect = orderBtn.getBoundingClientRect();
 
@@ -4473,49 +4393,20 @@ So she says I'm not a ***`;
 
       orderSection.style.display = 'flex';
 
-      if (!useAnim) {
-        // Просто: кнопка уезжает вправо, блок сразу появляется
-        orderBtn.classList.add('order-btn--hide');
-        orderBtn.style.pointerEvents = 'none';
-        orderSection.style.opacity = '1';
-        orderSection.classList.add('visible');
-        setTimeout(() => {
-          orderBtn.style.display = 'none';
-        }, 500);
-      } else {
-        orderSection.style.opacity = '0';
-        orderSection.style.visibility = 'hidden';
+      // Кнопка просто уезжает вправо и исчезает — без полёта на блок
+      orderBtn.classList.add('order-btn--hide');
+      orderBtn.style.pointerEvents = 'none';
 
-        const launcherBlock = orderSection.querySelector('.launcher-block');
-        void orderSection.offsetHeight;
-        void launcherBlock.offsetHeight;
+      // Блок просто появляется
+      orderSection.style.opacity = '1';
+      orderSection.classList.add('visible');
 
-        const topY = orderSection.getBoundingClientRect().top + window.scrollY - 20;
-        window.scrollTo({ top: topY, behavior: 'auto' });
+      // В гамбургер-меню добавляем пункт «Лаунчер»
+      showMenuDynamic('menuLauncherItem');
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            orderSection.style.visibility = 'visible';
-
-            morphIntoSection(
-              orderBtn,
-              launcherBlock,
-              'order-btn--morph',
-              'order-btn--settled',
-              () => {
-                orderBtn.style.display = 'none';
-                orderSection.style.opacity = '1';
-                orderSection.classList.add('visible');
-              },
-              true,
-              false,
-              false,
-              null,
-              startRect
-            );
-          });
-        });
-      }
+      setTimeout(() => {
+        orderBtn.style.display = 'none';
+      }, 500);
 
       const closeBtn = orderSection.querySelector('[data-close="order"]');
       if (closeBtn) {
@@ -4524,6 +4415,16 @@ So she says I'm not a ***`;
           closeOrderSection(orderSection);
         });
       }
+    });
+  }
+
+  // Пункт меню «Лаунчер»
+  if (menuLauncherItem) {
+    menuLauncherItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      burger.classList.remove('open');
+      menu.classList.remove('open');
+      if (orderBtn) orderBtn.click();
     });
   }
 
@@ -4559,6 +4460,9 @@ So she says I'm not a ***`;
         textEl.style.transform = '';
       }
     }
+
+    // Убираем пункт «Лаунчер» из гамбургер-меню
+    hideMenuDynamic('menuLauncherItem');
 
     setTimeout(() => {
       if (orderSection.parentNode) orderSection.parentNode.removeChild(orderSection);
@@ -4741,6 +4645,9 @@ So she says I'm not a ***`;
       statsSection.style.opacity = '1';
       statsSection.classList.add('visible');
 
+      // В гамбургер-меню добавляем пункт «Статистика»
+      showMenuDynamic('menuStatsItem');
+
       const statsCloseBtn = statsSection.querySelector('[data-close="stats"]');
       if (statsCloseBtn) {
         statsCloseBtn.addEventListener('click', (ev) => {
@@ -4862,12 +4769,25 @@ So she says I'm not a ***`;
     });
   }
 
+  // Пункт меню «Статистика»
+  if (menuStatsItem) {
+    menuStatsItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      burger.classList.remove('open');
+      menu.classList.remove('open');
+      if (onlineIndicator) onlineIndicator.click();
+    });
+  }
+
   function closeStatsSection(statsSection) {
     if (!statsSection) return;
 
     const targetSlot = statsSection.querySelector('#statsOnlineSlot');
     const targetLabel = statsSection.querySelector('.stats-section__label.stats-online-slot__label');
     const targetCount = targetSlot ? targetSlot.querySelector('.stats-online-slot__count') : null;
+
+    // Убираем пункт «Статистика» из гамбургер-меню
+    hideMenuDynamic('menuStatsItem');
 
     if (onlineIndicator) {
       onlineIndicator.style.display = '';
@@ -4983,7 +4903,6 @@ So she says I'm not a ***`;
   }
 
   (async () => {
-    // при первом запуске применяем картинки по текущей теме
     updateThemedImages();
     applyLanguage();
     updateInfoPanel();
@@ -5090,7 +5009,7 @@ So she says I'm not a ***`;
       const y = today.getFullYear();
       const m = String(today.getMonth() + 1).padStart(2, '0');
       const yearMonth = y + '-' + m;
-      
+
       const ua = navigator.userAgent || '';
       let platform = 'windows';
       if (/android/i.test(ua)) platform = 'android';
@@ -5099,7 +5018,7 @@ So she says I'm not a ***`;
       const visitsRef = ref(db, 'visits');
       await runTransaction(visitsRef, (currentData) => {
         if (!currentData) currentData = { timeline: {}, visitors: { android: 0, iphone: 0, windows: 0 } };
-        
+
         if (!currentData.timeline) currentData.timeline = {};
         currentData.timeline[yearMonth] = (currentData.timeline[yearMonth] || 0) + 1;
 
